@@ -109,7 +109,7 @@ src/
 - [x] Design the initial Supabase schema.
 - [x] Add Supabase client/server utilities.
 - [x] Add RLS policies.
-- [ ] Validate the app shell on desktop and mobile.
+- [x] Validate the app shell on desktop and mobile.
 
 ## Documentation
 
