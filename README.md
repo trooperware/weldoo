@@ -48,6 +48,28 @@ npm run lint
 npm run build
 ```
 
+## Environment Variables
+
+Create `.env.local` from `.env.example`:
+
+```bash
+cp .env.example .env.local
+```
+
+Required for Supabase:
+
+- `NEXT_PUBLIC_SUPABASE_URL`: public Supabase project URL.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public anon key used by browser and server clients.
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only key for future privileged backend tasks. Do not use it in client components.
+
+Development healthcheck:
+
+```text
+http://localhost:3000/api/dev/health
+```
+
+The healthcheck is available only outside production and reports whether Supabase environment variables are configured.
+
 ## Important Note
 
 The scaffold was created with `create-next-app`, but dependency installation
@@ -85,7 +107,7 @@ src/
 - [x] Extract design tokens from the prototype.
 - [x] Create base UI components.
 - [x] Design the initial Supabase schema.
-- [ ] Add Supabase client/server utilities.
+- [x] Add Supabase client/server utilities.
 - [ ] Add RLS policies.
 - [ ] Validate the app shell on desktop and mobile.
 
