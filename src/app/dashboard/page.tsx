@@ -2,12 +2,13 @@ import { AppShell } from "@/components/app/app-shell";
 import { Button } from "@/components/ui";
 import { requireCompletedOnboarding } from "@/lib/auth/session";
 import { signOutAction } from "@/server/actions/auth";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const { profile, user } = await requireCompletedOnboarding();
 
   return (
-    <AppShell>
+    <AppShell auth={{ email: user.email, profileType: profile.profile_type }}>
       <main className="px-4 py-8 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-4xl rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white p-6 shadow-weldoo-sm">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--weldoo-indigo)]">
@@ -24,7 +25,17 @@ export default async function DashboardPage() {
             </span>
             . The product dashboard will be implemented after onboarding.
           </p>
-          <form action={signOutAction} className="mt-6">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            {profile.profile_type === "professional" ? (
+              <Link
+                className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
+                href="/profile/edit"
+              >
+                Edit professional profile
+              </Link>
+            ) : null}
+          </div>
+          <form action={signOutAction} className="mt-4">
             <Button type="submit" variant="ghost">
               Sign out
             </Button>

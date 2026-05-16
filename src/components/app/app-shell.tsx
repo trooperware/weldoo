@@ -1,18 +1,26 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { signOutAction } from "@/server/actions/auth";
+
 type AppShellProps = {
+  auth?: {
+    email?: string | null;
+    profileType?: string | null;
+  };
   children: ReactNode;
 };
 
 const mainNavItems = [
-  { label: "Feed", href: "/", status: "Foundation" },
-  { label: "Network", href: "/", status: "Next" },
-  { label: "Jobs", href: "/", status: "Next" },
-  { label: "Academy", href: "/", status: "Next" },
+  { label: "Feed", href: "/" },
+  { label: "Network", href: "/" },
+  { label: "Jobs", href: "/" },
+  { label: "Academy", href: "/" },
 ];
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ auth, children }: AppShellProps) {
+  const isSignedIn = Boolean(auth);
+
   return (
     <div className="min-h-screen bg-[var(--weldoo-bg)] text-[var(--weldoo-ink)]">
       <header className="border-b border-[var(--weldoo-border)] bg-white/95">
@@ -29,63 +37,83 @@ export function AppShell({ children }: AppShellProps) {
                 </span>
               </span>
             </Link>
-            <Link
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-xs font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)] lg:hidden"
-              href="/auth/sign-in"
-            >
-              Sign in
-            </Link>
+            {isSignedIn ? (
+              <Link
+                className="inline-flex h-9 shrink-0 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-xs font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)] lg:hidden"
+                href="/dashboard"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                className="inline-flex h-9 shrink-0 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-xs font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)] lg:hidden"
+                href="/auth/sign-in"
+              >
+                Sign in
+              </Link>
+            )}
           </div>
 
           <nav aria-label="Main navigation" className="overflow-x-auto">
             <ul className="flex min-w-max gap-2">
               {mainNavItems.map((item) => (
                 <li key={item.label}>
-                  {item.status === "Foundation" ? (
-                    <Link
-                      className="inline-flex h-9 items-center gap-2 rounded-[var(--weldoo-radius-sm)] px-3 text-sm font-semibold text-[var(--weldoo-indigo)] transition hover:bg-[var(--weldoo-bg)]"
-                      href={item.href}
-                    >
-                      {item.label}
-                      <span className="rounded-full bg-[var(--weldoo-bg-strong)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--weldoo-muted)]">
-                        {item.status}
-                      </span>
-                    </Link>
-                  ) : (
-                    <span
-                      aria-disabled="true"
-                      className="inline-flex h-9 cursor-not-allowed items-center gap-2 rounded-[var(--weldoo-radius-sm)] px-3 text-sm font-semibold text-[var(--weldoo-muted)]"
-                    >
-                      {item.label}
-                      <span className="rounded-full bg-[var(--weldoo-bg-strong)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--weldoo-muted)]">
-                        {item.status}
-                      </span>
-                    </span>
-                  )}
+                  <Link
+                    className="inline-flex h-9 items-center rounded-[var(--weldoo-radius-sm)] px-3 text-sm font-semibold text-[var(--weldoo-slate)] transition hover:bg-[var(--weldoo-bg)] hover:text-[var(--weldoo-indigo)]"
+                    href={item.href}
+                  >
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-              href="/auth/sign-in"
-            >
-              Sign in
-            </Link>
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-              href="/api/dev/health"
-            >
-              Health
-            </Link>
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-3 text-sm font-semibold text-white shadow-weldoo-sm transition hover:brightness-105"
-              href="/style-guide"
-            >
-              Style guide
-            </Link>
+            {isSignedIn ? (
+              <>
+                <span className="max-w-44 truncate text-sm font-semibold text-[var(--weldoo-muted)]">
+                  {auth?.email}
+                </span>
+                <Link
+                  className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+                  href="/dashboard"
+                >
+                  Dashboard
+                </Link>
+                {auth?.profileType === "professional" ? (
+                  <Link
+                    className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-3 text-sm font-semibold text-white shadow-weldoo-sm transition hover:brightness-105"
+                    href="/profile/edit"
+                  >
+                    Profile
+                  </Link>
+                ) : null}
+                <form action={signOutAction}>
+                  <button
+                    className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+                    type="submit"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Link
+                  className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+                  href="/auth/sign-in"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-3 text-sm font-semibold text-white shadow-weldoo-sm transition hover:brightness-105"
+                  href="/style-guide"
+                >
+                  Style guide
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>

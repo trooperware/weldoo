@@ -70,6 +70,8 @@ Auth routes:
 - `/auth/forgot-password`
 - `/auth/reset-password`
 - `/dashboard` protected placeholder route
+- `/onboarding` protected onboarding route
+- `/profile/edit` protected professional profile edit route
 
 Development healthcheck:
 
