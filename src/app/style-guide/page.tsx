@@ -1,3 +1,20 @@
+import Link from "next/link";
+
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Select,
+  Textarea,
+} from "@/components/ui";
+
+import { StyleGuideExamples } from "./style-guide-examples";
+
 const colorTokens = [
   ["Indigo", "var(--weldoo-indigo)", "#3d3db4"],
   ["Indigo dark", "var(--weldoo-indigo-dark)", "#2d2d9a"],
@@ -18,128 +35,128 @@ export default function StyleGuidePage() {
     <main className="min-h-screen bg-weldoo-bg px-6 py-10 text-weldoo-ink">
       <div className="mx-auto flex max-w-6xl flex-col gap-10">
         <header className="space-y-3">
-          <a className="text-sm font-semibold text-weldoo-indigo" href="/">
+          <Link className="text-sm font-semibold text-weldoo-indigo" href="/">
             Back to project home
-          </a>
+          </Link>
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-weldoo-indigo">
-              Sprint 0.1.2
+              Sprint 0.1.3
             </p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight">
-              Weldoo style guide
+              Weldoo UI foundation
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-weldoo-muted">
-              Design tokens extracted from the static prototype and converted
-              into reusable CSS variables and Tailwind theme values.
+              Design tokens and base UI components for building the Weldoo MVP
+              sprint by sprint.
             </p>
           </div>
         </header>
 
-        <section className="rounded-weldoo-lg border border-weldoo-border-light bg-white p-6 shadow-weldoo-sm">
-          <h2 className="text-lg font-semibold">Color tokens</h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {colorTokens.map(([name, variable, hex]) => (
-              <div
-                className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm"
-                key={name}
-              >
+        <Card>
+          <CardHeader>
+            <CardTitle>Color tokens</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {colorTokens.map(([name, variable, hex]) => (
                 <div
-                  className="h-20"
-                  style={{ backgroundColor: variable }}
-                />
-                <div className="space-y-1 p-3">
-                  <p className="text-sm font-semibold">{name}</p>
-                  <p className="font-mono text-xs text-weldoo-muted">{hex}</p>
+                  className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm"
+                  key={name}
+                >
+                  <div
+                    className="h-20"
+                    style={{ backgroundColor: variable }}
+                  />
+                  <div className="space-y-1 p-3">
+                    <p className="text-sm font-semibold">{name}</p>
+                    <p className="font-mono text-xs text-weldoo-muted">
+                      {hex}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          <div className="rounded-weldoo-lg border border-weldoo-border-light bg-white p-6 shadow-weldoo-md">
-            <h2 className="text-lg font-semibold">Actions and forms</h2>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button className="h-11 rounded-weldoo-sm bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105">
-                Primary action
-              </button>
-              <button className="h-11 rounded-weldoo-sm border border-weldoo-indigo px-5 text-sm font-semibold text-weldoo-indigo transition hover:bg-weldoo-bg">
-                Secondary action
-              </button>
-              <button className="h-11 rounded-weldoo-sm border border-weldoo-border-light px-5 text-sm font-semibold text-weldoo-slate transition hover:border-weldoo-border hover:bg-weldoo-bg">
-                Neutral action
-              </button>
-            </div>
+          <Card className="shadow-weldoo-md">
+            <CardHeader>
+              <CardTitle>Actions and forms</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <Button>Primary action</Button>
+                <Button variant="secondary">Secondary action</Button>
+                <Button variant="ghost">Neutral action</Button>
+                <Button variant="danger">Danger action</Button>
+              </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <label className="space-y-2">
-                <span className="text-sm font-semibold">Professional title</span>
-                <input
-                  className="h-11 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none transition focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <Input
+                  label="Professional title"
                   placeholder="TIG Welder · Stainless Steel"
                 />
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm font-semibold">Location</span>
-                <input
-                  className="h-11 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none transition focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
-                  placeholder="Barcelona, Spain"
-                />
-              </label>
-              <label className="space-y-2 sm:col-span-2">
-                <span className="text-sm font-semibold">Bio</span>
-                <textarea
-                  className="min-h-28 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 py-3 text-sm outline-none transition focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
-                  placeholder="Describe welding experience, processes, materials, and availability."
-                />
-              </label>
-            </div>
-          </div>
-
-          <aside className="rounded-weldoo-lg border border-weldoo-border-light bg-white p-6 shadow-weldoo-md">
-            <h2 className="text-lg font-semibold">Profile card</h2>
-            <div className="mt-5 overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm">
-              <div className="h-20 bg-[linear-gradient(135deg,#2a2a8a_0%,#3d3db4_35%,#42b8d4_70%,#5ce8b4_100%)]" />
-              <div className="px-5 pb-5">
-                <div className="-mt-6 flex h-12 w-12 items-center justify-center rounded-weldoo-md bg-[linear-gradient(135deg,#3d3db4,#5558e8)] text-sm font-bold text-white shadow-weldoo-md">
-                  DW
-                </div>
-                <h3 className="mt-3 text-base font-bold">Demo Welder</h3>
-                <p className="mt-1 text-sm leading-5 text-weldoo-slate">
-                  Senior TIG Welder · Pressure vessels
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["TIG", "316L", "6G", "EN ISO 9606-1"].map((tag) => (
-                    <span
-                      className="rounded-full border border-weldoo-border-light bg-weldoo-bg px-3 py-1 text-xs font-semibold text-weldoo-indigo"
-                      key={tag}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                <Select label="Availability" defaultValue="">
+                  <option value="" disabled>
+                    Select availability
+                  </option>
+                  <option>Available</option>
+                  <option>Open to opportunities</option>
+                  <option>Not available</option>
+                </Select>
+                <div className="sm:col-span-2">
+                  <Textarea
+                    label="Bio"
+                    placeholder="Describe welding experience, processes, materials, and availability."
+                  />
                 </div>
               </div>
-            </div>
-          </aside>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden shadow-weldoo-md">
+            <div className="h-20 bg-[linear-gradient(135deg,#2a2a8a_0%,#3d3db4_35%,#42b8d4_70%,#5ce8b4_100%)]" />
+            <CardContent className="pt-0">
+              <Avatar className="-mt-6 rounded-weldoo-md" initials="DW" />
+              <h2 className="mt-3 text-base font-bold">Demo Welder</h2>
+              <p className="mt-1 text-sm leading-5 text-weldoo-slate">
+                Senior TIG Welder · Pressure vessels
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {["TIG", "316L", "6G", "EN ISO 9606-1"].map((tag) => (
+                  <Badge key={tag} variant="neutral">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
-        <section className="rounded-weldoo-lg border border-weldoo-border-light bg-white p-6 shadow-weldoo-sm">
-          <h2 className="text-lg font-semibold">Navigation states</h2>
-          <nav className="mt-5 flex flex-wrap gap-2">
-            {navItems.map((item, index) => (
-              <button
-                className={
-                  index === 0
-                    ? "rounded-full bg-weldoo-indigo/10 px-4 py-2 text-sm font-semibold text-weldoo-indigo"
-                    : "rounded-full px-4 py-2 text-sm font-medium text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-ink"
-                }
-                key={item}
-              >
-                {item}
-              </button>
-            ))}
-          </nav>
-        </section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Navigation states</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <nav className="flex flex-wrap gap-2">
+              {navItems.map((item, index) => (
+                <button
+                  className={
+                    index === 0
+                      ? "rounded-full bg-weldoo-indigo/10 px-4 py-2 text-sm font-semibold text-weldoo-indigo"
+                      : "rounded-full px-4 py-2 text-sm font-medium text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-ink"
+                  }
+                  key={item}
+                >
+                  {item}
+                </button>
+              ))}
+            </nav>
+          </CardContent>
+        </Card>
+
+        <StyleGuideExamples />
       </div>
     </main>
   );

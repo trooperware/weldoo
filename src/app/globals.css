@@ -60,13 +60,14 @@
   --radius-weldoo-sm: var(--weldoo-radius-sm);
   --radius-weldoo-md: var(--weldoo-radius-md);
   --radius-weldoo-lg: var(--weldoo-radius-lg);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Albert Sans", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: "Albert Sans", Inter, ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
