@@ -81,13 +81,13 @@ src/
 
 ## Sprint 0 Checklist
 
-1. Confirm stack and environment variables.
-2. Extract design tokens from the prototype.
-3. Create base UI components.
-4. Design the initial Supabase schema.
-5. Add Supabase client/server utilities.
-6. Add RLS policies.
-7. Validate the app shell on desktop and mobile.
+- [x] Confirm stack and environment variables.
+- [x] Extract design tokens from the prototype.
+- [x] Create base UI components.
+- [x] Design the initial Supabase schema.
+- [ ] Add Supabase client/server utilities.
+- [ ] Add RLS policies.
+- [ ] Validate the app shell on desktop and mobile.
 
 ## Documentation
 
@@ -97,4 +97,3 @@ The `docs/` folder contains:
 - Effort estimate.
 - Codex task plan.
 - Validation units.
-
