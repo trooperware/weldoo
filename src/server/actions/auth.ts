@@ -71,7 +71,7 @@ export async function signUpAction(
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      emailRedirectTo: getAuthCallbackUrl("/auth/callback?next=/dashboard"),
+      emailRedirectTo: getAuthCallbackUrl("/auth/callback?next=/onboarding"),
     },
   });
 

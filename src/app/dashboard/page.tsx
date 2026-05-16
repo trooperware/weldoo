@@ -1,10 +1,10 @@
 import { AppShell } from "@/components/app/app-shell";
 import { Button } from "@/components/ui";
-import { requireUser } from "@/lib/auth/session";
+import { requireCompletedOnboarding } from "@/lib/auth/session";
 import { signOutAction } from "@/server/actions/auth";
 
 export default async function DashboardPage() {
-  const user = await requireUser();
+  const { profile, user } = await requireCompletedOnboarding();
 
   return (
     <AppShell>
@@ -18,7 +18,11 @@ export default async function DashboardPage() {
           </h1>
           <p className="mt-3 text-sm leading-6 text-[var(--weldoo-muted)]">
             Signed in as <span className="font-semibold text-[var(--weldoo-ink)]">{user.email}</span>.
-            The product dashboard will be implemented after onboarding.
+            Your current profile type is{" "}
+            <span className="font-semibold text-[var(--weldoo-ink)]">
+              {profile.profile_type}
+            </span>
+            . The product dashboard will be implemented after onboarding.
           </p>
           <form action={signOutAction} className="mt-6">
             <Button type="submit" variant="ghost">

@@ -25,6 +25,7 @@ export type Database = {
         }>;
         Insert: Insert<Database["public"]["Tables"]["profiles"]["Row"]>;
         Update: Update<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
       };
       professional_profiles: {
         Row: Row<{
@@ -42,6 +43,7 @@ export type Database = {
         }>;
         Insert: Insert<Database["public"]["Tables"]["professional_profiles"]["Row"]>;
         Update: Update<Database["public"]["Tables"]["professional_profiles"]["Row"]>;
+        Relationships: [];
       };
       companies: {
         Row: Row<{
@@ -61,6 +63,7 @@ export type Database = {
         }>;
         Insert: Insert<Database["public"]["Tables"]["companies"]["Row"]>;
         Update: Update<Database["public"]["Tables"]["companies"]["Row"]>;
+        Relationships: [];
       };
       training_providers: {
         Row: Row<{
@@ -79,6 +82,7 @@ export type Database = {
         }>;
         Insert: Insert<Database["public"]["Tables"]["training_providers"]["Row"]>;
         Update: Update<Database["public"]["Tables"]["training_providers"]["Row"]>;
+        Relationships: [];
       };
       posts: {
         Row: Row<{
