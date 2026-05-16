@@ -58,9 +58,18 @@ cp .env.example .env.local
 
 Required for Supabase:
 
+- `NEXT_PUBLIC_APP_URL`: public app URL used for Supabase email redirects.
 - `NEXT_PUBLIC_SUPABASE_URL`: public Supabase project URL.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public anon key used by browser and server clients.
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only key for future privileged backend tasks. Do not use it in client components.
+
+Auth routes:
+
+- `/auth/sign-in`
+- `/auth/sign-up`
+- `/auth/forgot-password`
+- `/auth/reset-password`
+- `/dashboard` protected placeholder route
 
 Development healthcheck:
 

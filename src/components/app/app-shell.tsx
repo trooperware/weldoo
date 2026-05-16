@@ -31,9 +31,9 @@ export function AppShell({ children }: AppShellProps) {
             </Link>
             <Link
               className="inline-flex h-9 shrink-0 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-xs font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)] lg:hidden"
-              href="/style-guide"
+              href="/auth/sign-in"
             >
-              Style guide
+              Sign in
             </Link>
           </div>
 
@@ -68,6 +68,12 @@ export function AppShell({ children }: AppShellProps) {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+              href="/auth/sign-in"
+            >
+              Sign in
+            </Link>
             <Link
               className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
               href="/api/dev/health"
