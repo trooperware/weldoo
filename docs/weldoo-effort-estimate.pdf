@@ -1,0 +1,301 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 3126 >>
+stream
+BT /F2 20 Tf 52 790 Td (Weldoo - Effort Estimate) Tj ET
+0.8 w 52 766 m 543 766 l S
+BT /F1 10 Tf 52 746 Td (Functional development effort estimate for converting the current prototype into a working) Tj ET
+BT /F1 10 Tf 52 732 Td (responsive web app. The estimate assumes one developer using Codex extensively for) Tj ET
+BT /F1 10 Tf 52 718 Td (implementation, refactoring, testing support, and documentation.) Tj ET
+BT /F2 14 Tf 52 692 Td (Executive Summary) Tj ET
+0.8 w 52 680 m 542 680 l S
+BT /F2 9.5 Tf 56 666 Td (Scope) Tj ET
+BT /F2 9.5 Tf 246 666 Td (Target Estimate) Tj ET
+BT /F2 9.5 Tf 396 666 Td (Planning Number) Tj ET
+0.5 w 52 660 m 542 660 l S
+BT /F1 9 Tf 56 646 Td (Phase 1 - Strong MVP) Tj ET
+BT /F1 9 Tf 246 646 Td (350-550 hours) Tj ET
+BT /F1 9 Tf 396 646 Td (500 hours) Tj ET
+0.25 w 52 640 m 542 640 l S
+BT /F1 9 Tf 56 626 Td (Phase 2 - Product Evolution) Tj ET
+BT /F1 9 Tf 246 626 Td (400-810 hours) Tj ET
+BT /F1 9 Tf 396 626 Td (600 hours) Tj ET
+0.25 w 52 620 m 542 620 l S
+BT /F1 9 Tf 56 606 Td (Combined Phase 1 + Phase 2) Tj ET
+BT /F1 9 Tf 246 606 Td (750-1,360 hours) Tj ET
+BT /F1 9 Tf 396 606 Td (1,100 hours) Tj ET
+0.25 w 52 600 m 542 600 l S
+BT /F1 10 Tf 52 580 Td (The recommended planning number for Phase 1 is 500 hours. This includes product decisions,) Tj ET
+BT /F1 10 Tf 52 566 Td (implementation, AI-assisted development, human validation, QA, integration, and launch) Tj ET
+BT /F1 10 Tf 52 552 Td (preparation.) Tj ET
+BT /F2 14 Tf 52 526 Td (Phase 1 Scope) Tj ET
+BT /F1 10 Tf 52 508 Td (Phase 1 is the strong MVP. It focuses on validating the core Weldoo value proposition with) Tj ET
+BT /F1 10 Tf 52 494 Td (real users.) Tj ET
+BT /F1 10 Tf 52 474 Td (- Authentication and onboarding by user type: professional/welder, company, training) Tj ET
+BT /F1 10 Tf 52 460 Td (  provider.) Tj ET
+BT /F1 10 Tf 52 446 Td (- Welding-specific editable profiles with skills, processes, materials, positions,) Tj ET
+BT /F1 10 Tf 52 432 Td (  certifications, availability, and work preferences.) Tj ET
+BT /F1 10 Tf 52 418 Td (- Professional feed with posts, comments, likes, saved posts, image upload, and basic) Tj ET
+BT /F1 10 Tf 52 404 Td (  reporting.) Tj ET
+BT /F1 10 Tf 52 390 Td (- Professional network and directory with search, filters, public profiles, and) Tj ET
+BT /F1 10 Tf 52 376 Td (  connections or follows.) Tj ET
+BT /F1 10 Tf 52 362 Td (- Jobs board with job listings, search, filters, saved jobs, company posting, and simple) Tj ET
+BT /F1 10 Tf 52 348 Td (  applications.) Tj ET
+BT /F1 10 Tf 52 334 Td (- Academy, courses, and events with listing, detail pages, filters, saved items, and) Tj ET
+BT /F1 10 Tf 52 320 Td (  interest registration.) Tj ET
+BT /F1 10 Tf 52 306 Td (- Contact requests or simple 1:1 messaging.) Tj ET
+BT /F1 10 Tf 52 292 Td (- Basic internal notifications.) Tj ET
+BT /F1 10 Tf 52 278 Td (- Admin and moderation panel.) Tj ET
+BT /F1 10 Tf 52 264 Td (- Responsive web app experience for desktop, tablet, and mobile.) Tj ET
+BT /F2 11.5 Tf 52 240 Td (Phase 1 Module Estimate) Tj ET
+BT /F1 8 Tf 52 28 Td (Weldoo effort estimate) Tj ET BT /F1 8 Tf 503 28 Td (Page 1) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 4352 >>
+stream
+0.8 w 52 796 m 542 796 l S
+BT /F2 9.5 Tf 56 782 Td (Module) Tj ET
+BT /F2 9.5 Tf 416 782 Td (Estimate) Tj ET
+0.5 w 52 776 m 542 776 l S
+BT /F1 9 Tf 56 762 Td (Product cleanup / specification) Tj ET
+BT /F1 9 Tf 416 762 Td (12-24h) Tj ET
+0.25 w 52 756 m 542 756 l S
+BT /F1 9 Tf 56 742 Td (Technical setup, architecture, and deployment) Tj ET
+BT /F1 9 Tf 416 742 Td (30-50h) Tj ET
+0.25 w 52 736 m 542 736 l S
+BT /F1 9 Tf 56 722 Td (Prototype conversion into responsive app) Tj ET
+BT /F1 9 Tf 416 722 Td (50-90h) Tj ET
+0.25 w 52 716 m 542 716 l S
+BT /F1 9 Tf 56 702 Td (Auth and onboarding) Tj ET
+BT /F1 9 Tf 416 702 Td (25-45h) Tj ET
+0.25 w 52 696 m 542 696 l S
+BT /F1 9 Tf 56 682 Td (Profiles) Tj ET
+BT /F1 9 Tf 416 682 Td (45-75h) Tj ET
+0.25 w 52 676 m 542 676 l S
+BT /F1 9 Tf 56 662 Td (Feed) Tj ET
+BT /F1 9 Tf 416 662 Td (55-90h) Tj ET
+0.25 w 52 656 m 542 656 l S
+BT /F1 9 Tf 56 642 Td (Network / directory) Tj ET
+BT /F1 9 Tf 416 642 Td (35-60h) Tj ET
+0.25 w 52 636 m 542 636 l S
+BT /F1 9 Tf 56 622 Td (Jobs) Tj ET
+BT /F1 9 Tf 416 622 Td (40-70h) Tj ET
+0.25 w 52 616 m 542 616 l S
+BT /F1 9 Tf 56 602 Td (Academy/events) Tj ET
+BT /F1 9 Tf 416 602 Td (35-60h) Tj ET
+0.25 w 52 596 m 542 596 l S
+BT /F1 9 Tf 56 582 Td (Contact request / simple messaging) Tj ET
+BT /F1 9 Tf 416 582 Td (30-60h) Tj ET
+0.25 w 52 576 m 542 576 l S
+BT /F1 9 Tf 56 562 Td (Admin/moderation) Tj ET
+BT /F1 9 Tf 416 562 Td (40-70h) Tj ET
+0.25 w 52 556 m 542 556 l S
+BT /F1 9 Tf 56 542 Td (QA, mobile polish, and launch fixes) Tj ET
+BT /F1 9 Tf 416 542 Td (40-70h) Tj ET
+0.25 w 52 536 m 542 536 l S
+BT /F2 14 Tf 52 510 Td (Human vs AI Effort - Phase 1) Tj ET
+BT /F1 10 Tf 52 492 Td (The 500-hour planning number should be treated as total project effort. Codex can accelerate) Tj ET
+BT /F1 10 Tf 52 478 Td (implementation, but the developer still needs to guide, review, test, integrate, and make) Tj ET
+BT /F1 10 Tf 52 464 Td (product decisions.) Tj ET
+0.8 w 52 450 m 542 450 l S
+BT /F2 9.5 Tf 56 436 Td (Work Type) Tj ET
+BT /F2 9.5 Tf 316 436 Td (Approx. Hours) Tj ET
+BT /F2 9.5 Tf 446 436 Td (Share) Tj ET
+0.5 w 52 430 m 542 430 l S
+BT /F1 9 Tf 56 416 Td (AI-assisted implementation) Tj ET
+BT /F1 9 Tf 316 416 Td (280-330h equivalent) Tj ET
+BT /F1 9 Tf 446 416 Td (56-66%) Tj ET
+0.25 w 52 410 m 542 410 l S
+BT /F1 9 Tf 56 396 Td (Human validation and technical review) Tj ET
+BT /F1 9 Tf 316 396 Td (120-160h) Tj ET
+BT /F1 9 Tf 446 396 Td (24-32%) Tj ET
+0.25 w 52 390 m 542 390 l S
+BT /F1 9 Tf 56 376 Td (Product decisions, QA, integration, launch) Tj ET
+BT /F1 9 Tf 56 365 Td (preparation) Tj ET
+BT /F1 9 Tf 316 376 Td (50-90h) Tj ET
+BT /F1 9 Tf 446 376 Td (10-18%) Tj ET
+0.25 w 52 359 m 542 359 l S
+BT /F1 10 Tf 52 339 Td (Practical recommendation: plan for at least one third of the total effort to be human-led) Tj ET
+BT /F1 10 Tf 52 325 Td (validation, review, QA, and decision-making. Codex can write a lot of code, but it should) Tj ET
+BT /F1 10 Tf 52 311 Td (not replace engineering judgement.) Tj ET
+BT /F2 14 Tf 52 285 Td (Phase 2 Scope) Tj ET
+BT /F1 10 Tf 52 267 Td (Phase 2 includes functionality intentionally excluded from the first MVP. These modules add) Tj ET
+BT /F1 10 Tf 52 253 Td (product maturity but also increase technical risk and implementation cost.) Tj ET
+BT /F1 10 Tf 52 233 Td (- Payments: paid courses, subscriptions, featured job postings, company plans, checkout,) Tj ET
+BT /F1 10 Tf 52 219 Td (  and invoicing.) Tj ET
+BT /F1 10 Tf 52 205 Td (- Integrated live video: embedded webinar rooms, permissions, attendance, and session) Tj ET
+BT /F1 10 Tf 52 191 Td (  state.) Tj ET
+BT /F1 10 Tf 52 177 Td (- Complex recommendations: jobs, courses, contacts, and personalised feed ranking.) Tj ET
+BT /F1 10 Tf 52 163 Td (- Certification verification: uploads, admin review, verified badges, and expiry fields.) Tj ET
+BT /F1 10 Tf 52 149 Td (- Advanced chat: real-time messages, read states, attachments, blocking, and richer) Tj ET
+BT /F1 10 Tf 52 135 Td (  messaging workflows.) Tj ET
+BT /F1 10 Tf 52 121 Td (- Advanced notifications: email flows, preferences, digests, and real-time updates.) Tj ET
+BT /F1 10 Tf 52 101 Td (Native iOS and Android apps are not part of the planned scope. Weldoo is planned as a) Tj ET
+BT /F1 10 Tf 52 87 Td (responsive web app.) Tj ET
+BT /F1 8 Tf 52 28 Td (Weldoo effort estimate) Tj ET BT /F1 8 Tf 503 28 Td (Page 2) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 3827 >>
+stream
+BT /F2 11.5 Tf 52 786 Td (Phase 2 Module Estimate) Tj ET
+0.8 w 52 777 m 542 777 l S
+BT /F2 9.5 Tf 56 763 Td (Module) Tj ET
+BT /F2 9.5 Tf 416 763 Td (Estimate) Tj ET
+0.5 w 52 757 m 542 757 l S
+BT /F1 9 Tf 56 743 Td (Payments: plans, checkout, invoicing, paid courses or featured) Tj ET
+BT /F1 9 Tf 56 732 Td (jobs) Tj ET
+BT /F1 9 Tf 416 743 Td (40-80h) Tj ET
+0.25 w 52 726 m 542 726 l S
+BT /F1 9 Tf 56 712 Td (Integrated live video: embedded room, permissions, session state,) Tj ET
+BT /F1 9 Tf 56 701 Td (attendance) Tj ET
+BT /F1 9 Tf 416 712 Td (70-140h) Tj ET
+0.25 w 52 695 m 542 695 l S
+BT /F1 9 Tf 56 681 Td (Complex recommendations: jobs, courses, contacts, feed ranking) Tj ET
+BT /F1 9 Tf 416 681 Td (60-130h) Tj ET
+0.25 w 52 675 m 542 675 l S
+BT /F1 9 Tf 56 661 Td (Certification verification: uploads, admin review, verified) Tj ET
+BT /F1 9 Tf 56 650 Td (badges, expiry fields) Tj ET
+BT /F1 9 Tf 416 661 Td (60-120h) Tj ET
+0.25 w 52 644 m 542 644 l S
+BT /F1 9 Tf 56 630 Td (Advanced chat: real-time messages, read states, attachments,) Tj ET
+BT /F1 9 Tf 56 619 Td (blocking) Tj ET
+BT /F1 9 Tf 416 630 Td (70-140h) Tj ET
+0.25 w 52 613 m 542 613 l S
+BT /F1 9 Tf 56 599 Td (Advanced notifications: email flows, preferences, digests, real-) Tj ET
+BT /F1 9 Tf 56 588 Td (time updates) Tj ET
+BT /F1 9 Tf 416 599 Td (50-110h) Tj ET
+0.25 w 52 582 m 542 582 l S
+BT /F1 9 Tf 56 568 Td (Phase 2 QA, migration, polish, and production hardening) Tj ET
+BT /F1 9 Tf 416 568 Td (50-90h) Tj ET
+0.25 w 52 562 m 542 562 l S
+BT /F2 14 Tf 52 536 Td (Human vs AI Effort - Phase 2) Tj ET
+0.8 w 52 524 m 542 524 l S
+BT /F2 9.5 Tf 56 510 Td (Work Type) Tj ET
+BT /F2 9.5 Tf 316 510 Td (Approx. Hours) Tj ET
+BT /F2 9.5 Tf 446 510 Td (Share) Tj ET
+0.5 w 52 504 m 542 504 l S
+BT /F1 9 Tf 56 490 Td (AI-assisted implementation) Tj ET
+BT /F1 9 Tf 316 490 Td (300-380h equivalent) Tj ET
+BT /F1 9 Tf 446 490 Td (50-63%) Tj ET
+0.25 w 52 484 m 542 484 l S
+BT /F1 9 Tf 56 470 Td (Human validation and technical review) Tj ET
+BT /F1 9 Tf 316 470 Td (160-210h) Tj ET
+BT /F1 9 Tf 446 470 Td (27-35%) Tj ET
+0.25 w 52 464 m 542 464 l S
+BT /F1 9 Tf 56 450 Td (Product decisions, QA, security, integration) Tj ET
+BT /F1 9 Tf 316 450 Td (70-120h) Tj ET
+BT /F1 9 Tf 446 450 Td (12-20%) Tj ET
+0.25 w 52 444 m 542 444 l S
+BT /F1 10 Tf 52 424 Td (Phase 2 requires more human validation because it includes payments, real-time features,) Tj ET
+BT /F1 10 Tf 52 410 Td (verification workflows, and more complex infrastructure.) Tj ET
+BT /F2 14 Tf 52 384 Td (Codex Subscription and Credits) Tj ET
+BT /F1 10 Tf 52 366 Td (A 100 EUR/month Codex-oriented subscription is likely enough to start and probably enough) Tj ET
+BT /F1 10 Tf 52 352 Td (for Phase 1 if development happens over 3-4 months with normal usage. It may be insufficient) Tj ET
+BT /F1 10 Tf 52 338 Td (if the work is compressed into 1-2 months or if many agents, fast mode, or large-context) Tj ET
+BT /F1 10 Tf 52 324 Td (tasks are used heavily.) Tj ET
+0.8 w 52 310 m 542 310 l S
+BT /F2 9.5 Tf 56 296 Td (Phase) Tj ET
+BT /F2 9.5 Tf 216 296 Td (Suggested AI Budget) Tj ET
+0.5 w 52 290 m 542 290 l S
+BT /F1 9 Tf 56 276 Td (Phase 1) Tj ET
+BT /F1 9 Tf 216 276 Td (300-500 EUR subscription cost + 100-300 EUR optional extra) Tj ET
+BT /F1 9 Tf 216 265 Td (credits) Tj ET
+0.25 w 52 259 m 542 259 l S
+BT /F1 9 Tf 56 245 Td (Phase 2) Tj ET
+BT /F1 9 Tf 216 245 Td (400-800 EUR+ depending on intensity and timeline) Tj ET
+0.25 w 52 239 m 542 239 l S
+BT /F1 9 Tf 56 225 Td (Recommendation) Tj ET
+BT /F1 9 Tf 216 225 Td (Start with 100 EUR/month, measure usage after Sprint 0 and) Tj ET
+BT /F1 9 Tf 216 214 Td (Sprint 1, then recalibrate.) Tj ET
+0.25 w 52 208 m 542 208 l S
+BT /F2 14 Tf 52 182 Td (Recommended Execution Plan) Tj ET
+BT /F1 8 Tf 52 28 Td (Weldoo effort estimate) Tj ET BT /F1 8 Tf 503 28 Td (Page 3) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 2033 >>
+stream
+0.8 w 52 796 m 542 796 l S
+BT /F2 9.5 Tf 56 782 Td (Sprint) Tj ET
+BT /F2 9.5 Tf 156 782 Td (Focus) Tj ET
+0.5 w 52 776 m 542 776 l S
+BT /F1 9 Tf 56 762 Td (Sprint 0) Tj ET
+BT /F1 9 Tf 156 762 Td (Stack choice, data model, repo setup, auth/database/deployment,) Tj ET
+BT /F1 9 Tf 156 751 Td (prototype conversion start.) Tj ET
+0.25 w 52 745 m 542 745 l S
+BT /F1 9 Tf 56 731 Td (Sprint 1) Tj ET
+BT /F1 9 Tf 156 731 Td (Auth, onboarding, public and editable profiles, welding-specific profile) Tj ET
+BT /F1 9 Tf 156 720 Td (data.) Tj ET
+0.25 w 52 714 m 542 714 l S
+BT /F1 9 Tf 56 700 Td (Sprint 2) Tj ET
+BT /F1 9 Tf 156 700 Td (Feed, posts, comments, likes, saved posts, reports.) Tj ET
+0.25 w 52 694 m 542 694 l S
+BT /F1 9 Tf 56 680 Td (Sprint 3) Tj ET
+BT /F1 9 Tf 156 680 Td (Professional directory, search, filters, connection/follow model.) Tj ET
+0.25 w 52 674 m 542 674 l S
+BT /F1 9 Tf 56 660 Td (Sprint 4) Tj ET
+BT /F1 9 Tf 156 660 Td (Jobs listing, detail, company posting, simple application, saved jobs.) Tj ET
+0.25 w 52 654 m 542 654 l S
+BT /F1 9 Tf 56 640 Td (Sprint 5) Tj ET
+BT /F1 9 Tf 156 640 Td (Academy/events listing, detail, filters, interest registration, saved) Tj ET
+BT /F1 9 Tf 156 629 Td (courses/events.) Tj ET
+0.25 w 52 623 m 542 623 l S
+BT /F1 9 Tf 56 609 Td (Sprint 6) Tj ET
+BT /F1 9 Tf 156 609 Td (Contact requests/simple messaging, admin, moderation, responsive QA,) Tj ET
+BT /F1 9 Tf 156 598 Td (private beta prep.) Tj ET
+0.25 w 52 592 m 542 592 l S
+BT /F2 14 Tf 52 566 Td (Planning Recommendation) Tj ET
+BT /F1 10 Tf 52 548 Td (Use 500 hours as the planning number for Phase 1 and 600 hours for Phase 2. For budgeting,) Tj ET
+BT /F1 10 Tf 52 534 Td (treat the AI subscription as an accelerator rather than a replacement for human effort. The) Tj ET
+BT /F1 10 Tf 52 520 Td (limiting factor will usually be product clarity, validation, QA, and integration, not raw) Tj ET
+BT /F1 10 Tf 52 506 Td (code generation.) Tj ET
+BT /F1 8 Tf 52 28 Td (Weldoo effort estimate) Tj ET BT /F1 8 Tf 503 28 Td (Page 4) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R] /Count 4 >>
+endobj
+12 0 obj
+<< /Type /Catalog /Pages 11 0 R >>
+endobj
+xref
+0 13
+0000000000 65535 f 
+0000000015 00000 n 
+0000000112 00000 n 
+0000000214 00000 n 
+0000003392 00000 n 
+0000003529 00000 n 
+0000007933 00000 n 
+0000008070 00000 n 
+0000011949 00000 n 
+0000012086 00000 n 
+0000014171 00000 n 
+0000014309 00000 n 
+0000014386 00000 n 
+trailer
+<< /Size 13 /Root 12 0 R >>
+startxref
+14437
+%%EOF
