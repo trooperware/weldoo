@@ -6,9 +6,12 @@ This folder contains Supabase/Postgres migrations for the Weldoo MVP.
 
 1. `migrations/0001_initial_schema.sql`
    - Phase 1 tables, enums, foreign keys, constraints, and indexes.
-   - Does not include RLS policies.
 
-2. Next task: RLS policies.
+2. `migrations/0002_row_level_security.sql`
+   - Enables RLS on all Phase 1 tables.
+   - Adds table grants for `anon` and `authenticated`.
+   - Adds ownership, participant, public-read, and admin policies.
+   - Adds immutable relationship triggers for private relationship tables.
 
 ## Design Notes
 
@@ -25,7 +28,11 @@ This folder contains Supabase/Postgres migrations for the Weldoo MVP.
   - course/event interests per course/profile
   - open reports per reporter/target
 - `publication_status` is reused for posts, comments, jobs, and course/events to keep early state management simple.
-- RLS is intentionally not included here so it can be reviewed and implemented as a dedicated security task.
+- RLS is enabled in a separate migration so the data model and access model can be reviewed independently.
+- Public reads are limited to active profiles and published feed/job/course data.
+- Private data such as saved items, connections, contact requests, notifications, applications, and interests is limited to the owner or the involved parties.
+- Admin access is routed through `current_profile_is_admin()` rather than broad public policies.
+- Relationship IDs in connections, contact requests, job applications, and course/event interests are immutable after creation.
 
 ## Applying Locally
 

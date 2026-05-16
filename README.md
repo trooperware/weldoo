@@ -108,7 +108,7 @@ src/
 - [x] Create base UI components.
 - [x] Design the initial Supabase schema.
 - [x] Add Supabase client/server utilities.
-- [ ] Add RLS policies.
+- [x] Add RLS policies.
 - [ ] Validate the app shell on desktop and mobile.
 
 ## Documentation
