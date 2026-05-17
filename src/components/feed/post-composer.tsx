@@ -66,7 +66,7 @@ export function PostComposer() {
             aria-label="Post text"
             error={state.errors?.body}
             id="body"
-            className="min-h-10 resize-none rounded-full border-[1.5px] px-[18px] py-2.5 text-sm leading-5"
+            className="!h-10 !min-h-10 resize-none overflow-hidden rounded-full border-[1.5px] bg-[#eeeef8] px-[18px] py-2.5 text-sm leading-5"
             name="body"
             placeholder="Share something with the community..."
             rows={1}

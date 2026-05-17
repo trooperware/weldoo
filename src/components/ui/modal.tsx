@@ -26,14 +26,14 @@ export function Modal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-weldoo-ink/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-weldoo-ink/35 p-4 backdrop-blur-[2px]"
       role="dialog"
     >
-      <div className="w-full max-w-lg rounded-weldoo-lg border border-weldoo-border-light bg-white shadow-weldoo-xl">
-        <div className="border-b border-weldoo-border-light p-6">
+      <div className="w-full max-w-lg rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-xl">
+        <div className="border-b border-weldoo-border-light p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold">{title}</h2>
+              <h2 className="text-lg font-bold tracking-tight">{title}</h2>
               {description ? (
                 <p className="mt-1 text-sm leading-6 text-weldoo-muted">
                   {description}
@@ -42,16 +42,28 @@ export function Modal({
             </div>
             <button
               aria-label="Close modal"
-              className="rounded-full px-2 py-1 text-weldoo-muted hover:bg-weldoo-bg hover:text-weldoo-ink"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-ink"
               onClick={() => onOpenChange(false)}
               type="button"
             >
-              x
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
             </button>
           </div>
         </div>
-        <div className="p-6">{children}</div>
-        <div className="flex justify-end gap-3 border-t border-weldoo-border-light p-4">
+        <div className="p-5">{children}</div>
+        <div className="flex justify-end gap-3 border-t border-weldoo-border-light px-5 py-4">
           {footer ?? (
             <>
               <Button onClick={() => onOpenChange(false)} variant="ghost">
