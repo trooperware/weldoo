@@ -90,6 +90,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     hasNextPage: posts.length === FEED_PAGE_SIZE,
     items: posts.map((post) => ({
       author: profiles[post.author_profile_id] ?? null,
+      canManage: currentUserId === post.author_profile_id,
       commentCount: commentCounts[post.id] ?? 0,
       isSaved: savedPostIds.has(post.id),
       likeCount: likeCounts[post.id] ?? 0,

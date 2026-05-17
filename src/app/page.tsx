@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
 import { FeedPostCard } from "@/components/feed/feed-post-card";
+import { PostComposer } from "@/components/feed/post-composer";
 import { EmptyState } from "@/components/ui";
 import { getAppShellAuth, getCurrentUser } from "@/lib/auth/session";
 import { FEED_PAGE_SIZE, getFeedPage } from "@/lib/feed/queries";
@@ -42,6 +43,23 @@ export default async function Home({ searchParams }: HomePageProps) {
                 Latest welding-sector updates from professionals, companies, and training providers.
               </p>
             </div>
+
+            {user ? (
+              <PostComposer />
+            ) : (
+              <section className="rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white p-5 shadow-weldoo-sm">
+                <h2 className="text-base font-bold text-[var(--weldoo-ink)]">Join the feed</h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--weldoo-muted)]">
+                  Sign in to publish welding updates, shop notes, training content, and opportunities.
+                </p>
+                <Link
+                  className="mt-4 inline-flex h-10 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-4 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
+                  href="/auth/sign-in"
+                >
+                  Sign in
+                </Link>
+              </section>
+            )}
 
             {feed.items.length > 0 ? (
               <div className="space-y-4">

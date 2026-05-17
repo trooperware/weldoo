@@ -18,6 +18,11 @@ This folder contains Supabase/Postgres migrations for the Weldoo MVP.
    - Limits uploads to JPG, PNG, and WebP.
    - Restricts writes to each user's own storage folder.
 
+4. `migrations/0004_feed_media_storage.sql`
+   - Creates a public Supabase Storage bucket for post images.
+   - Limits uploads to JPG, PNG, and WebP.
+   - Restricts writes to each user's own storage folder.
+
 ## Design Notes
 
 - `profiles.id` references `auth.users(id)` so each authenticated user has one primary profile.
