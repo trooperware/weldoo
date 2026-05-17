@@ -28,8 +28,11 @@ export type JobListItem = Pick<
   | "experience_level"
   | "id"
   | "location"
+  | "materials"
   | "published_at"
   | "required_certifications"
+  | "requirements"
+  | "responsibilities"
   | "salary_currency"
   | "salary_max"
   | "salary_min"
@@ -131,7 +134,7 @@ export async function getJobsListing(
   let jobsQuery = supabase
     .from("jobs")
     .select(
-      "id, company_id, title, description, location, work_mode, contract_type, salary_min, salary_max, salary_currency, welding_processes, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
+      "id, company_id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
       { count: "exact" },
     )
     .eq("status", "published")
@@ -195,4 +198,33 @@ export async function getJobsListing(
     items,
     totalCount: items.length,
   };
+}
+
+export async function getPublishedJobById(
+  supabase: SupabaseClient<Database>,
+  jobId: string,
+) {
+  const { data, error } = await supabase
+    .from("jobs")
+    .select(
+      "id, company_id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
+    )
+    .eq("id", jobId)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) return null;
+
+  const row = data as Omit<JobListItem, "company"> & {
+    companies: CompanySummary | null;
+  };
+
+  return {
+    ...row,
+    company: row.companies,
+  } satisfies JobListItem;
 }

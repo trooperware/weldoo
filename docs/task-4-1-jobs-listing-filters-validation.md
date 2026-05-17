@@ -36,8 +36,7 @@ Users can browse published jobs and narrow results with shareable URL filters.
 
 ## Notes
 
-- Job detail remains Task 4.2.
+- Job detail is covered separately in Task 4.2.
 - Company job creation and management remain Task 4.3.
 - Applications remain Task 4.4.
 - Saved jobs remain Task 4.5.
-- The right-side detail pane is intentionally a placeholder until Task 4.2.

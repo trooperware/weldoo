@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/ui";
@@ -8,6 +9,7 @@ import {
   getJobsHref,
   getJobsListing,
   hasActiveJobFilters,
+  getPublishedJobById,
   parseJobFilters,
   type JobFilters,
   type JobListItem,
@@ -29,6 +31,7 @@ type JobsPageProps = {
     q?: string;
     travel?: string;
     workMode?: string;
+    job?: string;
   }>;
 };
 
@@ -72,6 +75,94 @@ function formatPostedDate(value: string | null, fallback: string) {
 
 function clearFilterHref(filters: JobFilters, key: keyof JobFilters) {
   return getJobsHref({ ...filters, [key]: undefined });
+}
+
+function getJobSelectionHref(filters: JobFilters, jobId: string) {
+  const baseHref = getJobsHref(filters);
+  const separator = baseHref.includes("?") ? "&" : "?";
+  return `${baseHref}${separator}job=${jobId}`;
+}
+
+function ExternalLinkIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      <polyline points="15 3 21 3 21 9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      <line x1="10" x2="21" y1="14" y2="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function ShareIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <circle cx="18" cy="5" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <circle cx="6" cy="12" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <circle cx="18" cy="19" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function MoreIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="currentColor" viewBox="0 0 24 24">
+      <circle cx="5" cy="12" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="19" cy="12" r="1.5" />
+    </svg>
+  );
+}
+
+function MonitorIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <rect height="14" rx="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" width="20" x="2" y="3" />
+      <path d="M8 21h8M12 17v4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <path d="M12 6v6l4 2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function EuroIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M14 2a6 6 0 0 0 0 12M4 9h7M4 13h7M14 22a6 6 0 0 0 0-12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function BriefcaseIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <rect height="14" rx="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" width="20" x="2" y="7" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function DetailPill({
+  children,
+  icon,
+}: {
+  children: string;
+  icon: ReactNode;
+}) {
+  return (
+    <span className="inline-flex h-[30px] items-center gap-[5px] rounded-full border-[1.5px] border-weldoo-border px-3.5 text-[12.5px] font-medium text-weldoo-ink">
+      {icon}
+      {children}
+    </span>
+  );
 }
 
 function FilterLink({
@@ -152,7 +243,197 @@ function JobLogo({ job }: { job: JobListItem }) {
   );
 }
 
-function JobCard({ job }: { job: JobListItem }) {
+function JobDetailPanel({ job }: { job: JobListItem | null }) {
+  if (!job) {
+    return (
+      <div className="hidden min-h-[520px] flex-col items-center justify-center gap-3 p-8 text-center text-weldoo-muted lg:flex">
+        <svg aria-hidden="true" className="h-14 w-14 opacity-25" fill="none" viewBox="0 0 24 24">
+          <rect height="14" rx="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" width="20" x="2" y="7" />
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+          <line x1="12" x2="12" y1="12" y2="16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+          <line x1="10" x2="14" y1="14" y2="14" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+        </svg>
+        <p className="max-w-[220px] text-sm leading-[1.6]">
+          Select a job from the list to see the full details
+        </p>
+      </div>
+    );
+  }
+
+  const salary = formatSalary(job);
+  const companyName = job.company?.name ?? "Weldoo company";
+  const companyLocation = job.company?.location ?? job.location;
+
+  return (
+    <div className="px-5 py-6 lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto lg:px-8 lg:py-7">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
+            {job.company?.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img alt="" className="h-full w-full object-contain" src={job.company.logo_url} />
+            ) : (
+              companyName.slice(0, 1).toUpperCase()
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[15px] font-bold text-weldoo-ink">{companyName}</div>
+            <div className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-weldoo-muted">
+              <svg aria-hidden="true" className="h-[13px] w-[13px]" fill="none" viewBox="0 0 24 24">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                <circle cx="12" cy="10" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+              </svg>
+              <span>{companyLocation ?? "Location not set"}</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex shrink-0 gap-1.5">
+          <button
+            className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted opacity-60"
+            disabled
+            title="Share"
+            type="button"
+          >
+            <ShareIcon />
+          </button>
+          <Link
+            className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light text-weldoo-muted transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+            href={`/jobs/${job.id}`}
+            title="Open job page"
+          >
+            <MoreIcon />
+          </Link>
+        </div>
+      </div>
+
+      <h2 className="mb-2 text-2xl font-extrabold leading-[1.2] tracking-[-0.4px] text-weldoo-ink">
+        {job.title}
+      </h2>
+      <p className="mb-4 text-[13px] leading-[1.7] text-weldoo-muted">
+        {job.location ?? companyLocation ?? "Location not set"} · Posted{" "}
+        {formatPostedDate(job.published_at, job.created_at)}
+        {job.contract_type ? ` · ${contractTypeLabels[job.contract_type]}` : ""}
+      </p>
+
+      <div className="mb-5 flex flex-wrap gap-2">
+        {job.work_mode ? (
+          <DetailPill icon={<MonitorIcon />}>
+            {workModeLabels[job.work_mode]}
+          </DetailPill>
+        ) : null}
+        {job.contract_type ? (
+          <DetailPill icon={<ClockIcon />}>
+            {contractTypeLabels[job.contract_type]}
+          </DetailPill>
+        ) : null}
+        {salary ? (
+          <DetailPill icon={<EuroIcon />}>
+            {salary}
+          </DetailPill>
+        ) : null}
+        {job.travel_required ? (
+          <DetailPill icon={<BriefcaseIcon />}>
+            Travel required
+          </DetailPill>
+        ) : null}
+      </div>
+
+      <div className="mb-5 flex items-center gap-2">
+        <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 font-bold tracking-[-0.01em] text-white opacity-60 shadow-[0_2px_8px_rgba(61,61,180,0.25)]" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
+          <ExternalLinkIcon className="h-3 w-3" />
+          Apply now
+        </button>
+        <button className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo px-5 font-semibold tracking-[-0.01em] text-weldoo-indigo opacity-60" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
+          Save
+        </button>
+      </div>
+
+      <div className="my-5 h-px bg-weldoo-border-light" />
+      <section>
+        <h3 className="mb-3 text-base font-bold tracking-[-0.15px] text-weldoo-ink">
+          About the role
+        </h3>
+        <p className="whitespace-pre-line text-sm leading-[1.75] text-weldoo-ink">
+          {job.description}
+        </p>
+      </section>
+
+      {job.responsibilities ? (
+        <>
+          <div className="my-5 h-px bg-weldoo-border-light" />
+          <section>
+            <h3 className="mb-3 text-base font-bold tracking-[-0.15px] text-weldoo-ink">
+              Responsibilities
+            </h3>
+            <p className="whitespace-pre-line text-sm leading-[1.75] text-weldoo-ink">
+              {job.responsibilities}
+            </p>
+          </section>
+        </>
+      ) : null}
+
+      {job.requirements ? (
+        <>
+          <div className="my-5 h-px bg-weldoo-border-light" />
+          <section>
+            <h3 className="mb-3 text-base font-bold tracking-[-0.15px] text-weldoo-ink">
+              Requirements
+            </h3>
+            <p className="whitespace-pre-line text-sm leading-[1.75] text-weldoo-ink">
+              {job.requirements}
+            </p>
+          </section>
+        </>
+      ) : null}
+
+      {job.benefits.length ? (
+        <>
+          <div className="my-5 h-px bg-weldoo-border-light" />
+          <section>
+            <h3 className="mb-3 text-base font-bold tracking-[-0.15px] text-weldoo-ink">
+              Benefits
+            </h3>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {job.benefits.map((benefit) => (
+                <div className="flex items-center gap-2 text-[13.5px] text-weldoo-ink" key={benefit}>
+                  <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-weldoo-indigo/10 text-weldoo-indigo">
+                    <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </span>
+                  {benefit}
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
+      ) : null}
+
+      <div className="mt-5 rounded-weldoo-md border border-weldoo-indigo/15 bg-weldoo-indigo/[0.04] px-4 py-4">
+        <h3 className="mb-2 text-[13.5px] font-bold text-weldoo-ink">
+          Welding match fields
+        </h3>
+        <div className="flex flex-wrap gap-1.5">
+          {[...job.welding_processes, ...job.materials, ...job.required_certifications].map((tag) => (
+            <span className="inline-flex h-[30px] items-center rounded-full border border-weldoo-indigo/20 bg-weldoo-indigo/[0.07] px-3 text-[12.5px] font-medium text-weldoo-indigo" key={tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JobCard({
+  active,
+  filters,
+  job,
+}: {
+  active: boolean;
+  filters: JobFilters;
+  job: JobListItem;
+}) {
   const tags = [
     ...job.welding_processes.slice(0, 2),
     ...job.required_certifications.slice(0, 1),
@@ -160,7 +441,13 @@ function JobCard({ job }: { job: JobListItem }) {
   const salary = formatSalary(job);
 
   return (
-    <article className="relative flex items-start gap-3 border-b border-weldoo-border-light px-[18px] py-3.5 transition hover:bg-weldoo-bg-strong">
+    <Link
+      className={[
+        "relative flex items-start gap-3 border-b border-weldoo-border-light px-[18px] py-3.5 transition hover:bg-weldoo-bg-strong",
+        active ? "bg-weldoo-indigo/[0.06] before:absolute before:bottom-0 before:left-0 before:top-0 before:w-[3px] before:rounded-r-sm before:bg-weldoo-indigo" : "",
+      ].join(" ")}
+      href={getJobSelectionHref(filters, job.id)}
+    >
       <JobLogo job={job} />
       <div className="min-w-0 flex-1">
         <h2 className="mb-[3px] truncate text-sm font-bold text-weldoo-ink transition group-hover:text-weldoo-indigo">
@@ -197,7 +484,7 @@ function JobCard({ job }: { job: JobListItem }) {
           {salary ? ` · ${salary}` : ""}
         </p>
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -206,6 +493,10 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const filters = parseJobFilters(params);
   const supabase = await createSupabaseServerClient();
   const listing = await getJobsListing(supabase, filters);
+  const selectedJobId = params.job?.trim();
+  const selectedJob =
+    listing.items.find((job) => job.id === selectedJobId) ??
+    (selectedJobId ? await getPublishedJobById(supabase, selectedJobId) : listing.items[0] ?? null);
 
   return (
     <AppShell auth={appShellAuth}>
@@ -299,7 +590,12 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             {listing.items.length ? (
               <div>
                 {listing.items.map((job) => (
-                  <JobCard job={job} key={job.id} />
+                  <JobCard
+                    active={job.id === selectedJob?.id}
+                    filters={filters}
+                    job={job}
+                    key={job.id}
+                  />
                 ))}
               </div>
             ) : (
@@ -315,17 +611,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               </div>
             )}
           </div>
-          <div className="hidden min-h-[520px] flex-col items-center justify-center gap-3 p-8 text-center text-weldoo-muted lg:flex">
-            <svg aria-hidden="true" className="h-14 w-14 opacity-25" fill="none" viewBox="0 0 24 24">
-              <rect height="14" rx="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" width="20" x="2" y="7" />
-              <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              <line x1="12" x2="12" y1="12" y2="16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              <line x1="10" x2="14" y1="14" y2="14" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-            </svg>
-            <p className="max-w-[220px] text-sm leading-[1.6]">
-              Select a job from the list to see the full details in Task 4.2
-            </p>
-          </div>
+          <JobDetailPanel job={selectedJob} />
         </section>
       </main>
     </AppShell>
