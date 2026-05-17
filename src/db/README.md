@@ -54,3 +54,14 @@ supabase db reset
 ```
 
 Or apply the SQL manually in a Supabase SQL editor during early prototyping.
+
+## Development Seeds
+
+Seed files live in `seeds/` and are intended for development/demo data only.
+
+1. `seeds/0001_demo_jobs.sql`
+   - Inserts realistic published welding-sector jobs.
+   - Requires at least one existing company profile in `public.companies`.
+   - Safe to run multiple times; it avoids duplicate jobs with the same title for the same company.
+
+Apply seed SQL manually in the Supabase SQL editor after migrations are applied and at least one company profile exists.
