@@ -122,6 +122,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       message: "Profile saved.",
+      publicProfileUrl: `/professionals/${user.id}`,
       status: "success",
     });
   } catch (error) {

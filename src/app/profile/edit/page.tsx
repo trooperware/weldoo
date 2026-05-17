@@ -76,6 +76,7 @@ export default async function EditProfilePage() {
                 workPreferences: professional?.work_preferences,
                 yearsExperience: professional?.years_experience,
               }}
+              publicProfileUrl={`/professionals/${user.id}`}
             />
           </div>
         </section>

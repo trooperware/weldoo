@@ -256,6 +256,26 @@ Entregables:
 - Perfil publico centro.
 - Estados vacios.
 
+### Task 1.7 - Profile media upload
+
+Objetivo:
+
+Permitir subida real de avatar/logo y cover image para perfiles.
+
+Prompt para Codex:
+
+```text
+Implement profile media uploads with Supabase Storage. Create storage buckets and policies for avatars and cover images. Add reusable upload controls to professional, company, and training provider profile forms. Validate file type and size, upload files to the authenticated user's folder, save the public URL in the existing profile fields, and show clear upload/save feedback.
+```
+
+Entregables:
+
+- Buckets y politicas de Storage.
+- Upload avatar/logo.
+- Upload cover image.
+- Integracion en formularios de perfil.
+- Validacion tipo/tamano archivo.
+
 ## Sprint 2 - Feed
 
 ### Task 2.1 - Feed layout and data queries
@@ -959,4 +979,3 @@ Review Weldoo's user experience across onboarding, profiles, feed, network, jobs
 ```text
 Review the Weldoo database schema and RLS policies. Focus on relational integrity, duplicate prevention, indexes, query performance, authorization, auditability, and future extensibility for Phase 2. Provide findings and recommended migrations.
 ```
-

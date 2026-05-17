@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 
+import { ProfileMediaUploadField } from "@/components/profile/profile-media-upload-field";
 import { Button, FormError, Input, Textarea } from "@/components/ui";
 import type { CompanyProfileFieldErrors } from "@/lib/validators/company-profile";
 
@@ -148,23 +149,19 @@ export function CompanyProfileForm({
       />
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <Input
-          defaultValue={defaultValues.logoUrl ?? ""}
-          error={state.errors?.logoUrl}
-          id="logoUrl"
-          label="Logo URL"
+        <ProfileMediaUploadField
+          bucket="avatars"
+          currentUrl={defaultValues.logoUrl}
+          description="JPG, PNG, or WebP. Maximum 2 MB."
+          label="Logo"
           name="logoUrl"
-          placeholder="https://..."
-          type="url"
         />
-        <Input
-          defaultValue={defaultValues.coverUrl ?? ""}
-          error={state.errors?.coverUrl}
-          id="coverUrl"
-          label="Cover image URL"
+        <ProfileMediaUploadField
+          bucket="covers"
+          currentUrl={defaultValues.coverUrl}
+          description="JPG, PNG, or WebP. Maximum 5 MB."
+          label="Cover image"
           name="coverUrl"
-          placeholder="https://..."
-          type="url"
         />
       </section>
 

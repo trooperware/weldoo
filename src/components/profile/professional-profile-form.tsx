@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 
+import { ProfileMediaUploadField } from "@/components/profile/profile-media-upload-field";
 import { Button, FormError, Input, Select, Textarea } from "@/components/ui";
 import type { ProfessionalProfileFieldErrors } from "@/lib/validators/professional-profile";
 
@@ -25,11 +27,13 @@ type ProfessionalProfileFormValues = {
 
 type ProfessionalProfileFormProps = {
   defaultValues: ProfessionalProfileFormValues;
+  publicProfileUrl?: string | null;
 };
 
 type SaveState = {
   errors?: ProfessionalProfileFieldErrors;
   message?: string;
+  publicProfileUrl?: string;
   status?: "error" | "success";
 };
 
@@ -37,7 +41,10 @@ function listToText(value?: string[] | null) {
   return value?.join(", ") ?? "";
 }
 
-export function ProfessionalProfileForm({ defaultValues }: ProfessionalProfileFormProps) {
+export function ProfessionalProfileForm({
+  defaultValues,
+  publicProfileUrl,
+}: ProfessionalProfileFormProps) {
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<SaveState>({});
 
@@ -60,6 +67,7 @@ export function ProfessionalProfileForm({ defaultValues }: ProfessionalProfileFo
 
       setState({
         message: payload.message ?? "Profile saved.",
+        publicProfileUrl: payload.publicProfileUrl,
         status: "success",
       });
     } catch (error) {
@@ -71,6 +79,8 @@ export function ProfessionalProfileForm({ defaultValues }: ProfessionalProfileFo
       setPending(false);
     }
   }
+
+  const savedPublicUrl = state.publicProfileUrl ?? publicProfileUrl;
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -203,23 +213,19 @@ export function ProfessionalProfileForm({ defaultValues }: ProfessionalProfileFo
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <Input
-          defaultValue={defaultValues.avatarUrl ?? ""}
-          error={state.errors?.avatarUrl}
-          id="avatarUrl"
-          label="Avatar URL"
+        <ProfileMediaUploadField
+          bucket="avatars"
+          currentUrl={defaultValues.avatarUrl}
+          description="JPG, PNG, or WebP. Maximum 2 MB."
+          label="Avatar"
           name="avatarUrl"
-          placeholder="https://..."
-          type="url"
         />
-        <Input
-          defaultValue={defaultValues.coverUrl ?? ""}
-          error={state.errors?.coverUrl}
-          id="coverUrl"
-          label="Cover image URL"
+        <ProfileMediaUploadField
+          bucket="covers"
+          currentUrl={defaultValues.coverUrl}
+          description="JPG, PNG, or WebP. Maximum 5 MB."
+          label="Cover image"
           name="coverUrl"
-          placeholder="https://..."
-          type="url"
         />
       </section>
 
@@ -227,6 +233,14 @@ export function ProfessionalProfileForm({ defaultValues }: ProfessionalProfileFo
         <Button disabled={pending} type="submit">
           {pending ? "Saving" : "Save profile"}
         </Button>
+        {savedPublicUrl ? (
+          <Link
+            className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-white px-5 text-sm font-semibold text-[var(--weldoo-slate)] transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+            href={savedPublicUrl}
+          >
+            View public profile
+          </Link>
+        ) : null}
       </div>
     </form>
   );

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app/app-shell";
+import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
+import { getAppShellAuth } from "@/lib/auth/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -13,6 +16,31 @@ type CompanyPublicPageProps = {
     companyId: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: CompanyPublicPageProps): Promise<Metadata> {
+  const { companyId } = await params;
+  const supabase = await createSupabaseServerClient();
+  const { data: companyData } = await supabase
+    .from("companies")
+    .select("name, sector, description")
+    .eq("id", companyId)
+    .maybeSingle();
+
+  if (!companyData) {
+    return {
+      title: "Company profile | Weldoo",
+    };
+  }
+
+  const company = companyData as Pick<CompanyRow, "description" | "name" | "sector">;
+
+  return {
+    description: company.description ?? company.sector ?? "Weldoo company profile.",
+    title: `${company.name} | Weldoo`,
+  };
+}
 
 export default async function CompanyPublicPage({ params }: CompanyPublicPageProps) {
   const { companyId } = await params;
@@ -34,9 +62,10 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === company.owner_profile_id;
+  const appShellAuth = await getAppShellAuth();
 
   return (
-    <AppShell>
+    <AppShell auth={appShellAuth}>
       <main className="px-4 py-8 sm:px-6 lg:px-8">
         <article className="mx-auto max-w-5xl overflow-hidden rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white shadow-weldoo-sm">
           <div className="min-h-40 bg-[linear-gradient(135deg,#f5f7fb_0%,#e9ecf8_100%)]">
@@ -124,6 +153,11 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
                 </div>
               ) : null}
             </div>
+
+            <PublicProfileEmptySection
+              description="Published jobs from this company will appear here once job posting is implemented."
+              title="No public jobs yet"
+            />
           </div>
         </article>
       </main>

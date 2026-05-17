@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app/app-shell";
+import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
+import { getAppShellAuth } from "@/lib/auth/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -13,6 +16,37 @@ type TrainingProviderPublicPageProps = {
     providerId: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: TrainingProviderPublicPageProps): Promise<Metadata> {
+  const { providerId } = await params;
+  const supabase = await createSupabaseServerClient();
+  const { data: providerData } = await supabase
+    .from("training_providers")
+    .select("name, description, training_types")
+    .eq("id", providerId)
+    .maybeSingle();
+
+  if (!providerData) {
+    return {
+      title: "Training provider profile | Weldoo",
+    };
+  }
+
+  const provider = providerData as Pick<
+    TrainingProviderRow,
+    "description" | "name" | "training_types"
+  >;
+
+  return {
+    description:
+      provider.description ??
+      provider.training_types.join(", ") ??
+      "Weldoo training provider profile.",
+    title: `${provider.name} | Weldoo`,
+  };
+}
 
 export default async function TrainingProviderPublicPage({
   params,
@@ -36,9 +70,10 @@ export default async function TrainingProviderPublicPage({
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === provider.owner_profile_id;
+  const appShellAuth = await getAppShellAuth();
 
   return (
-    <AppShell>
+    <AppShell auth={appShellAuth}>
       <main className="px-4 py-8 sm:px-6 lg:px-8">
         <article className="mx-auto max-w-5xl overflow-hidden rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white shadow-weldoo-sm">
           <div className="min-h-40 bg-[linear-gradient(135deg,#f5f7fb_0%,#e9ecf8_100%)]">
@@ -127,6 +162,11 @@ export default async function TrainingProviderPublicPage({
                 </div>
               ) : null}
             </div>
+
+            <PublicProfileEmptySection
+              description="Published courses and events from this provider will appear here once course management is implemented."
+              title="No public courses or events yet"
+            />
           </div>
         </article>
       </main>
