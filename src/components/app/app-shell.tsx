@@ -20,6 +20,12 @@ const mainNavItems = [
 
 export function AppShell({ auth, children }: AppShellProps) {
   const isSignedIn = Boolean(auth);
+  const profileHref =
+    auth?.profileType === "professional"
+      ? "/profile/edit"
+      : auth?.profileType === "company"
+        ? "/company/edit"
+        : null;
 
   return (
     <div className="min-h-screen bg-[var(--weldoo-bg)] text-[var(--weldoo-ink)]">
@@ -81,10 +87,10 @@ export function AppShell({ auth, children }: AppShellProps) {
                 >
                   Dashboard
                 </Link>
-                {auth?.profileType === "professional" ? (
+                {profileHref ? (
                   <Link
                     className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-3 text-sm font-semibold text-white shadow-weldoo-sm transition hover:brightness-105"
-                    href="/profile/edit"
+                    href={profileHref}
                   >
                     Profile
                   </Link>
