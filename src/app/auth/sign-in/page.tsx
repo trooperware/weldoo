@@ -20,16 +20,22 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
   return (
     <AuthCard
-      description="Access your Weldoo workspace to manage your profile, network, jobs, and learning activity."
-      footer={
+      activeTab="sign-in"
+      description={
         <>
-          New to Weldoo?{" "}
-          <Link className="font-semibold text-[var(--weldoo-indigo)]" href="/auth/sign-up">
-            Create an account
+          No account yet?{" "}
+          <Link className="font-bold text-weldoo-indigo" href="/auth/sign-up">
+            Create one free
           </Link>
         </>
       }
-      title="Sign in"
+      footer={
+        <>
+          <span className="underline">Privacy</span> |{" "}
+          <span className="underline">Terms</span>
+        </>
+      }
+      title="Welcome back"
     >
       <SignInForm redirectTo={redirectTo} />
     </AuthCard>

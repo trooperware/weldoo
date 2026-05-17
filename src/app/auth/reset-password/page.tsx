@@ -14,6 +14,7 @@ export default async function ResetPasswordPage() {
   return (
     <AuthCard
       description="Choose a new password for your Weldoo account."
+      showTabs={false}
       title="Set new password"
     >
       <ResetPasswordForm />

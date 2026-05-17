@@ -800,6 +800,55 @@ Entregables:
 
 Objetivo: ampliar la plataforma despues de validar Phase 1.
 
+## Sprint 7A - OAuth Authentication
+
+Objetivo: activar autenticacion social despues de validar el MVP base con email y password.
+
+### Task 7A.1 - OAuth architecture and provider setup plan
+
+Prompt para Codex:
+
+```text
+Design the Phase 2 OAuth authentication plan for Weldoo using Supabase Auth. Start with Google OAuth and keep LinkedIn OAuth as the second provider. Define required provider configuration, redirect URLs for local/staging/production, environment variables, callback behavior, account linking rules, onboarding behavior after OAuth sign-up, error states, and QA checks. Do not implement code yet; create a technical implementation plan in docs.
+```
+
+Entregables:
+
+- Plan tecnico OAuth.
+- Checklist de configuracion Google y LinkedIn.
+- Reglas para cuentas existentes con el mismo email.
+- Validaciones de onboarding despues de OAuth.
+
+### Task 7A.2 - Google OAuth implementation
+
+Prompt para Codex:
+
+```text
+Implement Google OAuth sign-in and sign-up for Weldoo using Supabase Auth. Enable the existing Google button in the auth UI, add the client-side OAuth start action, preserve redirectTo behavior, handle callback errors, and ensure new OAuth users are sent to onboarding if they do not have a completed profile. Keep email/password auth working unchanged. Add validation documentation and manual QA steps.
+```
+
+Entregables:
+
+- Login y registro con Google.
+- Manejo correcto de redirect y callback.
+- Compatibilidad con onboarding por rol.
+- Documento de validacion.
+
+### Task 7A.3 - LinkedIn OAuth implementation
+
+Prompt para Codex:
+
+```text
+Implement LinkedIn OAuth for Weldoo using Supabase Auth after Google OAuth is working. Enable the existing LinkedIn button, document the LinkedIn developer app configuration, handle provider-specific profile data limitations, preserve redirectTo behavior, and ensure OAuth-created accounts follow the same onboarding and profile completion rules as email/password users. Add validation documentation and manual QA steps.
+```
+
+Entregables:
+
+- Login y registro con LinkedIn.
+- Documentacion de configuracion LinkedIn.
+- Manejo de datos parciales del perfil OAuth.
+- Documento de validacion.
+
 ## Sprint 7 - Payments
 
 ### Task 7.1 - Payment architecture

@@ -14,13 +14,19 @@ export default async function SignUpPage() {
 
   return (
     <AuthCard
-      description="Create your Weldoo account. Onboarding will collect your role and profile details in the next sprint task."
-      footer={
+      activeTab="sign-up"
+      description={
         <>
           Already have an account?{" "}
-          <Link className="font-semibold text-[var(--weldoo-indigo)]" href="/auth/sign-in">
+          <Link className="font-bold text-weldoo-indigo" href="/auth/sign-in">
             Sign in
           </Link>
+        </>
+      }
+      footer={
+        <>
+          <span className="underline">Privacy</span> |{" "}
+          <span className="underline">Terms</span>
         </>
       }
       title="Create account"

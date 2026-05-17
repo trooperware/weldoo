@@ -31,7 +31,7 @@ export function ForgotPasswordForm() {
         placeholder="you@example.com"
         type="email"
       />
-      <SubmitButton pendingLabel="Sending link">Send reset link</SubmitButton>
+      <SubmitButton pendingLabel="Sending link">{"Send reset link ->"}</SubmitButton>
     </form>
   );
 }
