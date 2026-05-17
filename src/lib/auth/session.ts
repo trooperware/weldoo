@@ -80,9 +80,37 @@ export async function getAppShellAuth() {
   }
 
   const profile = await getCurrentProfile();
+  const supabase = await createSupabaseServerClient();
+  let publicProfileHref: string | null = null;
+
+  if (profile?.profile_type === "professional") {
+    publicProfileHref = `/professionals/${profile.id}`;
+  }
+
+  if (profile?.profile_type === "company") {
+    const { data } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("owner_profile_id", profile.id)
+      .maybeSingle();
+    const company = data as Pick<Tables<"companies">, "id"> | null;
+    publicProfileHref = company?.id ? `/companies/${company.id}` : null;
+  }
+
+  if (profile?.profile_type === "training_provider") {
+    const { data } = await supabase
+      .from("training_providers")
+      .select("id")
+      .eq("owner_profile_id", profile.id)
+      .maybeSingle();
+    const provider = data as Pick<Tables<"training_providers">, "id"> | null;
+    publicProfileHref = provider?.id ? `/training-providers/${provider.id}` : null;
+  }
 
   return {
+    displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "Weldoo member",
     email: user.email,
+    publicProfileHref,
     profileType: profile?.profile_type ?? null,
   };
 }

@@ -6,7 +6,9 @@ import { signOutAction } from "@/server/actions/auth";
 
 type AppShellProps = {
   auth?: {
+    displayName?: string | null;
     email?: string | null;
+    publicProfileHref?: string | null;
     profileType?: string | null;
   };
   children: ReactNode;
@@ -95,6 +97,16 @@ function HeaderIcon({ label }: { label: string }) {
 
 export function AppShell({ auth, children }: AppShellProps) {
   const isSignedIn = Boolean(auth);
+  const displayName = auth?.displayName ?? auth?.email?.split("@")[0] ?? "Weldoo member";
+  const roleLabel =
+    auth?.profileType === "company"
+      ? "Company profile"
+      : auth?.profileType === "training_provider"
+        ? "Training provider"
+        : auth?.profileType === "professional"
+          ? "Weldoo professional"
+          : "Weldoo member";
+  const avatarInitial = displayName.slice(0, 1).toUpperCase();
   const profileHref =
     auth?.profileType === "professional"
       ? "/profile/edit"
@@ -162,21 +174,65 @@ export function AppShell({ auth, children }: AppShellProps) {
                   <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-weldoo-indigo px-[3px] text-[9px] font-bold leading-none text-white">7</span>
                 </button>
                 {profileHref ? (
-                  <Link
-                    className="ml-1 flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] transition hover:scale-[1.03] hover:shadow-weldoo-md"
-                    href={profileHref}
-                  >
-                    {(auth?.email ?? "D").slice(0, 1).toUpperCase()}
-                  </Link>
+                  <details className="group relative ml-1">
+                    <summary
+                      className="flex h-[34px] w-[34px] cursor-pointer list-none items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] transition hover:scale-[1.03] hover:shadow-weldoo-md [&::-webkit-details-marker]:hidden"
+                      title="My profile"
+                    >
+                      {avatarInitial}
+                    </summary>
+                    <div className="absolute right-0 top-11 z-40 w-60 overflow-hidden rounded-[14px] border border-weldoo-border-light bg-white shadow-weldoo-xl">
+                      <div className="flex items-center gap-3 px-4 pb-3.5 pt-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[linear-gradient(135deg,#3d3db4,#5558e8)] text-[15.4px] font-bold text-white">
+                          {avatarInitial}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate text-[14.3px] font-bold text-weldoo-ink">
+                            {displayName}
+                          </div>
+                          <div className="mt-0.5 truncate text-[11px] text-weldoo-muted">
+                            {roleLabel}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="h-px bg-weldoo-border-light" />
+                      <Link
+                        className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+                        href={auth?.publicProfileHref ?? profileHref}
+                      >
+                        <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                          <circle cx="12" cy="7" r="4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                        </svg>
+                        My profile
+                      </Link>
+                      <Link
+                        className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+                        href="/settings"
+                      >
+                        <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                        </svg>
+                        Settings
+                      </Link>
+                      <div className="h-px bg-weldoo-border-light" />
+                      <form action={signOutAction}>
+                        <button
+                          className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+                          type="submit"
+                        >
+                          <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                            <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                            <line x1="21" x2="9" y1="12" y2="12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                          </svg>
+                          Log out
+                        </button>
+                      </form>
+                    </div>
+                  </details>
                 ) : null}
-                <form action={signOutAction} className="hidden">
-                  <button
-                    className="inline-flex h-9 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-3 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-                    type="submit"
-                  >
-                    Sign out
-                  </button>
-                </form>
               </>
             ) : (
               <>
