@@ -90,7 +90,12 @@ export function PostComposer() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <PostImageUploadField />
-        <Button className="h-8 px-3 text-xs" disabled={pending} size="sm" type="submit">
+        <Button
+          className="h-[34px] rounded-weldoo-sm border border-weldoo-border-light bg-white px-3 text-xs font-semibold text-weldoo-indigo shadow-none hover:bg-weldoo-bg-strong"
+          disabled={pending}
+          size="sm"
+          type="submit"
+        >
           {pending ? "Publishing" : "Publish"}
         </Button>
       </div>

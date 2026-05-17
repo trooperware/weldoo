@@ -84,7 +84,7 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-1">
       <input name="imageUrl" type="hidden" value={url} />
       <input
         accept="image/jpeg,image/png,image/webp"

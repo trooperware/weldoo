@@ -49,8 +49,8 @@ export default async function Home({ searchParams }: HomePageProps) {
                 <div className="flex flex-col gap-1.5 border-t border-weldoo-border-light pt-2.5 text-xs font-normal text-weldoo-slate">
                   <div className="flex items-center gap-[7px]">
                     <svg aria-hidden="true" className="h-[13px] w-[13px] shrink-0 text-weldoo-muted" fill="none" viewBox="0 0 24 24">
-                      <path d="M12 21S5 14.5 5 9.5C5 5.6 8.1 3 12 3S19 5.6 19 9.5C19 14.5 12 21 12 21Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
-                      <path d="M12 12A2.5 2.5 0 1 0 12 7A2.5 2.5 0 0 0 12 12Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+                      <path d="M21 10C21 17 12 23 12 23S3 17 3 10A9 9 0 0 1 21 10Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
                     </svg>
                     <span>Barcelona, Spain</span>
                   </div>
