@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { PostImageUploadField } from "@/components/feed/post-image-upload-field";
-import { Button, FormError, Input, Textarea } from "@/components/ui";
+import { Button, FormError, Textarea } from "@/components/ui";
 import type { PostFieldErrors } from "@/lib/validators/post";
 
 type SaveState = {
@@ -54,45 +54,46 @@ export function PostComposer() {
 
   return (
     <form
-      className="space-y-4 rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white p-5 shadow-weldoo-sm"
+      className="rounded-weldoo-md border border-weldoo-border-light bg-white p-4 shadow-weldoo-sm transition hover:shadow-weldoo-md"
       onSubmit={handleSubmit}
     >
-      <div>
-        <h2 className="text-base font-bold text-[var(--weldoo-ink)]">Create post</h2>
-        <p className="mt-1 text-sm text-[var(--weldoo-muted)]">
-          Share welding work, shop updates, training notes, or job-relevant insights.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white">
+          W
+        </div>
+        <div className="min-w-0 flex-1">
+          <Textarea
+            aria-label="Post text"
+            error={state.errors?.body}
+            id="body"
+            className="min-h-16 rounded-[1.25rem] px-4"
+            name="body"
+            placeholder="Share something with the community..."
+            rows={2}
+          />
+        </div>
       </div>
 
-      <FormError>{state.status === "error" ? state.message : null}</FormError>
-      {state.status === "success" && state.message ? (
-        <div
-          className="rounded-[var(--weldoo-radius-sm)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
-          role="status"
-        >
-          {state.message}
-        </div>
-      ) : null}
+      <div className="mt-3">
+        <FormError>{state.status === "error" ? state.message : null}</FormError>
+        {state.status === "success" && state.message ? (
+          <div
+            className="rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
+            role="status"
+          >
+            {state.message}
+          </div>
+        ) : null}
+      </div>
 
-      <Textarea
-        error={state.errors?.body}
-        id="body"
-        label="Post text"
-        name="body"
-        placeholder="Share a welding update..."
-      />
-      <Input
-        error={state.errors?.tags}
-        id="tags"
-        label="Tags"
-        name="tags"
-        placeholder="TIG, stainless steel, inspection"
-      />
-      <PostImageUploadField />
+      <input name="tags" type="hidden" value="" />
 
-      <Button disabled={pending} type="submit">
-        {pending ? "Publishing" : "Publish post"}
-      </Button>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-weldoo-border-light pt-3">
+        <PostImageUploadField />
+        <Button className="h-9 px-4" disabled={pending} size="sm" type="submit">
+          {pending ? "Publishing" : "Publish"}
+        </Button>
+      </div>
     </form>
   );
 }

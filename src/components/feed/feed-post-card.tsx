@@ -65,9 +65,9 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
   const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
 
   return (
-    <article className="rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white p-5 shadow-weldoo-sm">
-      <header className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white">
+    <article className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm transition hover:border-weldoo-border hover:shadow-weldoo-md">
+      <header className="flex items-start gap-3 px-[18px] pt-[18px]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.2)]">
           {author?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img alt="" className="h-full w-full object-cover" src={author.avatar_url} />
@@ -79,13 +79,13 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
           <div className="flex flex-wrap items-center gap-2">
             {authorHref ? (
               <Link
-                className="font-semibold text-[var(--weldoo-ink)] hover:text-[var(--weldoo-indigo)]"
+                className="text-[15px] font-bold leading-tight text-weldoo-ink hover:text-weldoo-indigo"
                 href={authorHref}
               >
                 {author?.display_name ?? "Weldoo member"}
               </Link>
             ) : (
-              <span className="font-semibold text-[var(--weldoo-ink)]">
+              <span className="text-[15px] font-bold leading-tight text-weldoo-ink">
                 {author?.display_name ?? "Weldoo member"}
               </span>
             )}
@@ -94,46 +94,43 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
             ) : null}
           </div>
           {author?.headline ? (
-            <p className="mt-1 truncate text-xs font-medium text-[var(--weldoo-muted)]">
+            <p className="mt-0.5 truncate text-[12.5px] leading-tight text-weldoo-slate">
               {author.headline}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-[var(--weldoo-muted)]">
+          <p className="mt-1 text-[11.5px] text-weldoo-muted">
             {formatPostDate(post.created_at)}
           </p>
         </div>
       </header>
 
-      <p className="mt-4 whitespace-pre-line text-sm leading-6 text-[var(--weldoo-ink)]">
-        {post.body}
-      </p>
+      <div className="px-[18px] py-3">
+        <p className="whitespace-pre-line text-[15px] leading-6 text-weldoo-ink">
+          {post.body}
+        </p>
+
+        {post.tags.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <Badge key={tag} variant="info">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+      </div>
 
       {post.image_url ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          alt=""
-          className="mt-4 max-h-[460px] w-full rounded-[var(--weldoo-radius-sm)] object-cover"
-          src={post.image_url}
-        />
+        <img alt="" className="aspect-video w-full object-cover" src={post.image_url} />
       ) : null}
 
-      {post.tags.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {post.tags.map((tag) => (
-            <Badge key={tag} variant="info">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      ) : null}
-
-      <footer className="mt-4 flex flex-wrap gap-4 border-t border-[var(--weldoo-border-light)] pt-4 text-xs font-semibold text-[var(--weldoo-muted)]">
+      <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs text-weldoo-muted">
         <span>{likeCount} likes</span>
         <span>{commentCount} comments</span>
-        <span>{isSaved ? "Saved" : "Not saved"}</span>
       </footer>
       {canInteract ? (
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--weldoo-border-light)] pt-4">
+        <div className="mx-4 flex flex-wrap items-center gap-2 border-t border-weldoo-border-light py-1">
           <FeedPostActions
             initialIsLiked={isLiked}
             initialIsSaved={isSaved}
@@ -144,6 +141,7 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
         </div>
       ) : null}
       {canManage ? (
+        <div className="px-[18px] pb-3">
         <PostOwnerControls
           defaultValues={{
             body: post.body,
@@ -152,6 +150,7 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
           }}
           postId={post.id}
         />
+        </div>
       ) : null}
       <FeedComments canComment={canInteract} comments={comments} postId={post.id} />
     </article>

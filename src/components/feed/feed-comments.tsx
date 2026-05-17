@@ -93,68 +93,79 @@ export function FeedComments({ canComment, comments, postId }: FeedCommentsProps
   }
 
   return (
-    <section className="mt-4 border-t border-[var(--weldoo-border-light)] pt-4">
-      <h3 className="text-sm font-bold text-[var(--weldoo-ink)]">Comments</h3>
+    <section className="border-t border-weldoo-border-light">
       <FormError>{state.status === "error" ? state.message : null}</FormError>
 
       {comments.length > 0 ? (
-        <div className="mt-3 space-y-3">
+        <div className="space-y-0.5 py-1">
           {comments.map((comment) => (
             <article
-              className="rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-[var(--weldoo-bg)] p-3"
+              className="flex gap-2 px-4 py-2"
               key={comment.comment.id}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[var(--weldoo-ink)]">
-                    {comment.author?.display_name ?? "Weldoo member"}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--weldoo-muted)]">
-                    {formatCommentDate(comment.comment.created_at)}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  {canComment ? (
-                    <ReportContentButton
-                      commentId={comment.comment.id}
-                      targetLabel="comment"
-                      targetType="comment"
-                    />
-                  ) : null}
-                  {comment.canDelete ? (
-                    <Button
-                      disabled={pending}
-                      onClick={() => setDeleteCommentId(comment.comment.id)}
-                      size="sm"
-                      variant="danger"
-                    >
-                      Delete
-                    </Button>
-                  ) : null}
-                </div>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-xs font-bold text-white">
+                {(comment.author?.display_name ?? "W").slice(0, 1).toUpperCase()}
               </div>
-              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[var(--weldoo-ink)]">
-                {comment.comment.body}
-              </p>
+              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] border border-weldoo-border-light bg-weldoo-bg px-3 py-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold leading-tight text-weldoo-ink">
+                    {comment.author?.display_name ?? "Weldoo member"}
+                    </p>
+                    <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
+                    {formatCommentDate(comment.comment.created_at)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    {canComment ? (
+                      <ReportContentButton
+                        commentId={comment.comment.id}
+                        targetLabel="comment"
+                        targetType="comment"
+                      />
+                    ) : null}
+                    {comment.canDelete ? (
+                      <Button
+                        disabled={pending}
+                        onClick={() => setDeleteCommentId(comment.comment.id)}
+                        size="sm"
+                        variant="danger"
+                      >
+                        Delete
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="mt-1 whitespace-pre-line text-sm leading-6 text-weldoo-ink">
+                  {comment.comment.body}
+                </p>
+              </div>
             </article>
           ))}
         </div>
       ) : (
-        <p className="mt-3 rounded-[var(--weldoo-radius-sm)] border border-dashed border-[var(--weldoo-border-light)] bg-white p-3 text-sm text-[var(--weldoo-muted)]">
+        <p className="mx-4 my-3 rounded-weldoo-sm border border-dashed border-weldoo-border-light bg-white p-3 text-sm text-weldoo-muted">
           No comments yet.
         </p>
       )}
 
       {canComment ? (
-        <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+        <form className="flex items-start gap-2 border-t border-weldoo-border-light px-[18px] py-3" onSubmit={handleSubmit}>
+          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-xs font-bold text-white">
+            W
+          </div>
+          <div className="min-w-0 flex-1">
           <Textarea
+            aria-label="Add comment"
             error={state.errors?.body}
             id={`comment-${postId}`}
-            label="Add comment"
+            className="min-h-11 rounded-full px-4 py-2"
             name="body"
             placeholder="Add a professional comment..."
+            rows={1}
           />
-          <Button disabled={pending} size="sm" type="submit">
+          </div>
+          <Button className="mt-1 h-9 shrink-0" disabled={pending} size="sm" type="submit">
             {pending ? "Posting" : "Post comment"}
           </Button>
         </form>

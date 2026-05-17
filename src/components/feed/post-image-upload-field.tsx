@@ -84,41 +84,54 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
   }
 
   return (
-    <div className="space-y-3 rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-[var(--weldoo-bg)] p-3">
+    <div className="flex flex-wrap items-center gap-3">
       <input name="imageUrl" type="hidden" value={url} />
-      <div>
-        <label
-          className="block text-sm font-semibold text-[var(--weldoo-ink)]"
-          htmlFor={inputId}
-        >
-          Post image
-        </label>
-        <p className="mt-1 text-xs leading-5 text-[var(--weldoo-muted)]">
-          Optional JPG, PNG, or WebP image. Maximum 5 MB.
-        </p>
-      </div>
-      {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          alt=""
-          className="h-40 w-full rounded-[var(--weldoo-radius-sm)] object-cover"
-          src={url}
-        />
-      ) : null}
       <input
         accept="image/jpeg,image/png,image/webp"
-        className="block w-full text-sm text-[var(--weldoo-muted)] file:mr-3 file:h-9 file:rounded-[var(--weldoo-radius-sm)] file:border-0 file:bg-white file:px-3 file:text-sm file:font-semibold file:text-[var(--weldoo-slate)]"
+        className="sr-only"
         disabled={status === "uploading"}
         id={inputId}
         onChange={handleFileChange}
         type="file"
       />
+      <label
+        className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-weldoo-sm px-3 text-sm font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+        htmlFor={inputId}
+      >
+        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+          <path d="M4 5H20V19H4V5ZM8.5 10A1.5 1.5 0 1 0 8.5 7A1.5 1.5 0 0 0 8.5 10ZM20 15L16 11L6 19" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+        </svg>
+        Photo
+      </label>
+      <button
+        className="inline-flex h-9 items-center gap-2 rounded-weldoo-sm px-3 text-sm font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+        disabled
+        type="button"
+      >
+        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+          <path d="M23 7L16 12L23 17V7ZM1 5H16V19H1V5Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+        </svg>
+        Video
+      </button>
+      <button
+        className="inline-flex h-9 items-center gap-2 rounded-weldoo-sm px-3 text-sm font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+        disabled
+        type="button"
+      >
+        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+          <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM14 2V8H20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+        </svg>
+        Article
+      </button>
+      {url ? (
+        <span className="text-xs font-semibold text-weldoo-indigo">Image ready</span>
+      ) : null}
       {message ? (
         <p
           className={
             status === "error"
               ? "text-xs font-semibold text-red-600"
-              : "text-xs font-semibold text-[var(--weldoo-muted)]"
+              : "text-xs font-semibold text-weldoo-muted"
           }
           role={status === "error" ? "alert" : "status"}
         >

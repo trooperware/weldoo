@@ -76,7 +76,7 @@ export function AuthCard({
   );
 }
 
-function WeldooLogo() {
+export function WeldooLogo() {
   return (
     <svg
       aria-label="weldoo"
