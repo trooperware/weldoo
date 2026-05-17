@@ -12,7 +12,7 @@ export function ForgotPasswordForm() {
   const [state, formAction] = useActionState(forgotPasswordAction, initialState);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-3.5">
       <FormError>{state.status === "error" ? state.message : null}</FormError>
       {state.status === "success" && state.message ? (
         <div
@@ -31,7 +31,7 @@ export function ForgotPasswordForm() {
         placeholder="you@example.com"
         type="email"
       />
-      <SubmitButton pendingLabel="Sending link">{"Send reset link ->"}</SubmitButton>
+      <SubmitButton pendingLabel="Sending link">Send reset link</SubmitButton>
     </form>
   );
 }

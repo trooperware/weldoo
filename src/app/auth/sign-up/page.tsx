@@ -25,7 +25,7 @@ export default async function SignUpPage() {
       }
       footer={
         <>
-          <span className="underline">Privacy</span> |{" "}
+          Protected by reCAPTCHA · <span className="underline">Privacy</span> ·{" "}
           <span className="underline">Terms</span>
         </>
       }

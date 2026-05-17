@@ -31,7 +31,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       }
       footer={
         <>
-          <span className="underline">Privacy</span> |{" "}
+          Protected by reCAPTCHA · <span className="underline">Privacy</span> ·{" "}
           <span className="underline">Terms</span>
         </>
       }

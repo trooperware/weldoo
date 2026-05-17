@@ -19,7 +19,7 @@ export function SignUpForm() {
       <AuthSocialButtons />
       <AuthDivider />
 
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-3.5">
         <FormError>{state.status === "error" ? state.message : null}</FormError>
         {state.status === "success" && state.message ? (
           <div
@@ -38,20 +38,20 @@ export function SignUpForm() {
           placeholder="you@example.com"
           type="email"
         />
-        <label className="block space-y-2" htmlFor="password">
-          <span className="text-sm font-semibold">Password</span>
+        <label className="block space-y-1.5" htmlFor="password">
+          <span className="text-sm font-bold">Password</span>
           <div className="relative">
             <input
               aria-invalid={Boolean(state.errors?.password)}
               autoComplete="new-password"
-              className="h-12 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-4 pr-20 text-sm outline-none transition placeholder:text-weldoo-muted/60 focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
+              className="h-11 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-4 pr-20 text-sm outline-none transition placeholder:text-weldoo-muted/60 focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
               id="password"
               name="password"
               placeholder="At least 8 characters"
               type={showPassword ? "text" : "password"}
             />
             <button
-              className="absolute inset-y-0 right-0 px-4 text-sm font-semibold text-weldoo-muted hover:text-weldoo-indigo"
+              className="absolute inset-y-0 right-0 rounded-r-weldoo-sm px-4 text-sm font-semibold text-weldoo-muted outline-none hover:text-weldoo-indigo focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-weldoo-indigo/30"
               onClick={() => setShowPassword((current) => !current)}
               type="button"
             >
@@ -62,20 +62,20 @@ export function SignUpForm() {
             <p className="text-xs font-medium text-red-600">{state.errors.password}</p>
           ) : null}
         </label>
-        <label className="block space-y-2" htmlFor="confirmPassword">
-          <span className="text-sm font-semibold">Confirm password</span>
+        <label className="block space-y-1.5" htmlFor="confirmPassword">
+          <span className="text-sm font-bold">Confirm password</span>
           <div className="relative">
             <input
               aria-invalid={Boolean(state.errors?.confirmPassword)}
               autoComplete="new-password"
-              className="h-12 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-4 pr-20 text-sm outline-none transition placeholder:text-weldoo-muted/60 focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
+              className="h-11 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-4 pr-20 text-sm outline-none transition placeholder:text-weldoo-muted/60 focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
               id="confirmPassword"
               name="confirmPassword"
               placeholder="Repeat your password"
               type={showConfirmPassword ? "text" : "password"}
             />
             <button
-              className="absolute inset-y-0 right-0 px-4 text-sm font-semibold text-weldoo-muted hover:text-weldoo-indigo"
+              className="absolute inset-y-0 right-0 rounded-r-weldoo-sm px-4 text-sm font-semibold text-weldoo-muted outline-none hover:text-weldoo-indigo focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-weldoo-indigo/30"
               onClick={() => setShowConfirmPassword((current) => !current)}
               type="button"
             >
@@ -88,7 +88,7 @@ export function SignUpForm() {
             </p>
           ) : null}
         </label>
-        <SubmitButton pendingLabel="Creating account">{"Create account ->"}</SubmitButton>
+        <SubmitButton pendingLabel="Creating account">Create account</SubmitButton>
       </form>
     </div>
   );
