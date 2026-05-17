@@ -82,7 +82,7 @@ export function FeedPostActions({
       <FormError>{state.status === "error" ? state.message : null}</FormError>
       <div className="grid grid-cols-4 gap-1">
         <button
-          className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] px-3 text-sm font-medium transition hover:bg-weldoo-bg hover:text-weldoo-indigo ${
+          className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
             isLiked ? "text-weldoo-indigo" : "text-weldoo-ink"
           }`}
           disabled={pendingAction !== null}
@@ -107,7 +107,7 @@ export function FeedPostActions({
           <span>Like</span>
         </button>
         <button
-          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] px-3 text-sm font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
           type="button"
         >
           <svg
@@ -128,7 +128,7 @@ export function FeedPostActions({
           <span>Comment</span>
         </button>
         <button
-          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] px-3 text-sm font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
           type="button"
         >
           <svg
@@ -149,7 +149,7 @@ export function FeedPostActions({
           <span>Share</span>
         </button>
         <button
-          className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] px-3 text-sm font-medium transition hover:bg-weldoo-bg hover:text-weldoo-indigo ${
+          className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
             isSaved ? "text-weldoo-indigo" : "text-weldoo-ink"
           }`}
           disabled={pendingAction !== null}

@@ -54,10 +54,10 @@ export function PostComposer() {
 
   return (
     <form
-      className="rounded-weldoo-md border border-weldoo-border-light bg-white p-4 shadow-weldoo-sm transition hover:shadow-weldoo-md"
+      className="rounded-weldoo-md border border-weldoo-border-light bg-white px-[18px] py-4 shadow-weldoo-sm transition hover:shadow-weldoo-md"
       onSubmit={handleSubmit}
     >
-      <div className="flex items-start gap-3">
+      <div className="mb-3 flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white">
           W
         </div>
@@ -66,10 +66,10 @@ export function PostComposer() {
             aria-label="Post text"
             error={state.errors?.body}
             id="body"
-            className="min-h-16 rounded-[1.25rem] px-4"
+            className="min-h-10 resize-none rounded-full border-[1.5px] px-[18px] py-2.5 text-sm leading-5"
             name="body"
             placeholder="Share something with the community..."
-            rows={2}
+            rows={1}
           />
         </div>
       </div>
@@ -88,9 +88,9 @@ export function PostComposer() {
 
       <input name="tags" type="hidden" value="" />
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-weldoo-border-light pt-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <PostImageUploadField />
-        <Button className="h-9 px-4" disabled={pending} size="sm" type="submit">
+        <Button className="h-8 px-3 text-xs" disabled={pending} size="sm" type="submit">
           {pending ? "Publishing" : "Publish"}
         </Button>
       </div>

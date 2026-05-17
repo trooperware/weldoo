@@ -95,7 +95,7 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
         type="file"
       />
       <label
-        className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-weldoo-sm px-3 text-sm font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+        className="inline-flex cursor-pointer items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
         htmlFor={inputId}
       >
         <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -104,7 +104,7 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
         Photo
       </label>
       <button
-        className="inline-flex h-9 items-center gap-2 rounded-weldoo-sm px-3 text-sm font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+        className="inline-flex items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
         disabled
         type="button"
       >
@@ -114,7 +114,7 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
         Video
       </button>
       <button
-        className="inline-flex h-9 items-center gap-2 rounded-weldoo-sm px-3 text-sm font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+        className="inline-flex items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
         disabled
         type="button"
       >

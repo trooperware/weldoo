@@ -125,20 +125,37 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
         <img alt="" className="aspect-video w-full object-cover" src={post.image_url} />
       ) : null}
 
-      <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs text-weldoo-muted">
-        <span>{likeCount} likes</span>
+      <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs tracking-[-0.01em] text-weldoo-muted">
+        <div className="flex items-center gap-1">
+          {likeCount > 0 ? (
+            <div className="flex">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white bg-[linear-gradient(135deg,#3d3db4,#7b7fe8)] text-[8px]">
+                👍
+              </span>
+              <span className="-ml-1 flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white bg-[linear-gradient(135deg,#e05c7e,#f59b42)] text-[8px]">
+                ❤️
+              </span>
+            </div>
+          ) : null}
+          <span>{likeCount}</span>
+        </div>
         <span>{commentCount} comments</span>
       </footer>
       {canInteract ? (
-        <div className="mx-4 flex flex-wrap items-center gap-2 border-t border-weldoo-border-light py-1">
+        <>
+        <div className="mx-4 h-px bg-weldoo-border-light" />
+        <div className="px-2.5 pb-1.5 pt-1">
           <FeedPostActions
             initialIsLiked={isLiked}
             initialIsSaved={isSaved}
             initialLikeCount={likeCount}
             postId={post.id}
           />
+        </div>
+        <div className="px-[18px] pb-2">
           <ReportContentButton postId={post.id} targetLabel="post" targetType="post" />
         </div>
+        </>
       ) : null}
       {canManage ? (
         <div className="px-[18px] pb-3">
