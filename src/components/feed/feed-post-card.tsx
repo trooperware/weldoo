@@ -1,12 +1,20 @@
 import Link from "next/link";
 
+import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
 import { Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
 
 type PostRow = Tables<"posts">;
+type CommentRow = Tables<"comments">;
 type ProfileRow = Tables<"profiles">;
+
+export type FeedComment = {
+  author: Pick<ProfileRow, "display_name" | "id"> | null;
+  canDelete: boolean;
+  comment: CommentRow;
+};
 
 export type FeedPost = {
   author: Pick<
@@ -16,6 +24,7 @@ export type FeedPost = {
   canManage: boolean;
   canInteract: boolean;
   commentCount: number;
+  comments: FeedComment[];
   isLiked: boolean;
   isSaved: boolean;
   likeCount: number;
@@ -40,8 +49,17 @@ function getProfileHref(author: FeedPost["author"]) {
 }
 
 export function FeedPostCard({ item }: { item: FeedPost }) {
-  const { author, canInteract, canManage, commentCount, isLiked, isSaved, likeCount, post } =
-    item;
+  const {
+    author,
+    canInteract,
+    canManage,
+    commentCount,
+    comments,
+    isLiked,
+    isSaved,
+    likeCount,
+    post,
+  } = item;
   const authorHref = getProfileHref(author);
   const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
 
@@ -131,6 +149,7 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
           postId={post.id}
         />
       ) : null}
+      <FeedComments canComment={canInteract} comments={comments} postId={post.id} />
     </article>
   );
 }

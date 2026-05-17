@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
-import type { FeedPost } from "@/components/feed/feed-post-card";
+import type { FeedComment, FeedPost } from "@/components/feed/feed-post-card";
 
 type PostRow = Tables<"posts">;
 type ProfileRow = Tables<"profiles">;
@@ -14,6 +14,22 @@ function countByPostId(rows: Array<{ post_id: string }>) {
   return rows.reduce<Record<string, number>>((counts, row) => {
     counts[row.post_id] = (counts[row.post_id] ?? 0) + 1;
     return counts;
+  }, {});
+}
+
+function groupCommentsByPostId(
+  comments: CommentRow[],
+  profiles: Record<string, ProfileRow>,
+  currentUserId?: string | null,
+) {
+  return comments.reduce<Record<string, FeedComment[]>>((byPost, comment) => {
+    byPost[comment.post_id] = byPost[comment.post_id] ?? [];
+    byPost[comment.post_id].push({
+      author: profiles[comment.author_profile_id] ?? null,
+      canDelete: currentUserId === comment.author_profile_id,
+      comment,
+    });
+    return byPost;
   }, {});
 }
 
@@ -46,17 +62,14 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     };
   }
 
-  const [profilesResult, likesResult, commentsResult, savedResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, display_name, headline, avatar_url, profile_type")
-      .in("id", authorIds),
+  const [likesResult, commentsResult, savedResult] = await Promise.all([
     supabase.from("likes").select("post_id, profile_id").in("post_id", postIds),
     supabase
       .from("comments")
-      .select("post_id")
+      .select("id, post_id, author_profile_id, body, status, created_at, updated_at")
       .eq("status", "published")
-      .in("post_id", postIds),
+      .in("post_id", postIds)
+      .order("created_at", { ascending: true }),
     currentUserId
       ? supabase
           .from("saved_items")
@@ -67,10 +80,20 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
       : Promise.resolve({ data: [], error: null }),
   ]);
 
-  if (profilesResult.error) throw new Error(profilesResult.error.message);
   if (likesResult.error) throw new Error(likesResult.error.message);
   if (commentsResult.error) throw new Error(commentsResult.error.message);
   if (savedResult.error) throw new Error(savedResult.error.message);
+
+  const comments = (commentsResult.data ?? []) as CommentRow[];
+  const profileIds = Array.from(
+    new Set([...authorIds, ...comments.map((comment) => comment.author_profile_id)]),
+  );
+  const profilesResult = await supabase
+    .from("profiles")
+    .select("id, display_name, headline, avatar_url, profile_type")
+    .in("id", profileIds);
+
+  if (profilesResult.error) throw new Error(profilesResult.error.message);
 
   const profiles = ((profilesResult.data ?? []) as ProfileRow[]).reduce<
     Record<string, ProfileRow>
@@ -79,7 +102,8 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     return byId;
   }, {});
   const likeCounts = countByPostId((likesResult.data ?? []) as LikeRow[]);
-  const commentCounts = countByPostId((commentsResult.data ?? []) as CommentRow[]);
+  const commentCounts = countByPostId(comments);
+  const commentsByPostId = groupCommentsByPostId(comments, profiles, currentUserId);
   const likedPostIds = new Set(
     ((likesResult.data ?? []) as LikeRow[])
       .filter((like) => like.profile_id === currentUserId)
@@ -98,6 +122,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
       canManage: currentUserId === post.author_profile_id,
       canInteract: Boolean(currentUserId),
       commentCount: commentCounts[post.id] ?? 0,
+      comments: commentsByPostId[post.id] ?? [],
       isLiked: likedPostIds.has(post.id),
       isSaved: savedPostIds.has(post.id),
       likeCount: likeCounts[post.id] ?? 0,
