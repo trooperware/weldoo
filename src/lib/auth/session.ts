@@ -71,3 +71,18 @@ export async function requireCompletedOnboarding() {
 
   return { profile, user };
 }
+
+export async function getAppShellAuth() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return undefined;
+  }
+
+  const profile = await getCurrentProfile();
+
+  return {
+    email: user.email,
+    profileType: profile?.profile_type ?? null,
+  };
+}

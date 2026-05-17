@@ -67,35 +67,40 @@ export function ProfileMediaUploadField({
     setStatus("uploading");
     setMessage("Uploading image...");
 
-    const supabase = createSupabaseBrowserClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+      if (userError || !user) {
+        setStatus("error");
+        setMessage("Sign in again before uploading images.");
+        return;
+      }
+
+      const extension = getFileExtension(file);
+      const path = `${user.id}/${name}-${Date.now()}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+      if (uploadError) {
+        setStatus("error");
+        setMessage(uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      setUrl(data.publicUrl);
+      setStatus("success");
+      setMessage("Image uploaded. Save the profile to apply it.");
+    } catch (error) {
       setStatus("error");
-      setMessage("Sign in again before uploading images.");
-      return;
+      setMessage(error instanceof Error ? error.message : "Could not upload image.");
     }
-
-    const extension = getFileExtension(file);
-    const path = `${user.id}/${name}-${Date.now()}.${extension}`;
-    const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, {
-      cacheControl: "3600",
-      upsert: true,
-    });
-
-    if (uploadError) {
-      setStatus("error");
-      setMessage(uploadError.message);
-      return;
-    }
-
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    setUrl(data.publicUrl);
-    setStatus("success");
-    setMessage("Image uploaded. Save the profile to apply it.");
   }
 
   const isCover = bucket === "covers";

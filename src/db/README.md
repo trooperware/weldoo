@@ -13,6 +13,11 @@ This folder contains Supabase/Postgres migrations for the Weldoo MVP.
    - Adds ownership, participant, public-read, and admin policies.
    - Adds immutable relationship triggers for private relationship tables.
 
+3. `migrations/0003_profile_media_storage.sql`
+   - Creates public Supabase Storage buckets for avatars and cover images.
+   - Limits uploads to JPG, PNG, and WebP.
+   - Restricts writes to each user's own storage folder.
+
 ## Design Notes
 
 - `profiles.id` references `auth.users(id)` so each authenticated user has one primary profile.
@@ -30,6 +35,7 @@ This folder contains Supabase/Postgres migrations for the Weldoo MVP.
 - `publication_status` is reused for posts, comments, jobs, and course/events to keep early state management simple.
 - RLS is enabled in a separate migration so the data model and access model can be reviewed independently.
 - Public reads are limited to active profiles and published feed/job/course data.
+- Profile media files are publicly readable, but authenticated users can only write inside their own folder.
 - Private data such as saved items, connections, contact requests, notifications, applications, and interests is limited to the owner or the involved parties.
 - Admin access is routed through `current_profile_is_admin()` rather than broad public policies.
 - Relationship IDs in connections, contact requests, job applications, and course/event interests are immutable after creation.

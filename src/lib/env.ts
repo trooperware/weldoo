@@ -17,8 +17,28 @@ function readEnv(name: string): string | undefined {
   return value && value.trim().length > 0 ? value : undefined;
 }
 
+function readPublicSupabaseUrl(): string | undefined {
+  const value = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return value && value.trim().length > 0 ? value : undefined;
+}
+
+function readPublicSupabaseAnonKey(): string | undefined {
+  const value = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return value && value.trim().length > 0 ? value : undefined;
+}
+
 function getMissingEnv(keys: readonly string[]): string[] {
-  return keys.filter((key) => !readEnv(key));
+  return keys.filter((key) => {
+    if (key === "NEXT_PUBLIC_SUPABASE_URL") {
+      return !readPublicSupabaseUrl();
+    }
+
+    if (key === "NEXT_PUBLIC_SUPABASE_ANON_KEY") {
+      return !readPublicSupabaseAnonKey();
+    }
+
+    return !readEnv(key);
+  });
 }
 
 export function getPublicSupabaseEnv(): PublicSupabaseEnv {
@@ -29,8 +49,8 @@ export function getPublicSupabaseEnv(): PublicSupabaseEnv {
   }
 
   return {
-    url: readEnv("NEXT_PUBLIC_SUPABASE_URL") as string,
-    anonKey: readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") as string,
+    url: readPublicSupabaseUrl() as string,
+    anonKey: readPublicSupabaseAnonKey() as string,
   };
 }
 
@@ -47,8 +67,8 @@ export function hasPublicSupabaseEnv(): boolean {
 
 export function getSupabaseEnvStatus() {
   return {
-    hasUrl: Boolean(readEnv("NEXT_PUBLIC_SUPABASE_URL")),
-    hasAnonKey: Boolean(readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY")),
+    hasUrl: Boolean(readPublicSupabaseUrl()),
+    hasAnonKey: Boolean(readPublicSupabaseAnonKey()),
     hasServiceRoleKey: Boolean(readEnv("SUPABASE_SERVICE_ROLE_KEY")),
   };
 }
