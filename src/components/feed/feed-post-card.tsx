@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
+import { ReportContentButton } from "@/components/feed/report-content-button";
 import { Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
 
@@ -132,12 +133,15 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
         <span>{isSaved ? "Saved" : "Not saved"}</span>
       </footer>
       {canInteract ? (
-        <FeedPostActions
-          initialIsLiked={isLiked}
-          initialIsSaved={isSaved}
-          initialLikeCount={likeCount}
-          postId={post.id}
-        />
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--weldoo-border-light)] pt-4">
+          <FeedPostActions
+            initialIsLiked={isLiked}
+            initialIsSaved={isSaved}
+            initialLikeCount={likeCount}
+            postId={post.id}
+          />
+          <ReportContentButton postId={post.id} targetLabel="post" targetType="post" />
+        </div>
       ) : null}
       {canManage ? (
         <PostOwnerControls

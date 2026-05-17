@@ -78,7 +78,7 @@ export function FeedPostActions({
   }
 
   return (
-    <div className="mt-4 border-t border-[var(--weldoo-border-light)] pt-4">
+    <div>
       <FormError>{state.status === "error" ? state.message : null}</FormError>
       <div className="flex flex-wrap gap-2">
         <Button

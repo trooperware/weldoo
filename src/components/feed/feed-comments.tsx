@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { Button, FormError, Modal, Textarea } from "@/components/ui";
+import { ReportContentButton } from "@/components/feed/report-content-button";
 import type { CommentFieldErrors } from "@/lib/validators/comment";
 import type { FeedComment } from "@/components/feed/feed-post-card";
 
@@ -112,16 +113,25 @@ export function FeedComments({ canComment, comments, postId }: FeedCommentsProps
                     {formatCommentDate(comment.comment.created_at)}
                   </p>
                 </div>
-                {comment.canDelete ? (
-                  <Button
-                    disabled={pending}
-                    onClick={() => setDeleteCommentId(comment.comment.id)}
-                    size="sm"
-                    variant="danger"
-                  >
-                    Delete
-                  </Button>
-                ) : null}
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {canComment ? (
+                    <ReportContentButton
+                      commentId={comment.comment.id}
+                      targetLabel="comment"
+                      targetType="comment"
+                    />
+                  ) : null}
+                  {comment.canDelete ? (
+                    <Button
+                      disabled={pending}
+                      onClick={() => setDeleteCommentId(comment.comment.id)}
+                      size="sm"
+                      variant="danger"
+                    >
+                      Delete
+                    </Button>
+                  ) : null}
+                </div>
               </div>
               <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[var(--weldoo-ink)]">
                 {comment.comment.body}
