@@ -25,7 +25,9 @@ export function AppShell({ auth, children }: AppShellProps) {
       ? "/profile/edit"
       : auth?.profileType === "company"
         ? "/company/edit"
-        : null;
+        : auth?.profileType === "training_provider"
+          ? "/training-provider/edit"
+          : null;
 
   return (
     <div className="min-h-screen bg-[var(--weldoo-bg)] text-[var(--weldoo-ink)]">
