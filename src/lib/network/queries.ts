@@ -20,6 +20,9 @@ export type NetworkDirectoryFilters = {
 
 export type NetworkDirectoryItem = {
   avatarUrl: string | null;
+  canConnect: boolean;
+  connectionId: string | null;
+  connectionStatus: "none" | "pending_sent" | "pending_received" | "accepted";
   createdAt: string;
   description: string | null;
   href: string;
@@ -28,6 +31,7 @@ export type NetworkDirectoryItem = {
   location: string | null;
   name: string;
   tags: string[];
+  targetProfileId: string;
   type: "professional" | "company" | "training_provider";
   typeLabel: string;
 };
@@ -79,6 +83,9 @@ function professionalToItem(
 ): NetworkDirectoryItem {
   return {
     avatarUrl: profile.avatar_url,
+    canConnect: false,
+    connectionId: null,
+    connectionStatus: "none",
     createdAt: profile.created_at,
     description: profile.headline,
     href: `/professionals/${profile.id}`,
@@ -91,6 +98,7 @@ function professionalToItem(
       ...(details?.welding_processes ?? []),
       ...(details?.materials ?? []),
     ]),
+    targetProfileId: profile.id,
     type: "professional",
     typeLabel: "Professional",
   };
@@ -99,6 +107,9 @@ function professionalToItem(
 function companyToItem(company: CompanyRow): NetworkDirectoryItem {
   return {
     avatarUrl: company.logo_url,
+    canConnect: false,
+    connectionId: null,
+    connectionStatus: "none",
     createdAt: company.created_at,
     description: company.sector,
     href: `/companies/${company.id}`,
@@ -107,6 +118,7 @@ function companyToItem(company: CompanyRow): NetworkDirectoryItem {
     location: company.location,
     name: company.name,
     tags: compactTags([company.sector, company.company_size]),
+    targetProfileId: company.owner_profile_id,
     type: "company",
     typeLabel: "Company",
   };
@@ -115,6 +127,9 @@ function companyToItem(company: CompanyRow): NetworkDirectoryItem {
 function trainingProviderToItem(provider: TrainingProviderRow): NetworkDirectoryItem {
   return {
     avatarUrl: provider.logo_url,
+    canConnect: false,
+    connectionId: null,
+    connectionStatus: "none",
     createdAt: provider.created_at,
     description: provider.training_types.length
       ? provider.training_types.join(", ")
@@ -125,6 +140,7 @@ function trainingProviderToItem(provider: TrainingProviderRow): NetworkDirectory
     location: provider.location,
     name: provider.name,
     tags: compactTags(provider.training_types),
+    targetProfileId: provider.owner_profile_id,
     type: "training_provider",
     typeLabel: "Training provider",
   };
@@ -134,6 +150,7 @@ export async function getNetworkDirectoryPage(
   supabase: SupabaseClient<Database>,
   page: number,
   filters: NetworkDirectoryFilters = {},
+  currentProfileId?: string | null,
 ): Promise<DirectoryQueryResult> {
   const normalizedPage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
   const fetchLimit = normalizedPage * NETWORK_PAGE_SIZE;
@@ -314,19 +331,98 @@ export async function getNetworkDirectoryPage(
   const allItems = [...professionals, ...companies, ...trainingProviders].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
+  const browsableItems = currentProfileId
+    ? allItems.filter((item) => item.targetProfileId !== currentProfileId)
+    : allItems;
+  const visibleItems = browsableItems.slice(
+    (normalizedPage - 1) * NETWORK_PAGE_SIZE,
+    (normalizedPage - 1) * NETWORK_PAGE_SIZE + NETWORK_PAGE_SIZE,
+  );
+
+  if (currentProfileId && visibleItems.length) {
+    const targetProfileIds = visibleItems
+      .map((item) => item.targetProfileId)
+      .filter((targetProfileId) => targetProfileId !== currentProfileId);
+
+    if (targetProfileIds.length) {
+      const { data, error } = await supabase
+        .from("connections")
+        .select("id, requester_profile_id, recipient_profile_id, status")
+        .or(
+          `and(requester_profile_id.eq.${currentProfileId},recipient_profile_id.in.(${targetProfileIds.join(",")})),and(recipient_profile_id.eq.${currentProfileId},requester_profile_id.in.(${targetProfileIds.join(",")}))`,
+        )
+        .in("status", ["pending", "accepted"]);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const connectionsByProfileId = ((data ?? []) as Array<{
+        id: string;
+        recipient_profile_id: string;
+        requester_profile_id: string;
+        status: "accepted" | "pending";
+      }>).reduce<
+        Record<
+          string,
+          {
+            id: string;
+            recipient_profile_id: string;
+            requester_profile_id: string;
+            status: "accepted" | "pending";
+          }
+        >
+      >((accumulator, connection) => {
+        const otherProfileId =
+          connection.requester_profile_id === currentProfileId
+            ? connection.recipient_profile_id
+            : connection.requester_profile_id;
+        accumulator[otherProfileId] = connection;
+        return accumulator;
+      }, {});
+
+      visibleItems.forEach((item) => {
+        item.canConnect = item.targetProfileId !== currentProfileId;
+        const connection = connectionsByProfileId[item.targetProfileId];
+
+        if (!connection) return;
+
+        item.connectionId = connection.id;
+        if (connection.status === "accepted") {
+          item.connectionStatus = "accepted";
+          return;
+        }
+
+        item.connectionStatus =
+          connection.requester_profile_id === currentProfileId
+            ? "pending_sent"
+            : "pending_received";
+      });
+    }
+
+    visibleItems.forEach((item) => {
+      if (item.targetProfileId !== currentProfileId) {
+        item.canConnect = true;
+      }
+    });
+  }
 
   const professionalCount = filteredProfessionalIds
     ? professionals.length
     : (professionalProfilesResult.count ?? 0);
-  const totalCount =
+  const ownItemsCount = currentProfileId
+    ? allItems.filter((item) => item.targetProfileId === currentProfileId).length
+    : 0;
+  const totalCount = Math.max(
+    0,
     professionalCount +
-    (companiesResult.count ?? 0) +
-    (trainingProvidersResult.count ?? 0);
+      (companiesResult.count ?? 0) +
+      (trainingProvidersResult.count ?? 0) -
+      ownItemsCount,
+  );
   const totalPages = Math.max(1, Math.ceil(totalCount / NETWORK_PAGE_SIZE));
-  const start = (normalizedPage - 1) * NETWORK_PAGE_SIZE;
-
   return {
-    items: allItems.slice(start, start + NETWORK_PAGE_SIZE),
+    items: visibleItems,
     page: normalizedPage,
     pageSize: NETWORK_PAGE_SIZE,
     totalCount,

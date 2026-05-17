@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
+import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { Badge, EmptyState } from "@/components/ui";
-import { getAppShellAuth } from "@/lib/auth/session";
+import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
 import {
   getNetworkDirectoryPage,
   NETWORK_PAGE_SIZE,
@@ -113,7 +114,7 @@ function TypePill({
       className={[
         "inline-flex h-8 items-center rounded-full border-[1.5px] px-4 text-[12.5px] font-medium tracking-[-0.01em] shadow-weldoo-sm transition",
         active
-          ? "border-weldoo-indigo bg-weldoo-indigo/10 text-weldoo-indigo shadow-[0_0_0_3px_rgba(61,61,180,0.08)]"
+          ? "border-weldoo-indigo bg-weldoo-indigo/[0.08] font-semibold text-weldoo-indigo shadow-[0_0_0_3px_rgba(61,61,180,0.08)]"
           : "border-weldoo-border-light bg-white text-weldoo-slate hover:border-[#c8c8e4] hover:text-weldoo-indigo",
       ].join(" ")}
       href={href}
@@ -125,7 +126,7 @@ function TypePill({
 
 function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
   return (
-    <article className="group flex flex-col items-center overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white text-center shadow-weldoo-sm transition hover:-translate-y-0.5 hover:border-[#d0d0ea] hover:shadow-weldoo-lg">
+    <article className="group flex flex-col items-center overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white text-center shadow-weldoo-sm transition hover:-translate-y-[3px] hover:border-[#d0d0ea] hover:shadow-[0_8px_32px_rgba(61,61,180,0.12)]">
       <div
         className={[
           "h-[60px] w-full",
@@ -164,7 +165,7 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
           {item.typeLabel}
         </Badge>
 
-        <h2 className="truncate text-[13.5px] font-bold leading-[1.3] tracking-[-0.01em] text-weldoo-ink">
+        <h2 className="truncate text-[13.5px] font-bold leading-[1.3] tracking-[-0.1px] text-weldoo-ink">
           {item.name}
         </h2>
         <p className="mt-0.5 line-clamp-1 text-[11.5px] font-medium leading-[1.4] text-weldoo-slate">
@@ -216,25 +217,27 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
         </div>
 
         <Link
-          className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-full border-[1.5px] border-weldoo-border bg-white text-[12.5px] font-semibold tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/5 hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)]"
+          className="mt-3 inline-flex h-8 w-full items-center justify-center rounded-full border border-weldoo-border-light bg-white text-[12px] font-semibold tracking-[-0.01em] text-weldoo-muted transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"
           href={item.href}
         >
           View profile
         </Link>
+        <ConnectionActionButton item={item} />
       </div>
     </article>
   );
 }
 
 export default async function NetworkPage({ searchParams }: NetworkPageProps) {
-  const [params, appShellAuth] = await Promise.all([
+  const [params, appShellAuth, currentProfile] = await Promise.all([
     searchParams,
     getAppShellAuth(),
+    getCurrentProfile(),
   ]);
   const page = parsePage(params.page);
   const filters = getFilters(params);
   const supabase = await createSupabaseServerClient();
-  const directory = await getNetworkDirectoryPage(supabase, page, filters);
+  const directory = await getNetworkDirectoryPage(supabase, page, filters, currentProfile?.id);
   const ownProfileEditHref = getOwnProfileEditHref(appShellAuth?.profileType);
 
   return (
@@ -284,7 +287,7 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
 
           <div className="flex flex-col gap-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h1 className="text-lg font-extrabold tracking-[-0.02em] text-weldoo-ink">
+              <h1 className="text-[18px] font-extrabold tracking-[-0.3px] text-weldoo-ink">
                 <span>{directory.totalCount}</span> professionals
               </h1>
               <div className="flex flex-wrap items-center gap-2">
