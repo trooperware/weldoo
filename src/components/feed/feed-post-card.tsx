@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
 import { Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
@@ -12,8 +13,10 @@ export type FeedPost = {
     ProfileRow,
     "avatar_url" | "display_name" | "headline" | "id" | "profile_type"
   > | null;
-  commentCount: number;
   canManage: boolean;
+  canInteract: boolean;
+  commentCount: number;
+  isLiked: boolean;
   isSaved: boolean;
   likeCount: number;
   post: PostRow;
@@ -37,7 +40,8 @@ function getProfileHref(author: FeedPost["author"]) {
 }
 
 export function FeedPostCard({ item }: { item: FeedPost }) {
-  const { author, canManage, commentCount, isSaved, likeCount, post } = item;
+  const { author, canInteract, canManage, commentCount, isLiked, isSaved, likeCount, post } =
+    item;
   const authorHref = getProfileHref(author);
   const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
 
@@ -109,6 +113,14 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
         <span>{commentCount} comments</span>
         <span>{isSaved ? "Saved" : "Not saved"}</span>
       </footer>
+      {canInteract ? (
+        <FeedPostActions
+          initialIsLiked={isLiked}
+          initialIsSaved={isSaved}
+          initialLikeCount={likeCount}
+          postId={post.id}
+        />
+      ) : null}
       {canManage ? (
         <PostOwnerControls
           defaultValues={{

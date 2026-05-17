@@ -51,7 +51,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
       .from("profiles")
       .select("id, display_name, headline, avatar_url, profile_type")
       .in("id", authorIds),
-    supabase.from("likes").select("post_id").in("post_id", postIds),
+    supabase.from("likes").select("post_id, profile_id").in("post_id", postIds),
     supabase
       .from("comments")
       .select("post_id")
@@ -80,6 +80,11 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
   }, {});
   const likeCounts = countByPostId((likesResult.data ?? []) as LikeRow[]);
   const commentCounts = countByPostId((commentsResult.data ?? []) as CommentRow[]);
+  const likedPostIds = new Set(
+    ((likesResult.data ?? []) as LikeRow[])
+      .filter((like) => like.profile_id === currentUserId)
+      .map((like) => like.post_id),
+  );
   const savedPostIds = new Set(
     ((savedResult.data ?? []) as SavedItemRow[])
       .map((item) => item.post_id)
@@ -91,7 +96,9 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     items: posts.map((post) => ({
       author: profiles[post.author_profile_id] ?? null,
       canManage: currentUserId === post.author_profile_id,
+      canInteract: Boolean(currentUserId),
       commentCount: commentCounts[post.id] ?? 0,
+      isLiked: likedPostIds.has(post.id),
       isSaved: savedPostIds.has(post.id),
       likeCount: likeCounts[post.id] ?? 0,
       post,
