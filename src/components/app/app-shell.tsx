@@ -9,6 +9,7 @@ type AppShellProps = {
     displayName?: string | null;
     email?: string | null;
     publicProfileHref?: string | null;
+    unreadContactRequestCount?: number;
     profileType?: string | null;
   };
   children: ReactNode;
@@ -107,6 +108,7 @@ export function AppShell({ auth, children }: AppShellProps) {
           ? "Weldoo professional"
           : "Weldoo member";
   const avatarInitial = displayName.slice(0, 1).toUpperCase();
+  const unreadContactRequestCount = auth?.unreadContactRequestCount ?? 0;
   const profileHref =
     auth?.profileType === "professional"
       ? "/profile/edit"
@@ -160,12 +162,20 @@ export function AppShell({ auth, children }: AppShellProps) {
           <div className="hidden items-center justify-end gap-1 lg:flex">
             {isSignedIn ? (
               <>
-                <button className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo" type="button">
+                <Link
+                  aria-label="Contact requests"
+                  className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
+                  href="/contact-requests"
+                >
                   <svg aria-hidden="true" className="h-[19px] w-[19px]" fill="none" viewBox="0 0 24 24">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
                   </svg>
-                  <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-weldoo-indigo px-[3px] text-[9px] font-bold leading-none text-white">3</span>
-                </button>
+                  {unreadContactRequestCount > 0 ? (
+                    <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-weldoo-indigo px-[3px] text-[9px] font-bold leading-none text-white">
+                      {unreadContactRequestCount > 9 ? "9+" : unreadContactRequestCount}
+                    </span>
+                  ) : null}
+                </Link>
                 <button className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo" type="button">
                   <svg aria-hidden="true" className="h-[19px] w-[19px]" fill="none" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app/app-shell";
+import { ContactRequestButton } from "@/components/contact/contact-request-button";
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
@@ -130,14 +131,21 @@ export default async function ProfessionalPublicPage({
                   </div>
                 </div>
               </div>
-              {isOwner ? (
-                <Link
-                  className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-white px-5 text-sm font-semibold text-[var(--weldoo-slate)] transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-                  href="/profile/edit"
-                >
-                  Edit profile
-                </Link>
-              ) : null}
+              <div className="flex flex-wrap gap-2">
+                {isOwner ? (
+                  <Link
+                    className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-white px-5 text-sm font-semibold text-[var(--weldoo-slate)] transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+                    href="/profile/edit"
+                  >
+                    Edit profile
+                  </Link>
+                ) : null}
+                <ContactRequestButton
+                  canContact={Boolean(user && !isOwner)}
+                  recipientName={profile.display_name}
+                  recipientProfileId={profile.id}
+                />
+              </div>
             </div>
 
             {profile.bio ? (

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
+import { ContactRequestButton } from "@/components/contact/contact-request-button";
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { Badge, EmptyState } from "@/components/ui";
 import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
@@ -124,7 +125,13 @@ function TypePill({
   );
 }
 
-function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
+function NetworkCard({
+  canContact,
+  item,
+}: {
+  canContact: boolean;
+  item: NetworkDirectoryItem;
+}) {
   return (
     <article className="group flex flex-col items-center overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white text-center shadow-weldoo-sm transition hover:-translate-y-[3px] hover:border-[#d0d0ea] hover:shadow-[0_8px_32px_rgba(61,61,180,0.12)]">
       <div
@@ -222,6 +229,12 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
         >
           View profile
         </Link>
+        <ContactRequestButton
+          canContact={canContact}
+          recipientName={item.name}
+          recipientProfileId={item.targetProfileId}
+          size="card"
+        />
         <ConnectionActionButton item={item} />
       </div>
     </article>
@@ -395,7 +408,11 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
           {directory.items.length ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {directory.items.map((item) => (
-                <NetworkCard item={item} key={`${item.type}-${item.id}`} />
+                <NetworkCard
+                  canContact={Boolean(currentProfile && item.targetProfileId !== currentProfile.id)}
+                  item={item}
+                  key={`${item.type}-${item.id}`}
+                />
               ))}
             </div>
           ) : (

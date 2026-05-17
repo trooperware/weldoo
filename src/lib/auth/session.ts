@@ -82,6 +82,7 @@ export async function getAppShellAuth() {
   const profile = await getCurrentProfile();
   const supabase = await createSupabaseServerClient();
   let publicProfileHref: string | null = null;
+  let unreadContactRequestCount = 0;
 
   if (profile?.profile_type === "professional") {
     publicProfileHref = `/professionals/${profile.id}`;
@@ -107,10 +108,21 @@ export async function getAppShellAuth() {
     publicProfileHref = provider?.id ? `/training-providers/${provider.id}` : null;
   }
 
+  if (profile?.id) {
+    const { count } = await supabase
+      .from("contact_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("recipient_profile_id", profile.id)
+      .is("read_at", null)
+      .is("archived_at", null);
+    unreadContactRequestCount = count ?? 0;
+  }
+
   return {
     displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "Weldoo member",
     email: user.email,
     publicProfileHref,
+    unreadContactRequestCount,
     profileType: profile?.profile_type ?? null,
   };
 }

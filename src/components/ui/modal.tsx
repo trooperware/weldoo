@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 
@@ -23,7 +24,7 @@ export function Modal({
 }: ModalProps) {
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center bg-weldoo-ink/35 p-4 backdrop-blur-[2px]"
@@ -74,6 +75,7 @@ export function Modal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
