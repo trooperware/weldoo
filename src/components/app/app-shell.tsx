@@ -225,6 +225,18 @@ export function AppShell({ auth, children }: AppShellProps) {
                         </svg>
                         Saved jobs
                       </Link>
+                      {auth?.profileType === "training_provider" ? (
+                        <Link
+                          className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+                          href="/training-provider/academy"
+                        >
+                          <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                            <path d="M6 12v5c3 3 9 3 12 0v-5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                          </svg>
+                          Manage Academy
+                        </Link>
+                      ) : null}
                       <Link
                         className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
                         href="/settings"
