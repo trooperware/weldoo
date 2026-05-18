@@ -35,12 +35,20 @@ export default async function DashboardPage() {
               </Link>
             ) : null}
             {profile.profile_type === "company" ? (
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
-                href="/company/edit"
-              >
-                Edit company profile
-              </Link>
+              <>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
+                  href="/company/edit"
+                >
+                  Edit company profile
+                </Link>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-weldoo-border-light bg-white px-5 text-sm font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                  href="/company/jobs"
+                >
+                  Manage jobs
+                </Link>
+              </>
             ) : null}
             {profile.profile_type === "training_provider" ? (
               <Link
