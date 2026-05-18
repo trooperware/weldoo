@@ -31,15 +31,19 @@ async function getUserAndCourseEvent(context: CourseInterestRouteContext) {
   return { courseEventId, error: null, supabase, user };
 }
 
-export async function POST(_request: Request, context: CourseInterestRouteContext) {
+export async function POST(request: Request, context: CourseInterestRouteContext) {
   try {
     const { courseEventId, error, supabase, user } = await getUserAndCourseEvent(context);
 
     if (error) return error;
 
+    const body = (await request.json().catch(() => ({}))) as { note?: unknown };
+    const note = typeof body.note === "string" ? body.note.trim().slice(0, 1000) : "";
+
     const { error: insertError } = await supabase.from("course_event_interests").insert([
       {
         course_event_id: courseEventId,
+        note: note || null,
         profile_id: user.id,
       },
     ] as never[]);

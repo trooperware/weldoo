@@ -80,6 +80,12 @@ export default async function TrainingProviderAcademyPage() {
             </Link>
             <Link
               className="inline-flex h-9 items-center justify-center rounded-full border border-weldoo-border-light bg-white px-4 text-[12px] font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+              href="/training-provider/academy/interests"
+            >
+              Review interests
+            </Link>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full border border-weldoo-border-light bg-white px-4 text-[12px] font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
               href="/training-provider/edit"
             >
               Edit provider profile
