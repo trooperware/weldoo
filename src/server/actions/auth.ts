@@ -57,9 +57,12 @@ export async function signUpAction(
   formData: FormData,
 ): Promise<AuthActionState> {
   const parsed = signUpSchema.safeParse({
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
+    purposes: formData.get("purposes"),
   });
 
   if (!parsed.success) {
@@ -67,10 +70,19 @@ export async function signUpAction(
   }
 
   const supabase = await createSupabaseServerClient();
+  const fullName = [parsed.data.firstName, parsed.data.lastName]
+    .filter(Boolean)
+    .join(" ");
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
+      data: {
+        first_name: parsed.data.firstName,
+        last_name: parsed.data.lastName,
+        full_name: fullName || undefined,
+        purposes: parsed.data.purposes,
+      },
       emailRedirectTo: getAuthCallbackUrl("/auth/callback?next=/onboarding"),
     },
   });

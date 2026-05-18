@@ -18,18 +18,18 @@ export default async function SignUpPage() {
       description={
         <>
           Already have an account?{" "}
-          <Link className="font-bold text-weldoo-indigo" href="/auth/sign-in">
+          <Link className="font-medium text-weldoo-indigo" href="/auth/sign-in">
             Sign in
           </Link>
         </>
       }
       footer={
         <>
-          Protected by reCAPTCHA · <span className="underline">Privacy</span> ·{" "}
-          <span className="underline">Terms</span>
+          By signing up you agree to our <span className="underline">Terms</span> and{" "}
+          <span className="underline">Privacy Policy</span>.
         </>
       }
-      title="Create account"
+      title="Join Weldoo"
     >
       <SignUpForm />
     </AuthCard>

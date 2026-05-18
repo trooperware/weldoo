@@ -1,4 +1,4 @@
-const DEFAULT_AUTH_REDIRECT = "/dashboard";
+const DEFAULT_AUTH_REDIRECT = "/";
 
 export function getSafeRedirectPath(value: FormDataEntryValue | string | null | undefined) {
   if (typeof value !== "string" || value.length === 0) {

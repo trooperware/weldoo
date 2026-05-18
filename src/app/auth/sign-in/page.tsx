@@ -15,7 +15,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   const [{ redirectTo }, user] = await Promise.all([searchParams, getCurrentUser()]);
 
   if (user) {
-    redirect(redirectTo ?? "/dashboard");
+    redirect(redirectTo ?? "/");
   }
 
   return (
@@ -24,7 +24,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       description={
         <>
           No account yet?{" "}
-          <Link className="font-bold text-weldoo-indigo" href="/auth/sign-up">
+          <Link className="font-medium text-weldoo-indigo" href="/auth/sign-up">
             Create one free
           </Link>
         </>

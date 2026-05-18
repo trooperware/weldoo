@@ -9,8 +9,12 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 
 export function Input({ className, error, id, label, ...props }: InputProps) {
   return (
-    <label className="block space-y-1.5" htmlFor={id}>
-      {label ? <span className="text-[13.5px] font-bold">{label}</span> : null}
+    <label className="block" htmlFor={id}>
+      {label ? (
+        <span className="mb-[5px] block text-[13.8px] font-semibold leading-[1.15] text-weldoo-ink">
+          {label}
+        </span>
+      ) : null}
       <input
         aria-invalid={Boolean(error)}
         className={cn(
@@ -21,7 +25,7 @@ export function Input({ className, error, id, label, ...props }: InputProps) {
         id={id}
         {...props}
       />
-      {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p> : null}
     </label>
   );
 }

@@ -19,25 +19,25 @@ export function AuthCard({
   title,
 }: AuthCardProps) {
   return (
-    <main className="flex min-h-screen items-center justify-center overflow-hidden bg-[#f6f7ff] px-4 py-8">
-      <section className="w-full max-w-[30rem]">
-        <div className="overflow-hidden rounded-weldoo-lg border border-weldoo-border bg-white shadow-[0_20px_56px_rgba(61,61,180,0.14)]">
-          <div className="h-1 bg-[linear-gradient(90deg,#3d3db4_0%,#5558e8_48%,#70e1b6_100%)]" />
+    <main className="flex min-h-screen items-center justify-center overflow-hidden bg-[#f6f7ff] p-6">
+      <section className="w-full max-w-[448px]">
+        <div className="overflow-hidden rounded-[18px] border border-weldoo-border-light bg-white shadow-weldoo-xl">
+          <div className="h-[3px] bg-[linear-gradient(90deg,#3d3db4_0%,#7b7fe8_34%,#42b8d4_68%,#5ce8b4_100%)]" />
 
-          <div className="px-7 pb-7 pt-7 sm:px-8">
-            <Link className="mb-6 inline-flex items-center" href="/">
+          <div className="px-7 pb-8 pt-9 sm:px-10">
+            <Link className="mb-[26px] inline-flex items-center" href="/">
               <WeldooLogo />
             </Link>
 
             {showTabs ? (
               <nav
                 aria-label="Authentication"
-                className="mb-6 flex gap-7 border-b border-weldoo-border-light"
+                className="mb-7 flex border-b-[1.5px] border-weldoo-border-light"
               >
                 <Link
-                  className={`-mb-px pb-2 text-sm font-bold transition ${
+                  className={`relative mr-7 pb-2.5 text-[15.4px] font-semibold tracking-[-0.01em] transition ${
                     activeTab === "sign-in"
-                      ? "border-b-2 border-weldoo-indigo text-weldoo-ink"
+                      ? "after:absolute after:inset-x-0 after:bottom-[-1.5px] after:h-[2.5px] after:rounded-full after:bg-weldoo-indigo text-weldoo-ink"
                       : "text-weldoo-muted hover:text-weldoo-ink"
                   }`}
                   href="/auth/sign-in"
@@ -45,9 +45,9 @@ export function AuthCard({
                   Sign in
                 </Link>
                 <Link
-                  className={`-mb-px pb-2 text-sm font-bold transition ${
+                  className={`relative pb-2.5 text-[15.4px] font-semibold tracking-[-0.01em] transition ${
                     activeTab === "sign-up"
-                      ? "border-b-2 border-weldoo-indigo text-weldoo-ink"
+                      ? "after:absolute after:inset-x-0 after:bottom-[-1.5px] after:h-[2.5px] after:rounded-full after:bg-weldoo-indigo text-weldoo-ink"
                       : "text-weldoo-muted hover:text-weldoo-ink"
                   }`}
                   href="/auth/sign-up"
@@ -58,16 +58,20 @@ export function AuthCard({
             ) : null}
 
             <div>
-              <h1 className="text-xl font-extrabold tracking-normal text-weldoo-ink">
+              <h1 className="text-[22px] font-extrabold leading-tight tracking-[-0.3px] text-weldoo-ink">
                 {title}
               </h1>
-              <p className="mt-1.5 text-sm leading-5 text-weldoo-muted">{description}</p>
+              <p className="mt-[5px] text-[14.9px] leading-[1.5] text-weldoo-muted">
+                {description}
+              </p>
             </div>
 
-            <div className="mt-5">{children}</div>
+            <div className="mt-6">{children}</div>
 
             {footer ? (
-              <div className="mt-5 text-center text-xs text-weldoo-muted">{footer}</div>
+              <div className="mt-3.5 text-center text-[12.7px] leading-[1.6] text-weldoo-muted">
+                {footer}
+              </div>
             ) : null}
           </div>
         </div>
@@ -80,7 +84,7 @@ export function WeldooLogo() {
   return (
     <svg
       aria-label="weldoo"
-      className="h-[1.45rem] w-[6.25rem]"
+      className="h-6 w-auto"
       fill="none"
       role="img"
       viewBox="0 0 251 59"
@@ -99,21 +103,26 @@ export function WeldooLogo() {
 
 export function AuthSocialButtons() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
       <button
-        className="flex h-9 items-center justify-center gap-2 rounded-weldoo-sm border border-weldoo-border-light bg-white text-sm font-semibold text-weldoo-ink shadow-weldoo-sm opacity-70"
+        className="flex h-[42px] items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-weldoo-border-light bg-white text-[14.3px] font-medium tracking-[-0.01em] text-weldoo-ink shadow-weldoo-sm"
         disabled
         type="button"
       >
-        <span className="text-sm font-black text-[#4285f4]">G</span>
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+        </svg>
         Google
       </button>
       <button
-        className="flex h-9 items-center justify-center gap-2 rounded-weldoo-sm border border-weldoo-border-light bg-white text-sm font-semibold text-weldoo-ink shadow-weldoo-sm opacity-70"
+        className="flex h-[42px] items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-weldoo-border-light bg-white text-[14.3px] font-medium tracking-[-0.01em] text-weldoo-ink shadow-weldoo-sm"
         disabled
         type="button"
       >
-        <span className="rounded-[0.2rem] bg-[#0a66c2] px-1 py-0.5 text-[0.65rem] font-black leading-none text-white">
+        <span className="flex h-[15px] w-[15px] items-center justify-center rounded-[2px] bg-[#0077b5] text-[11px] font-bold leading-none text-white">
           in
         </span>
         LinkedIn
@@ -124,7 +133,7 @@ export function AuthSocialButtons() {
 
 export function AuthDivider() {
   return (
-    <div className="my-4 flex items-center gap-4 text-xs font-bold uppercase tracking-[0.16em] text-weldoo-muted">
+    <div className="mb-[18px] mt-[18px] flex items-center gap-2.5 text-[12.7px] font-medium uppercase tracking-[0.05em] text-weldoo-muted">
       <span className="h-px flex-1 bg-weldoo-border-light" />
       or
       <span className="h-px flex-1 bg-weldoo-border-light" />

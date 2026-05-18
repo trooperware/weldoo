@@ -23,38 +23,66 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
       <AuthSocialButtons />
       <AuthDivider />
 
-      <div className="mb-5 rounded-weldoo-sm border border-weldoo-indigo/20 bg-weldoo-indigo/5 px-4 py-3">
-        <div className="flex items-center gap-2 text-sm font-bold text-weldoo-indigo">
-          <svg
-            aria-hidden="true"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 8H12.01M11 11H12V16H13M21 12C21 16.97 16.97 21 12 21C7.03 21 3 16.97 3 12C3 7.03 7.03 3 12 3C16.97 3 21 7.03 21 12Z"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-            />
-          </svg>
-          Demo access
-        </div>
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-weldoo-slate">
-          <span>Email:</span>
-          <code className="whitespace-nowrap rounded bg-white/80 px-1.5 py-0.5 font-mono">
-            demo@weldoo.net
-          </code>
-          <span>Password:</span>
-          <code className="whitespace-nowrap rounded bg-white/80 px-1.5 py-0.5 font-mono">
-            Weldoo2026
-          </code>
+      <div className="mb-[18px] flex items-start gap-2.5 rounded-[8px] border border-weldoo-indigo/15 bg-weldoo-indigo/[0.06] px-3.5 py-[11px]">
+        <svg
+          aria-hidden="true"
+          className="mt-px h-[15px] w-[15px] shrink-0 text-weldoo-indigo"
+          fill="none"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+          />
+          <line
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <div className="min-w-0 text-[13.8px] leading-[1.6] text-weldoo-ink">
+          <strong className="mb-[3px] block font-bold text-weldoo-indigo">
+            Demo access
+          </strong>
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12.8px] leading-[1.45]">
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              Email:
+              <code className="rounded bg-weldoo-indigo/[0.08] px-1 py-px font-mono text-[12px]">
+                demo@weldoo.net
+              </code>
+            </span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              Password:
+              <code className="rounded bg-weldoo-indigo/[0.08] px-1 py-px font-mono text-[12px]">
+                Weldoo2026
+              </code>
+            </span>
+          </div>
         </div>
       </div>
 
-      <form action={formAction} className="space-y-3.5">
+      <form action={formAction}>
         <input name="redirectTo" type="hidden" value={redirectTo ?? ""} />
         <FormError>{state.status === "error" ? state.message : null}</FormError>
         <Input
@@ -65,12 +93,13 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
           name="email"
           placeholder="you@example.com"
           type="email"
+          className="h-[42px] rounded-[10px] border-[1.5px] px-3.5 text-[15.4px] tracking-[-0.01em]"
         />
-        <label className="block space-y-1.5" htmlFor="password">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-bold">Password</span>
+        <label className="mt-3.5 block" htmlFor="password">
+          <div className="mb-[5px] flex items-center justify-between gap-4 leading-[1.15]">
+            <span className="text-[13.8px] font-semibold text-weldoo-ink">Password</span>
             <Link
-              className="text-sm font-semibold text-weldoo-indigo hover:text-weldoo-indigo-dark"
+              className="text-[13.2px] font-medium text-weldoo-indigo hover:underline"
               href="/auth/forgot-password"
             >
               Forgot password?
@@ -80,14 +109,14 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
             <input
               aria-invalid={Boolean(state.errors?.password)}
               autoComplete="current-password"
-              className="h-11 w-full rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-4 pr-20 text-sm outline-none transition placeholder:text-weldoo-muted/60 focus:border-weldoo-indigo focus:bg-white focus:ring-4 focus:ring-weldoo-indigo/10"
+              className="h-[42px] w-full rounded-[10px] border-[1.5px] border-weldoo-border-light bg-weldoo-bg px-3.5 pr-16 text-[15.4px] tracking-[-0.01em] text-weldoo-ink outline-none transition placeholder:text-[#c0c0d8] focus:border-weldoo-indigo focus:bg-white focus:ring-[3px] focus:ring-weldoo-indigo/10"
               id="password"
               name="password"
               placeholder="Enter your password"
               type={showPassword ? "text" : "password"}
             />
             <button
-              className="absolute inset-y-0 right-0 rounded-r-weldoo-sm px-4 text-sm font-semibold text-weldoo-muted outline-none hover:text-weldoo-indigo focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-weldoo-indigo/30"
+              className="absolute inset-y-0 right-3 px-0 text-[13.2px] font-semibold text-weldoo-muted outline-none hover:text-weldoo-indigo focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-weldoo-indigo/30"
               onClick={() => setShowPassword((current) => !current)}
               type="button"
             >

@@ -5,6 +5,11 @@ const passwordSchema = z
   .min(8, "Use at least 8 characters.")
   .max(72, "Use 72 characters or fewer.");
 
+const optionalNameSchema = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().trim().max(80, "Use 80 characters or fewer.").optional(),
+);
+
 export const signInSchema = z.object({
   email: z.email("Enter a valid email address.").trim().toLowerCase(),
   password: z.string().min(1, "Enter your password."),
@@ -13,9 +18,12 @@ export const signInSchema = z.object({
 
 export const signUpSchema = z
   .object({
+    firstName: optionalNameSchema,
+    lastName: optionalNameSchema,
     email: z.email("Enter a valid email address.").trim().toLowerCase(),
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Confirm your password."),
+    purposes: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
