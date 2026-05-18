@@ -69,4 +69,9 @@ Seed files live in `seeds/` and are intended for development/demo data only.
    - Requires at least one existing training provider profile in `public.training_providers`.
    - Safe to run multiple times; it avoids duplicate academy items with the same title for the same provider.
 
+3. `seeds/0003_demo_events.sql`
+   - Inserts additional published sector events for the dedicated `/events` page.
+   - Requires at least one existing training provider profile in `public.training_providers`.
+   - Safe to run multiple times; it avoids duplicate events with the same title for the same provider.
+
 Apply seed SQL manually in the Supabase SQL editor after migrations are applied and the required profile type exists.

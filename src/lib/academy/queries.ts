@@ -50,6 +50,18 @@ export type AcademyListingResult = {
   totalCount: number;
 };
 
+export type EventFilters = {
+  location?: string;
+  mode?: "in_person" | "virtual";
+  query?: string;
+  topic?: string;
+};
+
+export type EventsListingResult = {
+  items: AcademyItem[];
+  totalCount: number;
+};
+
 export type AcademyDetail = Pick<
   Tables<"course_events">,
   | "agenda"
@@ -151,6 +163,38 @@ export function hasActiveAcademyFilters(filters: AcademyFilters) {
   );
 }
 
+export function parseEventFilters(params: {
+  location?: string;
+  mode?: string;
+  q?: string;
+  topic?: string;
+}): EventFilters {
+  const mode = normalizeFilter(params.mode);
+
+  return {
+    location: normalizeFilter(params.location),
+    mode: mode === "in_person" || mode === "virtual" ? mode : undefined,
+    query: normalizeFilter(params.q),
+    topic: normalizeFilter(params.topic),
+  };
+}
+
+export function getEventsHref(filters: EventFilters) {
+  const params = new URLSearchParams();
+
+  if (filters.query) params.set("q", filters.query);
+  if (filters.location) params.set("location", filters.location);
+  if (filters.mode) params.set("mode", filters.mode);
+  if (filters.topic) params.set("topic", filters.topic);
+
+  const query = params.toString();
+  return query ? `/events?${query}` : "/events";
+}
+
+export function hasActiveEventFilters(filters: EventFilters) {
+  return Boolean(filters.query || filters.location || filters.mode || filters.topic);
+}
+
 export async function getAcademyListing(
   supabase: SupabaseClient<Database>,
   filters: AcademyFilters,
@@ -210,6 +254,60 @@ export async function getAcademyListing(
     .filter((item) =>
       providerFilter ? item.provider?.name.toLowerCase().includes(providerFilter) : true,
     );
+
+  return {
+    items,
+    totalCount: items.length,
+  };
+}
+
+export async function getEventsListing(
+  supabase: SupabaseClient<Database>,
+  filters: EventFilters,
+): Promise<EventsListingResult> {
+  let query = supabase
+    .from("course_events")
+    .select(
+      "id, training_provider_id, type, level, title, description, topics, welding_processes, location, online_url, external_registration_url, starts_at, ends_at, duration_text, capacity, price_text, published_at, created_at, training_providers(id, name, location, logo_url)",
+      { count: "exact" },
+    )
+    .eq("status", "published")
+    .eq("type", "sector_event")
+    .order("starts_at", { ascending: true, nullsFirst: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .limit(100);
+
+  if (filters.query) {
+    const like = normalizeLike(filters.query);
+    query = query.or(
+      `title.ilike.${like},description.ilike.${like},location.ilike.${like},duration_text.ilike.${like},price_text.ilike.${like}`,
+    );
+  }
+
+  if (filters.location) {
+    query = query.ilike("location", normalizeLike(filters.location));
+  }
+
+  if (filters.topic) {
+    query = query.contains("topics", [filters.topic]);
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw new Error(error.message);
+
+  const items = ((data ?? []) as Array<
+    Omit<AcademyItem, "provider"> & {
+      training_providers: TrainingProviderSummary | null;
+    }
+  >).map<AcademyItem>((row) => ({
+    ...row,
+    provider: row.training_providers,
+  })).filter((item) => {
+    if (filters.mode === "virtual") return Boolean(item.online_url) || item.location === "Online";
+    if (filters.mode === "in_person") return !item.online_url && item.location !== "Online";
+    return true;
+  });
 
   return {
     items,

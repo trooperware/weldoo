@@ -656,6 +656,26 @@ Entregables:
 - RLS y constraints.
 - Adaptacion de queries/UI existentes.
 
+### Task 5.7 - Events discovery page
+
+Objetivo:
+
+Crear una pantalla especifica para eventos de sector.
+
+Prompt para Codex:
+
+```text
+Implement a dedicated Events discovery page for Weldoo. Use the existing course_events model and list only published sector_event items. Add the /events route, update the top navigation, show event cards with provider, date, location, duration, capacity, and links to the existing course/event detail page for interest registration. Keep the UI visually aligned with the prototype and add empty/filter states.
+```
+
+Entregables:
+
+- Ruta `/events`.
+- Menu superior conectado a Events.
+- Cards de eventos.
+- Filtros basicos por ubicacion/topic.
+- Reutilizacion del detalle course/event existente.
+
 ## Sprint 6 - Admin, Notifications, QA, and Beta
 
 ### Task 6.1 - Basic admin layout and access control

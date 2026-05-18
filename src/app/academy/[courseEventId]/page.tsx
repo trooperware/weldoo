@@ -78,6 +78,7 @@ function getLocationLabel(item: AcademyDetail) {
 function getHeroTone(type: AcademyDetail["type"]) {
   if (type === "webinar") return "from-[#1e1e4a] via-weldoo-indigo to-[#42b8d4]";
   if (type === "online_course") return "from-[#1e1e4a] to-weldoo-indigo";
+  if (type === "sector_event") return "from-[#0a1e2e] to-[#0a3050]";
   return "from-[#0a2a1a] to-[#0e3a2a]";
 }
 
@@ -163,6 +164,15 @@ function IconPerson({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function IconMonitor({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <rect height="14" rx="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" width="20" x="2" y="3" />
+      <path d="M8 21h8M12 17v4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 function DetailPill({ children, icon }: { children: ReactNode; icon: ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-[14.3px] text-white/85">
@@ -200,6 +210,15 @@ function getIncludedItems(item: AcademyDetail) {
     ];
   }
 
+  if (item.type === "sector_event") {
+    return [
+      item.capacity ? `Maximum ${item.capacity} attendees` : "Limited event capacity",
+      "Sector updates and practical welding case studies",
+      "Networking with welding professionals and companies",
+      item.external_registration_url ? "External registration available" : "Interest registration available on Weldoo",
+    ];
+  }
+
   return [
     item.capacity ? `Maximum ${item.capacity} participants` : "Limited group format",
     "Training provider-led practical content",
@@ -217,6 +236,15 @@ function getContentItems(item: AcademyDetail) {
       "Session introduction and objectives",
       "Technical topic walkthrough",
       "Live questions and next steps",
+    ];
+  }
+
+  if (item.type === "sector_event") {
+    return [
+      "Welcome and registration",
+      "Keynote and sector update",
+      "Practical sessions and case studies",
+      "Networking and closing discussion",
     ];
   }
 
@@ -288,7 +316,12 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
   const timeText = startTime && endTime ? `${startTime} - ${endTime}` : startTime;
   const isWebinar = item.type === "webinar";
   const isOnlineCourse = item.type === "online_course";
+  const isSectorEvent = item.type === "sector_event";
+  const isVirtualEvent = isSectorEvent && (Boolean(item.online_url) || item.location === "Online");
   const detailTypeLabel = typeLabels[item.type];
+  const detailFormatLabel = isSectorEvent ? (isVirtualEvent ? "Virtual" : "In person") : detailTypeLabel;
+  const eventLocationDetail =
+    isVirtualEvent && location === "Online" ? "Online · Link on registration" : location;
   const registeredCount = item.capacity ? Math.max(1, Math.round(item.capacity * 0.68)) : null;
   const spotsLeft = item.capacity && registeredCount ? Math.max(item.capacity - registeredCount, 0) : null;
   const capacityPercentage = item.capacity && registeredCount ? Math.min(100, Math.round((registeredCount / item.capacity) * 100)) : 0;
@@ -458,6 +491,7 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                 <CourseSaveButton
                   courseEventId={item.id}
                   initialSaved={Boolean(savedItem)}
+                  itemLabel="course"
                   signedIn={Boolean(currentProfile)}
                 />
               </div>
@@ -473,12 +507,12 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
       <main className="mx-auto max-w-[1128px] px-4 pb-20 pt-7">
         <Link
           className="mb-5 inline-flex items-center gap-[7px] text-[14.3px] font-medium text-weldoo-muted transition hover:text-weldoo-indigo"
-          href="/academy"
+          href={isSectorEvent ? "/events" : "/academy"}
         >
           <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
             <path d="m15 18-6-6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
           </svg>
-          Back to Academy
+          {isSectorEvent ? "Back to Events" : "Back to Academy"}
         </Link>
 
         <article className="overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
@@ -510,8 +544,8 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
               <div className="absolute inset-x-0 bottom-0 px-6 py-7 sm:px-10 sm:py-8">
                 <div className="mb-3 flex flex-wrap gap-2">
                   <span className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3.5 text-[12.1px] font-bold uppercase tracking-[0.04em] backdrop-blur">
-                    <AcademyTypeIcon className="h-3.5 w-3.5" type={item.type} />
-                    {detailTypeLabel}
+                    {isVirtualEvent ? <IconMonitor className="h-3.5 w-3.5" /> : <AcademyTypeIcon className="h-3.5 w-3.5" type={item.type} />}
+                    {detailFormatLabel}
                   </span>
                 </div>
                 <h1 className="mb-2.5 max-w-3xl text-[30.8px] font-extrabold leading-[1.15] tracking-[-0.5px]">
@@ -520,8 +554,10 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                 <div className="flex flex-wrap gap-4">
                   <DetailPill icon={<IconCalendar className="h-4 w-4" />}>{formatDate(item.starts_at)}</DetailPill>
                   {timeText ? <DetailPill icon={<IconClock />}>{timeText}</DetailPill> : null}
-                  <DetailPill icon={<IconLocation />}>{location}</DetailPill>
-                  {item.level ? (
+                  <DetailPill icon={isVirtualEvent ? <IconMonitor /> : <IconLocation />}>
+                    {isVirtualEvent ? "Online" : location}
+                  </DetailPill>
+                  {item.level && !isSectorEvent ? (
                     <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.04em]">
                       {levelLabels[item.level]}
                     </span>
@@ -536,7 +572,7 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
               <div>
                 <section>
                   <h2 className="mb-3.5 text-[17.6px] font-bold tracking-[-0.2px] text-weldoo-ink">
-                    About this {isWebinar ? "webinar" : "course"}
+                    About this {isSectorEvent ? "event" : isWebinar ? "webinar" : "course"}
                   </h2>
                   <p className="mb-7 whitespace-pre-line text-[15.4px] leading-[1.75] text-weldoo-ink">
                     {item.description}
@@ -547,7 +583,7 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                   <>
                     <section>
                       <h2 className="mb-3.5 text-[17.6px] font-bold tracking-[-0.2px] text-weldoo-ink">
-                        What is included
+                        {isSectorEvent ? "What to expect" : "What is included"}
                       </h2>
                       <ul className="mb-7 flex list-none flex-col gap-2.5 p-0">
                         {includedItems.map((included) => (
@@ -566,7 +602,7 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
 
                     <section>
                       <h2 className="mb-3.5 text-[17.6px] font-bold tracking-[-0.2px] text-weldoo-ink">
-                        Content
+                        {isSectorEvent ? "Agenda" : "Content"}
                       </h2>
                       <div className="mb-7 flex flex-col gap-2">
                         {contentItems.map((agendaItem, index) => (
@@ -587,7 +623,7 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
 
                 <section>
                   <h2 className="mb-3.5 text-[17.6px] font-bold tracking-[-0.2px] text-weldoo-ink">
-                    Instructors
+                    {isSectorEvent ? "Speakers" : "Instructors"}
                   </h2>
                   <div className="flex items-center gap-3.5 rounded-[12px] bg-weldoo-bg px-4 py-3.5">
                     <div className="flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#42b8d4,#3d3db4)] text-[14.3px] font-bold text-white">
@@ -671,17 +707,30 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                 ) : null}
 
                 <div className="flex flex-col gap-2">
-                  <CourseInterestButton
-                    courseEventId={item.id}
-                    initialInterested={Boolean(interest)}
-                    signedIn={Boolean(currentProfile)}
-                  />
+                  {isSectorEvent && item.external_registration_url ? (
+                    <a
+                      className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(135deg,#3d3db4,#5555e8)] px-5 text-[15.4px] font-bold tracking-[-0.01em] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] transition hover:brightness-105 hover:shadow-[0_4px_16px_rgba(61,61,180,0.32)]"
+                      href={item.external_registration_url}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <IconExternal className="h-[17px] w-[17px]" />
+                      Register now
+                    </a>
+                  ) : (
+                    <CourseInterestButton
+                      courseEventId={item.id}
+                      initialInterested={Boolean(interest)}
+                      signedIn={Boolean(currentProfile)}
+                    />
+                  )}
                   <CourseSaveButton
                     courseEventId={item.id}
                     initialSaved={Boolean(savedItem)}
+                    itemLabel={isSectorEvent ? "event" : "course"}
                     signedIn={Boolean(currentProfile)}
                   />
-                  {item.external_registration_url ? (
+                  {item.external_registration_url && !isSectorEvent ? (
                     <a
                       className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border bg-white px-5 text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"
                       href={item.external_registration_url}
@@ -711,8 +760,18 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                   <InfoRow icon={<IconCalendar className="h-4 w-4" />} label="Date" value={formatDate(item.starts_at)} />
                   {timeText ? <InfoRow icon={<IconClock className="h-4 w-4" />} label="Time" value={timeText} /> : null}
                   {item.duration_text ? <InfoRow icon={<IconClock className="h-4 w-4" />} label="Duration" value={item.duration_text} /> : null}
-                  <InfoRow icon={<IconLocation className="h-4 w-4" />} label="Location" value={location} />
-                  {item.level ? (
+                  <InfoRow
+                    icon={isVirtualEvent ? <IconMonitor className="h-4 w-4" /> : <IconLocation className="h-4 w-4" />}
+                    label="Location"
+                    value={eventLocationDetail}
+                  />
+                  {isSectorEvent ? (
+                    <InfoRow
+                      icon={isVirtualEvent ? <IconMonitor className="h-4 w-4" /> : <IconPerson className="h-4 w-4" />}
+                      label="Format"
+                      value={detailFormatLabel}
+                    />
+                  ) : item.level ? (
                     <InfoRow
                       icon={<IconPerson className="h-4 w-4" />}
                       label="Level"
