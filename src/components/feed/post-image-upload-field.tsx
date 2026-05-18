@@ -2,6 +2,7 @@
 
 import { useId, useState, type ChangeEvent } from "react";
 
+import { Button, Modal } from "@/components/ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type PostImageUploadFieldProps = {
@@ -24,6 +25,7 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
   const inputId = useId();
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [url, setUrl] = useState(currentUrl ?? "");
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -83,6 +85,13 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
     }
   }
 
+  function handleRemoveImage() {
+    setUrl("");
+    setStatus("success");
+    setMessage("Image removed. Save the post to apply it.");
+    setRemoveModalOpen(false);
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-1">
       <input name="imageUrl" type="hidden" value={url} />
@@ -124,7 +133,37 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
         Article
       </button>
       {url ? (
-        <span className="text-xs font-semibold text-weldoo-indigo">Image ready</span>
+        <>
+          <span className="text-xs font-semibold text-weldoo-indigo">Image ready</span>
+          <button
+            className="inline-flex items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium tracking-[-0.01em] text-red-600 transition hover:bg-red-50"
+            disabled={status === "uploading"}
+            onClick={() => setRemoveModalOpen(true)}
+            type="button"
+          >
+            Remove photo
+          </button>
+          <Modal
+            description="The photo will be removed from this post when you save your changes."
+            footer={
+              <>
+                <Button onClick={() => setRemoveModalOpen(false)} variant="ghost">
+                  Cancel
+                </Button>
+                <Button onClick={handleRemoveImage} variant="danger">
+                  Remove photo
+                </Button>
+              </>
+            }
+            onOpenChange={setRemoveModalOpen}
+            open={removeModalOpen}
+            title="Remove photo?"
+          >
+            <p className="text-sm leading-6 text-weldoo-muted">
+              Are you sure you want to remove this photo from the post?
+            </p>
+          </Modal>
+        </>
       ) : null}
       {message ? (
         <p
