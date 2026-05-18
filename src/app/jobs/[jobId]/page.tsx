@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { AppShell } from "@/components/app/app-shell";
 import { JobApplyButton } from "@/components/jobs/job-apply-button";
 import { JobSaveButton } from "@/components/jobs/job-save-button";
-import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
+import { getAppShellAuth } from "@/lib/auth/session";
 import {
   getApplicationForCurrentUser,
   getSavedJobForCurrentUser,
@@ -128,9 +128,8 @@ export async function generateMetadata({
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { jobId } = await params;
-  const [appShellAuth, currentProfile, supabase] = await Promise.all([
+  const [appShellAuth, supabase] = await Promise.all([
     getAppShellAuth(),
-    getCurrentProfile(),
     createSupabaseServerClient(),
   ]);
   const job = await getPublishedJobById(supabase, jobId);
@@ -143,11 +142,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const companyName = job.company?.name ?? "Weldoo company";
   const companyLocation = job.company?.location ?? job.location;
   const application =
-    currentProfile?.profile_type === "professional"
-      ? await getApplicationForCurrentUser(supabase, job.id, currentProfile.id)
+    appShellAuth?.profileType === "professional" && appShellAuth.profileId
+      ? await getApplicationForCurrentUser(supabase, job.id, appShellAuth.profileId)
       : null;
-  const savedJob = currentProfile?.id
-    ? await getSavedJobForCurrentUser(supabase, job.id, currentProfile.id)
+  const savedJob = appShellAuth?.profileId
+    ? await getSavedJobForCurrentUser(supabase, job.id, appShellAuth.profileId)
     : null;
 
   return (
@@ -219,12 +218,12 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                   : null
               }
               jobId={job.id}
-              profileType={currentProfile?.profile_type}
+              profileType={appShellAuth?.profileType}
             />
             <JobSaveButton
               initialSaved={Boolean(savedJob)}
               jobId={job.id}
-              signedIn={Boolean(currentProfile)}
+              signedIn={Boolean(appShellAuth)}
             />
           </div>
 

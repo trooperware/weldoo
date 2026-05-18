@@ -4,7 +4,7 @@ import { AppShell } from "@/components/app/app-shell";
 import { FeedPostCard } from "@/components/feed/feed-post-card";
 import { PostComposer } from "@/components/feed/post-composer";
 import { EmptyState } from "@/components/ui";
-import { getAppShellAuth, getCurrentUser } from "@/lib/auth/session";
+import { getAppShellAuth } from "@/lib/auth/session";
 import { FEED_PAGE_SIZE, getFeedPage } from "@/lib/feed/queries";
 
 type HomePageProps = {
@@ -19,13 +19,12 @@ function parsePage(value?: string) {
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
-  const [{ page: requestedPage }, appShellAuth, user] = await Promise.all([
+  const [{ page: requestedPage }, appShellAuth] = await Promise.all([
     searchParams,
     getAppShellAuth(),
-    getCurrentUser(),
   ]);
   const page = parsePage(requestedPage);
-  const feed = await getFeedPage(page, user?.id);
+  const feed = await getFeedPage(page, appShellAuth?.profileId);
   const displayEmail = appShellAuth?.email ?? "Weldoo member";
   const initial = displayEmail.slice(0, 1).toUpperCase();
 
@@ -86,7 +85,7 @@ export default async function Home({ searchParams }: HomePageProps) {
           </aside>
 
           <div className="flex flex-col gap-5">
-            {user ? (
+            {appShellAuth ? (
               <PostComposer initial={initial} />
             ) : (
               <section className="rounded-weldoo-md border border-weldoo-border-light bg-white p-4 shadow-weldoo-sm">

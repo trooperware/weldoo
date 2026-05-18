@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { AppShell } from "@/components/app/app-shell";
 import { CourseInterestButton } from "@/components/academy/course-interest-button";
 import { CourseSaveButton } from "@/components/academy/course-save-button";
-import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
+import { getAppShellAuth } from "@/lib/auth/session";
 import {
   getCourseEventInterestForCurrentUser,
   getPublishedAcademyItemById,
@@ -295,18 +295,15 @@ function InfoRow({ icon, label, value }: { icon: ReactNode; label: string; value
 
 export default async function AcademyDetailPage({ params }: AcademyDetailPageProps) {
   const { courseEventId } = await params;
-  const [appShellAuth, currentProfile] = await Promise.all([
-    getAppShellAuth(),
-    getCurrentProfile(),
-  ]);
+  const appShellAuth = await getAppShellAuth();
   const supabase = await createSupabaseServerClient();
   const item = await getPublishedAcademyItemById(supabase, courseEventId);
 
   if (!item) notFound();
 
   const [savedItem, interest] = await Promise.all([
-    getSavedCourseEventForCurrentUser(supabase, item.id, currentProfile?.id),
-    getCourseEventInterestForCurrentUser(supabase, item.id, currentProfile?.id),
+    getSavedCourseEventForCurrentUser(supabase, item.id, appShellAuth?.profileId),
+    getCourseEventInterestForCurrentUser(supabase, item.id, appShellAuth?.profileId),
   ]);
 
   const providerName = item.provider?.name ?? "Weldoo academy provider";
@@ -486,13 +483,13 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                 <CourseInterestButton
                   courseEventId={item.id}
                   initialInterested={Boolean(interest)}
-                  signedIn={Boolean(currentProfile)}
+                  signedIn={Boolean(appShellAuth)}
                 />
                 <CourseSaveButton
                   courseEventId={item.id}
                   initialSaved={Boolean(savedItem)}
                   itemLabel="course"
-                  signedIn={Boolean(currentProfile)}
+                  signedIn={Boolean(appShellAuth)}
                 />
               </div>
             </section>
@@ -721,14 +718,14 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                     <CourseInterestButton
                       courseEventId={item.id}
                       initialInterested={Boolean(interest)}
-                      signedIn={Boolean(currentProfile)}
+                      signedIn={Boolean(appShellAuth)}
                     />
                   )}
                   <CourseSaveButton
                     courseEventId={item.id}
                     initialSaved={Boolean(savedItem)}
                     itemLabel={isSectorEvent ? "event" : "course"}
-                    signedIn={Boolean(currentProfile)}
+                    signedIn={Boolean(appShellAuth)}
                   />
                   {item.external_registration_url && !isSectorEvent ? (
                     <a

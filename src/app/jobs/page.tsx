@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app/app-shell";
 import { JobApplyButton } from "@/components/jobs/job-apply-button";
 import { JobSaveButton } from "@/components/jobs/job-save-button";
 import { EmptyState } from "@/components/ui";
-import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
+import { getAppShellAuth } from "@/lib/auth/session";
 import {
   getApplicationForCurrentUser,
   getSavedJobForCurrentUser,
@@ -502,10 +502,9 @@ function JobCard({
 }
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
-  const [params, appShellAuth, currentProfile] = await Promise.all([
+  const [params, appShellAuth] = await Promise.all([
     searchParams,
     getAppShellAuth(),
-    getCurrentProfile(),
   ]);
   const filters = parseJobFilters(params);
   const supabase = await createSupabaseServerClient();
@@ -515,12 +514,12 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     listing.items.find((job) => job.id === selectedJobId) ??
     (selectedJobId ? await getPublishedJobById(supabase, selectedJobId) : listing.items[0] ?? null);
   const selectedApplication =
-    selectedJob && currentProfile?.profile_type === "professional"
-      ? await getApplicationForCurrentUser(supabase, selectedJob.id, currentProfile.id)
+    selectedJob && appShellAuth?.profileType === "professional" && appShellAuth.profileId
+      ? await getApplicationForCurrentUser(supabase, selectedJob.id, appShellAuth.profileId)
       : null;
   const selectedSavedJob =
-    selectedJob && currentProfile?.id
-      ? await getSavedJobForCurrentUser(supabase, selectedJob.id, currentProfile.id)
+    selectedJob && appShellAuth?.profileId
+      ? await getSavedJobForCurrentUser(supabase, selectedJob.id, appShellAuth.profileId)
       : null;
 
   return (
@@ -640,7 +639,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             application={selectedApplication}
             isSaved={Boolean(selectedSavedJob)}
             job={selectedJob}
-            profileType={currentProfile?.profile_type}
+            profileType={appShellAuth?.profileType}
           />
         </section>
       </main>

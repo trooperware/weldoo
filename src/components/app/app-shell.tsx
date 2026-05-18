@@ -8,9 +8,12 @@ type AppShellProps = {
   auth?: {
     displayName?: string | null;
     email?: string | null;
+    profileId?: string | null;
     publicProfileHref?: string | null;
     unreadContactRequestCount?: number;
+    onboardingCompleted?: boolean;
     profileType?: string | null;
+    status?: string | null;
   };
   children: ReactNode;
 };

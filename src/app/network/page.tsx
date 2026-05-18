@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app/app-shell";
 import { ContactRequestButton } from "@/components/contact/contact-request-button";
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { Badge, EmptyState } from "@/components/ui";
-import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
+import { getAppShellAuth } from "@/lib/auth/session";
 import {
   getNetworkDirectoryPage,
   NETWORK_PAGE_SIZE,
@@ -242,15 +242,14 @@ function NetworkCard({
 }
 
 export default async function NetworkPage({ searchParams }: NetworkPageProps) {
-  const [params, appShellAuth, currentProfile] = await Promise.all([
+  const [params, appShellAuth] = await Promise.all([
     searchParams,
     getAppShellAuth(),
-    getCurrentProfile(),
   ]);
   const page = parsePage(params.page);
   const filters = getFilters(params);
   const supabase = await createSupabaseServerClient();
-  const directory = await getNetworkDirectoryPage(supabase, page, filters, currentProfile?.id);
+  const directory = await getNetworkDirectoryPage(supabase, page, filters, appShellAuth?.profileId);
   const ownProfileEditHref = getOwnProfileEditHref(appShellAuth?.profileType);
 
   return (
@@ -409,7 +408,9 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {directory.items.map((item) => (
                 <NetworkCard
-                  canContact={Boolean(currentProfile && item.targetProfileId !== currentProfile.id)}
+                  canContact={Boolean(
+                    appShellAuth?.profileId && item.targetProfileId !== appShellAuth.profileId,
+                  )}
                   item={item}
                   key={`${item.type}-${item.id}`}
                 />

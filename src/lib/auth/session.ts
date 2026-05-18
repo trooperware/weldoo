@@ -8,6 +8,25 @@ export type CurrentProfile = Pick<
   "display_name" | "id" | "onboarding_completed" | "profile_type" | "status"
 >;
 
+async function getCurrentProfileByUserId(userId: string): Promise<CurrentProfile | null> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, profile_type, status, display_name, onboarding_completed")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 export async function getCurrentUser() {
   try {
     const supabase = await createSupabaseServerClient();
@@ -43,27 +62,12 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
     return null;
   }
 
-  try {
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, profile_type, status, display_name, onboarding_completed")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (error || !data) {
-      return null;
-    }
-
-    return data;
-  } catch {
-    return null;
-  }
+  return getCurrentProfileByUserId(user.id);
 }
 
 export async function requireCompletedOnboarding() {
   const user = await requireUser();
-  const profile = await getCurrentProfile();
+  const profile = await getCurrentProfileByUserId(user.id);
 
   if (!profile?.onboarding_completed) {
     redirect("/onboarding");
@@ -73,14 +77,22 @@ export async function requireCompletedOnboarding() {
 }
 
 export async function getAppShellAuth() {
-  const user = await getCurrentUser();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (error || !user) {
     return undefined;
   }
 
-  const profile = await getCurrentProfile();
-  const supabase = await createSupabaseServerClient();
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("id, profile_type, status, display_name, onboarding_completed")
+    .eq("id", user.id)
+    .maybeSingle();
+  const profile = (profileData ?? null) as CurrentProfile | null;
   let publicProfileHref: string | null = null;
   let unreadContactRequestCount = 0;
 
@@ -121,8 +133,11 @@ export async function getAppShellAuth() {
   return {
     displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "Weldoo member",
     email: user.email,
+    profileId: profile?.id ?? user.id,
     publicProfileHref,
     unreadContactRequestCount,
+    onboardingCompleted: profile?.onboarding_completed ?? false,
     profileType: profile?.profile_type ?? null,
+    status: profile?.status ?? null,
   };
 }
