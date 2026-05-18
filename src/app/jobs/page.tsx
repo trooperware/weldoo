@@ -3,8 +3,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
+import { JobApplyButton } from "@/components/jobs/job-apply-button";
 import { EmptyState } from "@/components/ui";
-import { getAppShellAuth } from "@/lib/auth/session";
+import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
+import { getApplicationForCurrentUser } from "@/lib/jobs/applications";
 import {
   getJobsHref,
   getJobsListing,
@@ -81,16 +83,6 @@ function getJobSelectionHref(filters: JobFilters, jobId: string) {
   const baseHref = getJobsHref(filters);
   const separator = baseHref.includes("?") ? "&" : "?";
   return `${baseHref}${separator}job=${jobId}`;
-}
-
-function ExternalLinkIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
-  return (
-    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-      <polyline points="15 3 21 3 21 9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-      <line x1="10" x2="21" y1="14" y2="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-    </svg>
-  );
 }
 
 function ShareIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -243,7 +235,15 @@ function JobLogo({ job }: { job: JobListItem }) {
   );
 }
 
-function JobDetailPanel({ job }: { job: JobListItem | null }) {
+function JobDetailPanel({
+  application,
+  job,
+  profileType,
+}: {
+  application: { created_at: string; status: string } | null;
+  job: JobListItem | null;
+  profileType?: string | null;
+}) {
   if (!job) {
     return (
       <div className="hidden min-h-[520px] flex-col items-center justify-center gap-3 p-8 text-center text-weldoo-muted lg:flex">
@@ -339,10 +339,15 @@ function JobDetailPanel({ job }: { job: JobListItem | null }) {
       </div>
 
       <div className="mb-5 flex items-center gap-2">
-        <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 font-bold tracking-[-0.01em] text-white opacity-60 shadow-[0_2px_8px_rgba(61,61,180,0.25)]" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
-          <ExternalLinkIcon className="h-3 w-3" />
-          Apply now
-        </button>
+        <JobApplyButton
+          existingApplication={
+            application
+              ? { createdAt: application.created_at, status: application.status }
+              : null
+          }
+          jobId={job.id}
+          profileType={profileType}
+        />
         <button className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo px-5 font-semibold tracking-[-0.01em] text-weldoo-indigo opacity-60" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
           Save
         </button>
@@ -489,7 +494,11 @@ function JobCard({
 }
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
-  const [params, appShellAuth] = await Promise.all([searchParams, getAppShellAuth()]);
+  const [params, appShellAuth, currentProfile] = await Promise.all([
+    searchParams,
+    getAppShellAuth(),
+    getCurrentProfile(),
+  ]);
   const filters = parseJobFilters(params);
   const supabase = await createSupabaseServerClient();
   const listing = await getJobsListing(supabase, filters);
@@ -497,6 +506,10 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const selectedJob =
     listing.items.find((job) => job.id === selectedJobId) ??
     (selectedJobId ? await getPublishedJobById(supabase, selectedJobId) : listing.items[0] ?? null);
+  const selectedApplication =
+    selectedJob && currentProfile?.profile_type === "professional"
+      ? await getApplicationForCurrentUser(supabase, selectedJob.id, currentProfile.id)
+      : null;
 
   return (
     <AppShell auth={appShellAuth}>
@@ -611,7 +624,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               </div>
             )}
           </div>
-          <JobDetailPanel job={selectedJob} />
+          <JobDetailPanel
+            application={selectedApplication}
+            job={selectedJob}
+            profileType={currentProfile?.profile_type}
+          />
         </section>
       </main>
     </AppShell>

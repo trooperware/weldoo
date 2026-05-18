@@ -68,12 +68,20 @@ export default async function CompanyJobsPage() {
               Create structured welding-sector job offers, publish them to the public jobs board, and close them when hiring is done.
             </p>
           </div>
-          <Link
-            className="inline-flex h-9 items-center justify-center rounded-full border border-weldoo-border-light bg-white px-4 text-[12px] font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
-            href="/jobs"
-          >
-            View jobs board
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full border border-weldoo-border-light bg-white px-4 text-[12px] font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+              href="/company/applications"
+            >
+              Review applications
+            </Link>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full border border-weldoo-border-light bg-white px-4 text-[12px] font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+              href="/jobs"
+            >
+              View jobs board
+            </Link>
+          </div>
         </div>
 
         <CompanyJobManager company={company} jobs={jobs} />

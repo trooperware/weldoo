@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
-import { getAppShellAuth } from "@/lib/auth/session";
+import { JobApplyButton } from "@/components/jobs/job-apply-button";
+import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
+import { getApplicationForCurrentUser } from "@/lib/jobs/applications";
 import { getPublishedJobById, type JobListItem } from "@/lib/jobs/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -49,16 +51,6 @@ function formatPostedDate(value: string | null, fallback: string) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
   }).format(date);
-}
-
-function ExternalLinkIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
-  return (
-    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-      <polyline points="15 3 21 3 21 9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-      <line x1="10" x2="21" y1="14" y2="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-    </svg>
-  );
 }
 
 function MonitorIcon({ className = "h-3 w-3" }: { className?: string }) {
@@ -132,8 +124,9 @@ export async function generateMetadata({
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { jobId } = await params;
-  const [appShellAuth, supabase] = await Promise.all([
+  const [appShellAuth, currentProfile, supabase] = await Promise.all([
     getAppShellAuth(),
+    getCurrentProfile(),
     createSupabaseServerClient(),
   ]);
   const job = await getPublishedJobById(supabase, jobId);
@@ -145,6 +138,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const salary = formatSalary(job);
   const companyName = job.company?.name ?? "Weldoo company";
   const companyLocation = job.company?.location ?? job.location;
+  const application =
+    currentProfile?.profile_type === "professional"
+      ? await getApplicationForCurrentUser(supabase, job.id, currentProfile.id)
+      : null;
 
   return (
     <AppShell auth={appShellAuth}>
@@ -208,10 +205,15 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </div>
 
           <div className="mb-6 flex items-center gap-2">
-            <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 font-bold tracking-[-0.01em] text-white opacity-60 shadow-[0_2px_8px_rgba(61,61,180,0.25)]" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
-              <ExternalLinkIcon className="h-3 w-3" />
-              Apply now
-            </button>
+            <JobApplyButton
+              existingApplication={
+                application
+                  ? { createdAt: application.created_at, status: application.status }
+                  : null
+              }
+              jobId={job.id}
+              profileType={currentProfile?.profile_type}
+            />
             <button className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo px-5 font-semibold tracking-[-0.01em] text-weldoo-indigo opacity-60" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
               Save
             </button>

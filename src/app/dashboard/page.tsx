@@ -48,6 +48,12 @@ export default async function DashboardPage() {
                 >
                   Manage jobs
                 </Link>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-weldoo-border-light bg-white px-5 text-sm font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                  href="/company/applications"
+                >
+                  Review applications
+                </Link>
               </>
             ) : null}
             {profile.profile_type === "training_provider" ? (

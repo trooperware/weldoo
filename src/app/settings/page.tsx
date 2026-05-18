@@ -98,6 +98,7 @@ export default async function SettingsPage() {
                   </Link>
                 </div>
                 {appShellAuth?.profileType === "company" ? (
+                  <>
                   <div className="flex items-center justify-between gap-4 px-5 py-4">
                     <div>
                       <p className="text-[13.2px] font-medium text-weldoo-ink">
@@ -114,6 +115,23 @@ export default async function SettingsPage() {
                       Manage
                     </Link>
                   </div>
+                  <div className="flex items-center justify-between gap-4 px-5 py-4">
+                    <div>
+                      <p className="text-[13.2px] font-medium text-weldoo-ink">
+                        Job applications
+                      </p>
+                      <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
+                        Review candidates and update application status.
+                      </p>
+                    </div>
+                    <Link
+                      className="inline-flex h-9 items-center justify-center rounded-weldoo-sm border border-weldoo-border-light bg-white px-4 text-sm font-semibold text-weldoo-slate transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                      href="/company/applications"
+                    >
+                      Review
+                    </Link>
+                  </div>
+                  </>
                 ) : null}
               </div>
             </div>
