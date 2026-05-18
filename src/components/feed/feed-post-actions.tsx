@@ -80,7 +80,7 @@ export function FeedPostActions({
   return (
     <div className="w-full">
       <FormError>{state.status === "error" ? state.message : null}</FormError>
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-4">
         <button
           className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
             isLiked ? "text-weldoo-indigo" : "text-weldoo-ink"

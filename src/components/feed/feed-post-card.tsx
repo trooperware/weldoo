@@ -33,10 +33,24 @@ export type FeedPost = {
 };
 
 function formatPostDate(value: string) {
+  const createdAt = new Date(value);
+  const diffMs = Date.now() - createdAt.getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+    day: "numeric",
+    month: "short",
+  }).format(createdAt);
 }
 
 function getProfileHref(author: FeedPost["author"]) {
@@ -65,9 +79,9 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
   const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
 
   return (
-    <article className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm transition hover:border-weldoo-border hover:shadow-weldoo-md">
+    <article className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white transition hover:border-[#d0d0e8] hover:shadow-[0_4px_16px_rgba(61,61,180,0.08)]">
       <header className="flex items-start gap-3 px-[18px] pt-[18px]">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.2)]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-[15px] font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.2)]">
           {author?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img alt="" className="h-full w-full object-cover" src={author.avatar_url} />
@@ -79,33 +93,30 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
           <div className="flex flex-wrap items-center gap-2">
             {authorHref ? (
               <Link
-                className="text-[15px] font-bold leading-tight text-weldoo-ink hover:text-weldoo-indigo"
+                className="text-[15px] font-bold leading-[1.3] tracking-[-0.1px] text-weldoo-ink hover:text-weldoo-indigo"
                 href={authorHref}
               >
                 {author?.display_name ?? "Weldoo member"}
               </Link>
             ) : (
-              <span className="text-[15px] font-bold leading-tight text-weldoo-ink">
+              <span className="text-[15px] font-bold leading-[1.3] tracking-[-0.1px] text-weldoo-ink">
                 {author?.display_name ?? "Weldoo member"}
               </span>
             )}
-            {author?.profile_type ? (
-              <Badge variant="neutral">{author.profile_type.replace("_", " ")}</Badge>
-            ) : null}
           </div>
           {author?.headline ? (
-            <p className="mt-0.5 truncate text-[12.5px] leading-tight text-weldoo-slate">
+            <p className="mt-px truncate text-[12.5px] leading-[1.3] text-weldoo-slate">
               {author.headline}
             </p>
           ) : null}
-          <p className="mt-1 text-[11.5px] text-weldoo-muted">
+          <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
             {formatPostDate(post.created_at)}
           </p>
         </div>
       </header>
 
       <div className="px-[18px] py-3">
-        <p className="whitespace-pre-line text-[15px] leading-6 text-weldoo-ink">
+        <p className="whitespace-pre-line text-[15px] font-normal leading-[1.6] text-weldoo-ink">
           {post.body}
         </p>
 
@@ -122,7 +133,7 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
 
       {post.image_url ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img alt="" className="aspect-video w-full object-cover" src={post.image_url} />
+        <img alt="" className="mt-1.5 aspect-video w-full object-cover" src={post.image_url} />
       ) : null}
 
       <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs tracking-[-0.01em] text-weldoo-muted">
@@ -139,7 +150,7 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
           ) : null}
           <span>{likeCount}</span>
         </div>
-        <span>{commentCount} comments</span>
+        <span className="font-semibold">{commentCount} comments</span>
       </footer>
       {canInteract ? (
         <>

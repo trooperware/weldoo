@@ -13,10 +13,17 @@ type SaveState = {
   status?: "error" | "success";
 };
 
-export function PostComposer() {
+type PostComposerProps = {
+  initial: string;
+};
+
+export function PostComposer({ initial }: PostComposerProps) {
   const router = useRouter();
+  const [body, setBody] = useState("");
+  const [isComposing, setIsComposing] = useState(false);
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<SaveState>({});
+  const showPublish = isComposing || body.trim().length > 0 || pending;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +44,8 @@ export function PostComposer() {
       }
 
       form.reset();
+      setBody("");
+      setIsComposing(false);
       setState({
         message: payload.message ?? "Post published.",
         status: "success",
@@ -59,17 +68,20 @@ export function PostComposer() {
     >
       <div className="mb-3 flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white">
-          W
+          {initial}
         </div>
         <div className="min-w-0 flex-1">
           <Textarea
             aria-label="Post text"
             error={state.errors?.body}
             id="body"
-            className="!h-10 !min-h-10 resize-none overflow-hidden rounded-full border-[1.5px] bg-[#eeeef8] px-[18px] py-2.5 text-sm leading-5"
+            className="!h-10 !min-h-10 resize-none overflow-hidden rounded-full border-[1.5px] border-weldoo-border-light bg-weldoo-bg-strong px-[18px] py-2.5 text-sm leading-5 tracking-[-0.01em] text-weldoo-muted transition hover:border-[#c8c8e0] hover:bg-weldoo-bg"
             name="body"
+            onChange={(event) => setBody(event.target.value)}
+            onFocus={() => setIsComposing(true)}
             placeholder="Share something with the community..."
             rows={1}
+            value={body}
           />
         </div>
       </div>
@@ -90,14 +102,16 @@ export function PostComposer() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <PostImageUploadField />
-        <Button
-          className="h-[34px] rounded-weldoo-sm border border-weldoo-border-light bg-white px-3 text-xs font-semibold text-weldoo-indigo shadow-none hover:bg-weldoo-bg-strong"
-          disabled={pending}
-          size="sm"
-          type="submit"
-        >
-          {pending ? "Publishing" : "Publish"}
-        </Button>
+        {showPublish ? (
+          <Button
+            className="h-[34px] rounded-weldoo-sm border border-weldoo-border-light bg-white px-3 text-xs font-semibold text-weldoo-indigo shadow-none hover:bg-weldoo-bg-strong"
+            disabled={pending}
+            size="sm"
+            type="submit"
+          >
+            {pending ? "Publishing" : "Publish"}
+          </Button>
+        ) : null}
       </div>
     </form>
   );
