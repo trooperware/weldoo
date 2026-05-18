@@ -63,3 +63,87 @@ export async function getCompanyJobApplications(
     viewed_at: row.viewed_at,
   }));
 }
+
+export async function getSavedJobForCurrentUser(
+  supabase: SupabaseClient<Database>,
+  jobId: string,
+  profileId?: string | null,
+) {
+  if (!profileId) return null;
+
+  const { data, error } = await supabase
+    .from("saved_items")
+    .select("id")
+    .eq("profile_id", profileId)
+    .eq("item_type", "job")
+    .eq("job_id", jobId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data as Pick<Tables<"saved_items">, "id"> | null;
+}
+
+export type SavedJobItem = Pick<Tables<"saved_items">, "created_at" | "id"> & {
+  job: Pick<
+    Tables<"jobs">,
+    | "contract_type"
+    | "created_at"
+    | "id"
+    | "location"
+    | "published_at"
+    | "title"
+    | "welding_processes"
+    | "work_mode"
+  > & {
+    company: Pick<Tables<"companies">, "id" | "location" | "name" | "logo_url"> | null;
+  };
+};
+
+export async function getSavedJobsForCurrentUser(
+  supabase: SupabaseClient<Database>,
+  profileId: string,
+) {
+  const { data, error } = await supabase
+    .from("saved_items")
+    .select(
+      "id, created_at, jobs!inner(id, title, location, work_mode, contract_type, welding_processes, published_at, created_at, companies(id, name, location, logo_url))",
+    )
+    .eq("profile_id", profileId)
+    .eq("item_type", "job")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return ((data ?? []) as Array<{
+    created_at: string;
+    id: string;
+    jobs: Pick<
+      Tables<"jobs">,
+      | "contract_type"
+      | "created_at"
+      | "id"
+      | "location"
+      | "published_at"
+      | "title"
+      | "welding_processes"
+      | "work_mode"
+    > & {
+      companies: Pick<Tables<"companies">, "id" | "location" | "logo_url" | "name"> | null;
+    };
+  }>).map<SavedJobItem>((row) => ({
+    created_at: row.created_at,
+    id: row.id,
+    job: {
+      company: row.jobs.companies,
+      contract_type: row.jobs.contract_type,
+      created_at: row.jobs.created_at,
+      id: row.jobs.id,
+      location: row.jobs.location,
+      published_at: row.jobs.published_at,
+      title: row.jobs.title,
+      welding_processes: row.jobs.welding_processes,
+      work_mode: row.jobs.work_mode,
+    },
+  }));
+}

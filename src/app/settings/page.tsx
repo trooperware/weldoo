@@ -97,6 +97,22 @@ export default async function SettingsPage() {
                     Edit
                   </Link>
                 </div>
+                <div className="flex items-center justify-between gap-4 px-5 py-4">
+                  <div>
+                    <p className="text-[13.2px] font-medium text-weldoo-ink">
+                      Saved jobs
+                    </p>
+                    <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
+                      Review jobs you saved from the jobs board.
+                    </p>
+                  </div>
+                  <Link
+                    className="inline-flex h-9 items-center justify-center rounded-weldoo-sm border border-weldoo-border-light bg-white px-4 text-sm font-semibold text-weldoo-slate transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                    href="/saved/jobs"
+                  >
+                    Open
+                  </Link>
+                </div>
                 {appShellAuth?.profileType === "company" ? (
                   <>
                   <div className="flex items-center justify-between gap-4 px-5 py-4">

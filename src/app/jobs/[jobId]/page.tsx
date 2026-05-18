@@ -5,8 +5,12 @@ import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
 import { JobApplyButton } from "@/components/jobs/job-apply-button";
+import { JobSaveButton } from "@/components/jobs/job-save-button";
 import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
-import { getApplicationForCurrentUser } from "@/lib/jobs/applications";
+import {
+  getApplicationForCurrentUser,
+  getSavedJobForCurrentUser,
+} from "@/lib/jobs/applications";
 import { getPublishedJobById, type JobListItem } from "@/lib/jobs/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -142,6 +146,9 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     currentProfile?.profile_type === "professional"
       ? await getApplicationForCurrentUser(supabase, job.id, currentProfile.id)
       : null;
+  const savedJob = currentProfile?.id
+    ? await getSavedJobForCurrentUser(supabase, job.id, currentProfile.id)
+    : null;
 
   return (
     <AppShell auth={appShellAuth}>
@@ -214,9 +221,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               jobId={job.id}
               profileType={currentProfile?.profile_type}
             />
-            <button className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo px-5 font-semibold tracking-[-0.01em] text-weldoo-indigo opacity-60" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
-              Save
-            </button>
+            <JobSaveButton
+              initialSaved={Boolean(savedJob)}
+              jobId={job.id}
+              signedIn={Boolean(currentProfile)}
+            />
           </div>
 
           <div className="space-y-6 border-t border-weldoo-border-light pt-6">

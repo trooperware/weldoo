@@ -4,9 +4,13 @@ import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
 import { JobApplyButton } from "@/components/jobs/job-apply-button";
+import { JobSaveButton } from "@/components/jobs/job-save-button";
 import { EmptyState } from "@/components/ui";
 import { getAppShellAuth, getCurrentProfile } from "@/lib/auth/session";
-import { getApplicationForCurrentUser } from "@/lib/jobs/applications";
+import {
+  getApplicationForCurrentUser,
+  getSavedJobForCurrentUser,
+} from "@/lib/jobs/applications";
 import {
   getJobsHref,
   getJobsListing,
@@ -237,10 +241,12 @@ function JobLogo({ job }: { job: JobListItem }) {
 
 function JobDetailPanel({
   application,
+  isSaved,
   job,
   profileType,
 }: {
   application: { created_at: string; status: string } | null;
+  isSaved: boolean;
   job: JobListItem | null;
   profileType?: string | null;
 }) {
@@ -348,9 +354,11 @@ function JobDetailPanel({
           jobId={job.id}
           profileType={profileType}
         />
-        <button className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo px-5 font-semibold tracking-[-0.01em] text-weldoo-indigo opacity-60" disabled style={{ fontSize: "12px", lineHeight: 1 }} type="button">
-          Save
-        </button>
+        <JobSaveButton
+          initialSaved={isSaved}
+          jobId={job.id}
+          signedIn={Boolean(profileType)}
+        />
       </div>
 
       <div className="my-5 h-px bg-weldoo-border-light" />
@@ -510,6 +518,10 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     selectedJob && currentProfile?.profile_type === "professional"
       ? await getApplicationForCurrentUser(supabase, selectedJob.id, currentProfile.id)
       : null;
+  const selectedSavedJob =
+    selectedJob && currentProfile?.id
+      ? await getSavedJobForCurrentUser(supabase, selectedJob.id, currentProfile.id)
+      : null;
 
   return (
     <AppShell auth={appShellAuth}>
@@ -626,6 +638,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           </div>
           <JobDetailPanel
             application={selectedApplication}
+            isSaved={Boolean(selectedSavedJob)}
             job={selectedJob}
             profileType={currentProfile?.profile_type}
           />

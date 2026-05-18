@@ -218,6 +218,15 @@ export function AppShell({ auth, children }: AppShellProps) {
                       </Link>
                       <Link
                         className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+                        href="/saved/jobs"
+                      >
+                        <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                        </svg>
+                        Saved jobs
+                      </Link>
+                      <Link
+                        className="flex w-full items-center gap-2.5 px-4 py-[11px] text-left text-[13.2px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
                         href="/settings"
                       >
                         <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
