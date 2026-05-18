@@ -17,6 +17,11 @@ type TrainingProviderSummary = Pick<
   "id" | "location" | "logo_url" | "name"
 >;
 
+type TrainingProviderDetail = Pick<
+  Tables<"training_providers">,
+  "contact_email" | "description" | "id" | "location" | "logo_url" | "name" | "website_url"
+>;
+
 export type AcademyItem = Pick<
   Tables<"course_events">,
   | "capacity"
@@ -43,6 +48,31 @@ export type AcademyItem = Pick<
 export type AcademyListingResult = {
   items: AcademyItem[];
   totalCount: number;
+};
+
+export type AcademyDetail = Pick<
+  Tables<"course_events">,
+  | "agenda"
+  | "capacity"
+  | "created_at"
+  | "description"
+  | "duration_text"
+  | "ends_at"
+  | "external_registration_url"
+  | "id"
+  | "level"
+  | "location"
+  | "online_url"
+  | "price_text"
+  | "published_at"
+  | "recording_url"
+  | "starts_at"
+  | "title"
+  | "topics"
+  | "type"
+  | "welding_processes"
+> & {
+  provider: TrainingProviderDetail | null;
 };
 
 const courseTypes = [
@@ -185,4 +215,69 @@ export async function getAcademyListing(
     items,
     totalCount: items.length,
   };
+}
+
+export async function getPublishedAcademyItemById(
+  supabase: SupabaseClient<Database>,
+  courseEventId: string,
+) {
+  const { data, error } = await supabase
+    .from("course_events")
+    .select(
+      "id, training_provider_id, type, level, title, description, agenda, topics, welding_processes, location, online_url, external_registration_url, recording_url, starts_at, ends_at, duration_text, capacity, price_text, published_at, created_at, training_providers(id, name, location, description, website_url, contact_email, logo_url)",
+    )
+    .eq("id", courseEventId)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+
+  const row = data as Omit<AcademyDetail, "provider"> & {
+    training_providers: TrainingProviderDetail | null;
+  };
+
+  return {
+    ...row,
+    provider: row.training_providers,
+  } satisfies AcademyDetail;
+}
+
+export async function getSavedCourseEventForCurrentUser(
+  supabase: SupabaseClient<Database>,
+  courseEventId: string,
+  profileId?: string | null,
+) {
+  if (!profileId) return null;
+
+  const { data, error } = await supabase
+    .from("saved_items")
+    .select("id")
+    .eq("profile_id", profileId)
+    .eq("item_type", "course_event")
+    .eq("course_event_id", courseEventId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data as Pick<Tables<"saved_items">, "id"> | null;
+}
+
+export async function getCourseEventInterestForCurrentUser(
+  supabase: SupabaseClient<Database>,
+  courseEventId: string,
+  profileId?: string | null,
+) {
+  if (!profileId) return null;
+
+  const { data, error } = await supabase
+    .from("course_event_interests")
+    .select("id, created_at")
+    .eq("profile_id", profileId)
+    .eq("course_event_id", courseEventId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data as Pick<Tables<"course_event_interests">, "created_at" | "id"> | null;
 }

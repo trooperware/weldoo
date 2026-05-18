@@ -287,7 +287,7 @@ function AcademyCard({ item }: { item: AcademyItem }) {
         </div>
         <Link
           className="mt-3 flex h-[38px] w-full items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border bg-white text-[13px] font-semibold tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)]"
-          href={`/academy?course=${item.id}`}
+          href={`/academy/${item.id}`}
         >
           <PlayIcon />
           View course

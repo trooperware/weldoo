@@ -633,6 +633,29 @@ Entregables:
 - Evitar duplicados.
 - Panel provider.
 
+### Task 5.6 - Academy data model v2
+
+Objetivo:
+
+Preparar el modelo de datos avanzado de Academy para cursos online, progreso real, inscripciones y capacidad real.
+
+Prompt para Codex:
+
+```text
+Design and implement the Academy data model v2 for Weldoo. Extend the current course_events foundation with structured modules/chapters, lessons, lesson content types, user lesson progress, real enrollments/registrations, registration status, capacity counts derived from registrations, instructors, and optional certificate/attendance metadata. Create Supabase migrations, indexes, constraints, and RLS policies. Migrate or adapt existing Academy queries and UI so online courses use real lessons/progress, in-person courses use real registrations/capacity, and providers can manage their own course structure. Do not add payments or integrated live video in this task.
+```
+
+Entregables:
+
+- Migraciones Academy v2.
+- Modulos/capitulos/lecciones.
+- Progreso por usuario.
+- Inscripciones reales.
+- Capacidad calculada desde registros.
+- Instructores estructurados.
+- RLS y constraints.
+- Adaptacion de queries/UI existentes.
+
 ## Sprint 6 - Admin, Notifications, QA, and Beta
 
 ### Task 6.1 - Basic admin layout and access control
