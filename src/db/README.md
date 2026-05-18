@@ -64,4 +64,9 @@ Seed files live in `seeds/` and are intended for development/demo data only.
    - Requires at least one existing company profile in `public.companies`.
    - Safe to run multiple times; it avoids duplicate jobs with the same title for the same company.
 
-Apply seed SQL manually in the Supabase SQL editor after migrations are applied and at least one company profile exists.
+2. `seeds/0002_demo_academy.sql`
+   - Inserts realistic published welding courses, webinars, workshops, and sector events.
+   - Requires at least one existing training provider profile in `public.training_providers`.
+   - Safe to run multiple times; it avoids duplicate academy items with the same title for the same provider.
+
+Apply seed SQL manually in the Supabase SQL editor after migrations are applied and the required profile type exists.

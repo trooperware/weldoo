@@ -19,7 +19,7 @@ const mainNavItems = [
   { label: "Network", href: "/network" },
   { label: "Events", href: "/" },
   { label: "Jobs", href: "/jobs" },
-  { label: "Academy", href: "/" },
+  { label: "Academy", href: "/academy" },
 ];
 
 function HeaderIcon({ label }: { label: string }) {
