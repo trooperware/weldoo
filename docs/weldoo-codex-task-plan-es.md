@@ -676,6 +676,26 @@ Entregables:
 - Filtros basicos por ubicacion/topic.
 - Reutilizacion del detalle course/event existente.
 
+### Task 5.8 - Vercel staging deploy
+
+Objetivo:
+
+Publicar una primera version compartible del MVP en Vercel antes de continuar con admin y QA final.
+
+Prompt para Codex:
+
+```text
+Prepare Weldoo for a first Vercel staging deployment. Review the Next.js configuration, required environment variables, Supabase URL and anon key usage, auth callback URLs, storage bucket public URLs, build command, and deployment checklist. Add a deployment guide to docs with exact steps for Vercel and Supabase configuration. Do not commit secrets. After preparation, run lint and build locally and provide a smoke-test checklist for the deployed URL.
+```
+
+Entregables:
+
+- Checklist deploy Vercel.
+- Variables de entorno documentadas.
+- Callback URLs Supabase/Vercel revisadas.
+- Build local validado.
+- Smoke test post-deploy.
+
 ## Sprint 6 - Admin, Notifications, QA, and Beta
 
 ### Task 6.1 - Basic admin layout and access control
@@ -838,6 +858,25 @@ Entregables:
 - Checklist beta.
 - Docs lanzamiento.
 - Smoke tests.
+
+### Task 6.10 - Final UX/UI visual parity pass
+
+Objetivo:
+
+Hacer una pasada final de alineacion visual con el prototipo y feedback UX/UI.
+
+Prompt para Codex:
+
+```text
+Perform a final UX/UI visual parity pass for Weldoo against the current prototype. Review auth, feed, header/nav, network, jobs, academy, events, profile pages, modals, and main forms. Compare typography, spacing, icon sizes, card shapes, buttons, empty states, and responsive behavior. Fix concrete mismatches while preserving working functionality and accessibility. Validate with browser screenshots where possible.
+```
+
+Entregables:
+
+- Ajustes visuales finales.
+- Pantallas principales comparadas.
+- Estados responsive revisados.
+- Resumen de diferencias restantes aceptadas.
 
 ## Phase 2 - Product Evolution
 

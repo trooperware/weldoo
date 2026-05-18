@@ -130,3 +130,4 @@ The `docs/` folder contains:
 - Effort estimate.
 - Codex task plan.
 - Validation units.
+- Vercel staging deployment guide: `docs/task-5-8-vercel-staging-deploy.md`.
