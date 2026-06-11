@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { MainNavigation } from "@/components/app/app-shell-nav";
+import { MainNavigation, MobileBottomNavigation } from "@/components/app/app-shell-nav";
 import { WeldooLogo } from "@/components/auth/auth-card";
 import { signOutAction } from "@/server/actions/auth";
 
@@ -28,6 +28,8 @@ const mainNavItems = [
   { label: "Jobs", href: "/jobs" },
   { label: "Academy", href: "/academy" },
 ];
+
+const mobileNavItems = [{ label: "Home", href: "/" }, ...mainNavItems];
 
 function ProfileAvatar({
   avatarInitial,
@@ -225,6 +227,7 @@ export function AppShell({ auth, children }: AppShellProps) {
         : auth?.profileType === "training_provider"
           ? "/training-provider/edit"
           : null;
+  const showMobileBottomNav = isSignedIn && auth?.onboardingCompleted;
 
   return (
     <div className="min-h-screen bg-weldoo-bg text-weldoo-ink">
@@ -296,7 +299,10 @@ export function AppShell({ auth, children }: AppShellProps) {
           </div>
         </div>
       </header>
-      {children}
+      <div className={showMobileBottomNav ? "pb-[calc(70px+env(safe-area-inset-bottom))] md:pb-0" : undefined}>
+        {children}
+      </div>
+      {showMobileBottomNav ? <MobileBottomNavigation items={mobileNavItems} /> : null}
     </div>
   );
 }
