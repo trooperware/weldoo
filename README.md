@@ -73,6 +73,12 @@ Auth routes:
 - `/onboarding` protected onboarding route
 - `/profile/edit` protected professional profile edit route
 
+OAuth:
+
+- Google and LinkedIn OAuth use Supabase Auth.
+- Configure provider credentials and `/auth/callback` redirect URLs in Supabase for each environment.
+- See `docs/task-auth-004-oauth-login-validation.md` for setup and QA steps.
+
 Development healthcheck:
 
 ```text

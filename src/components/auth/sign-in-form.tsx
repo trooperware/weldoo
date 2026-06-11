@@ -9,18 +9,20 @@ import { signInAction, type AuthActionState } from "@/server/actions/auth";
 import { SubmitButton } from "./submit-button";
 
 type SignInFormProps = {
+  oauthError?: string;
   redirectTo?: string;
 };
 
 const initialState: AuthActionState = {};
 
-export function SignInForm({ redirectTo }: SignInFormProps) {
+export function SignInForm({ oauthError, redirectTo }: SignInFormProps) {
   const [state, formAction] = useActionState(signInAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div>
-      <AuthSocialButtons />
+      <FormError className="mb-3">{oauthError}</FormError>
+      <AuthSocialButtons redirectTo={redirectTo ?? "/"} />
       <AuthDivider />
 
       <div className="mb-[18px] flex items-start gap-2.5 rounded-[8px] border border-weldoo-indigo/15 bg-weldoo-indigo/[0.06] px-3.5 py-[11px]">

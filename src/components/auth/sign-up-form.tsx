@@ -18,7 +18,11 @@ const purposeOptions = [
   "Mentorship",
 ];
 
-export function SignUpForm() {
+type SignUpFormProps = {
+  oauthError?: string;
+};
+
+export function SignUpForm({ oauthError }: SignUpFormProps) {
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +40,8 @@ export function SignUpForm() {
 
   return (
     <div>
-      <AuthSocialButtons />
+      <FormError className="mb-3">{oauthError}</FormError>
+      <AuthSocialButtons redirectTo="/onboarding" source="sign-up" />
       <AuthDivider />
 
       <form action={formAction}>
