@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { OnboardingForm } from "@/components/onboarding/onboarding-form";
+import { getLinkedInProfileImport } from "@/lib/auth/linkedin-profile-import";
 import { getCurrentProfile, requireUser } from "@/lib/auth/session";
 import type { Enums } from "@/types/database";
 
@@ -30,6 +31,7 @@ export default async function OnboardingPage() {
     profile && profile.profile_type !== "admin"
       ? (profile.profile_type as SelectableProfileType)
       : "professional";
+  const linkedInImport = getLinkedInProfileImport(user);
 
   return (
     <main className="min-h-screen bg-[var(--weldoo-bg)] px-4 py-10 sm:px-6 lg:px-8">
@@ -46,8 +48,13 @@ export default async function OnboardingPage() {
         </p>
         <div className="mt-7">
           <OnboardingForm
-            defaultDisplayName={profile?.display_name ?? getUserDisplayNameFallback(user)}
+            defaultAvatarUrl={profile?.avatar_url ?? linkedInImport?.avatarUrl}
+            defaultDisplayName={
+              profile?.display_name ?? linkedInImport?.displayName ?? getUserDisplayNameFallback(user)
+            }
+            defaultHeadline={profile?.headline ?? linkedInImport?.headline}
             defaultProfileType={defaultProfileType}
+            importedLinkedInProfile={linkedInImport}
           />
         </div>
       </section>
