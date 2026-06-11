@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { getAuthCallbackUrl, getSafeRedirectPath } from "@/lib/auth/redirects";
+import { getAuthCallbackUrl, getPostAuthRedirectPath } from "@/lib/auth/redirects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   forgotPasswordSchema,
@@ -20,7 +20,6 @@ export type AuthActionState = {
 };
 
 const DEFAULT_ERROR = "Something went wrong. Please try again.";
-const feedRedirectPaths = new Set(["/", "/dashboard", "/onboarding"]);
 
 function getErrorState(message = DEFAULT_ERROR): AuthActionState {
   return { message, status: "error" };
@@ -30,13 +29,12 @@ async function getPostSignInRedirectPath(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   redirectTo: FormDataEntryValue | string | null | undefined,
 ) {
-  const safeRedirectPath = getSafeRedirectPath(redirectTo);
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return safeRedirectPath;
+    return getPostAuthRedirectPath({ onboardingCompleted: false, redirectTo });
   }
 
   const { data } = await supabase
@@ -46,15 +44,10 @@ async function getPostSignInRedirectPath(
     .maybeSingle();
   const profile = data as { onboarding_completed: boolean | null } | null;
 
-  if (profile?.onboarding_completed && feedRedirectPaths.has(safeRedirectPath)) {
-    return "/";
-  }
-
-  if (!profile?.onboarding_completed && ["/", "/dashboard"].includes(safeRedirectPath)) {
-    return "/onboarding";
-  }
-
-  return safeRedirectPath;
+  return getPostAuthRedirectPath({
+    onboardingCompleted: Boolean(profile?.onboarding_completed),
+    redirectTo,
+  });
 }
 
 export async function signInAction(

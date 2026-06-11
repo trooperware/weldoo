@@ -3,37 +3,41 @@ import { redirect } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignInForm } from "@/components/auth/sign-in-form";
-import { getSafeRedirectPath } from "@/lib/auth/redirects";
+import { getPostAuthRedirectPath } from "@/lib/auth/redirects";
 import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 
 type SignInPageProps = {
   searchParams: Promise<{
+    error?: string;
+    message?: string;
     redirectTo?: string;
   }>;
 };
 
+function getOAuthErrorMessage(error?: string, message?: string) {
+  if (!error) return undefined;
+  const detail = message ? ` ${message}` : "";
+
+  if (error === "oauth_provider") return "Unsupported OAuth provider.";
+  if (error === "oauth_callback") return `OAuth sign in could not be completed.${detail}`;
+
+  return `OAuth sign in could not be started. Please try again.${detail}`;
+}
+
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ redirectTo }, user, profile] = await Promise.all([
+  const [{ error, message, redirectTo }, user, profile] = await Promise.all([
     searchParams,
     getCurrentUser(),
     getCurrentProfile(),
   ]);
 
   if (user) {
-    const redirectPath = getSafeRedirectPath(redirectTo);
-
-    if (
-      profile?.onboarding_completed &&
-      ["/", "/dashboard", "/onboarding"].includes(redirectPath)
-    ) {
-      redirect("/");
-    }
-
-    if (!profile?.onboarding_completed && ["/", "/dashboard"].includes(redirectPath)) {
-      redirect("/onboarding");
-    }
-
-    redirect(redirectPath);
+    redirect(
+      getPostAuthRedirectPath({
+        onboardingCompleted: Boolean(profile?.onboarding_completed),
+        redirectTo,
+      }),
+    );
   }
 
   return (
@@ -55,7 +59,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       }
       title="Welcome back"
     >
-      <SignInForm redirectTo={redirectTo} />
+      <SignInForm oauthError={getOAuthErrorMessage(error, message)} redirectTo={redirectTo} />
     </AuthCard>
   );
 }

@@ -6,6 +6,18 @@ import type { Enums } from "@/types/database";
 
 type SelectableProfileType = Exclude<Enums<"profile_type">, "admin">;
 
+function getUserDisplayNameFallback(user: Awaited<ReturnType<typeof requireUser>>) {
+  const metadata = user.user_metadata;
+  const metadataName =
+    typeof metadata.full_name === "string"
+      ? metadata.full_name
+      : typeof metadata.name === "string"
+        ? metadata.name
+        : null;
+
+  return metadataName ?? user.email?.split("@")[0] ?? "";
+}
+
 export default async function OnboardingPage() {
   const user = await requireUser("/onboarding");
   const profile = await getCurrentProfile();
@@ -34,7 +46,7 @@ export default async function OnboardingPage() {
         </p>
         <div className="mt-7">
           <OnboardingForm
-            defaultDisplayName={profile?.display_name ?? user.email?.split("@")[0] ?? ""}
+            defaultDisplayName={profile?.display_name ?? getUserDisplayNameFallback(user)}
             defaultProfileType={defaultProfileType}
           />
         </div>
