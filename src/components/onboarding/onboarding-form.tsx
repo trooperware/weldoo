@@ -4,14 +4,18 @@ import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui";
 import { FormError, Input } from "@/components/ui";
+import type { LinkedInProfileImport } from "@/lib/auth/linkedin-profile-import";
 import type { OnboardingFieldErrors } from "@/lib/validators/onboarding";
 import type { Enums } from "@/types/database";
 
 type SelectableProfileType = Exclude<Enums<"profile_type">, "admin">;
 
 type OnboardingFormProps = {
+  defaultAvatarUrl?: string | null;
   defaultDisplayName?: string;
+  defaultHeadline?: string | null;
   defaultProfileType?: SelectableProfileType;
+  importedLinkedInProfile?: LinkedInProfileImport | null;
 };
 
 const profileTypeOptions: Array<{
@@ -43,8 +47,11 @@ type OnboardingClientState = {
 };
 
 export function OnboardingForm({
+  defaultAvatarUrl,
   defaultDisplayName = "",
+  defaultHeadline,
   defaultProfileType = "professional",
+  importedLinkedInProfile,
 }: OnboardingFormProps) {
   const [state, setState] = useState<OnboardingClientState>({});
   const [pending, setPending] = useState(false);
@@ -86,6 +93,52 @@ export function OnboardingForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <FormError>{state.status === "error" ? state.message : null}</FormError>
+
+      {importedLinkedInProfile ? (
+        <section className="rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white p-4">
+          <div className="flex gap-3">
+            {importedLinkedInProfile.avatarUrl ? (
+              <div
+                aria-hidden="true"
+                className="h-12 w-12 shrink-0 rounded-full bg-cover bg-center"
+                style={{ backgroundImage: `url(${importedLinkedInProfile.avatarUrl})` }}
+              />
+            ) : (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--weldoo-bg)] text-sm font-bold text-[var(--weldoo-indigo)]">
+                in
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-bold text-[var(--weldoo-ink)]">
+                LinkedIn profile data imported
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--weldoo-muted)]">
+                Review and edit the fields below before saving them to Weldoo.
+              </p>
+              <dl className="mt-3 grid gap-2 text-xs text-[var(--weldoo-muted)] sm:grid-cols-2">
+                {importedLinkedInProfile.firstName ? (
+                  <div>
+                    <dt className="font-semibold text-[var(--weldoo-ink)]">First name</dt>
+                    <dd>{importedLinkedInProfile.firstName}</dd>
+                  </div>
+                ) : null}
+                {importedLinkedInProfile.lastName ? (
+                  <div>
+                    <dt className="font-semibold text-[var(--weldoo-ink)]">Last name</dt>
+                    <dd>{importedLinkedInProfile.lastName}</dd>
+                  </div>
+                ) : null}
+                {importedLinkedInProfile.email ? (
+                  <div className="sm:col-span-2">
+                    <dt className="font-semibold text-[var(--weldoo-ink)]">Account email</dt>
+                    <dd>{importedLinkedInProfile.email}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-bold text-[var(--weldoo-ink)]">
@@ -151,6 +204,28 @@ export function OnboardingForm({
           type="text"
         />
       ) : null}
+
+      {selectedType === "professional" ? (
+        <Input
+          defaultValue={defaultHeadline ?? ""}
+          error={state.errors?.headline}
+          id="headline"
+          label="Professional headline"
+          name="headline"
+          placeholder="TIG welder · Pressure vessel specialist"
+          type="text"
+        />
+      ) : null}
+
+      <Input
+        defaultValue={defaultAvatarUrl ?? ""}
+        error={state.errors?.avatarUrl}
+        id="avatarUrl"
+        label="Profile image URL"
+        name="avatarUrl"
+        placeholder="https://..."
+        type="url"
+      />
 
       <div className="sm:max-w-40">
         <Button className="w-full" disabled={pending} type="submit">

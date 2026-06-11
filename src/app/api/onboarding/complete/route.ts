@@ -7,7 +7,9 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const parsed = onboardingSchema.safeParse({
+      avatarUrl: formData.get("avatarUrl"),
       displayName: formData.get("displayName"),
+      headline: formData.get("headline"),
       location: formData.get("location"),
       organizationName: formData.get("organizationName"),
       profileType: formData.get("profileType"),
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { displayName, location, organizationName, profileType } = parsed.data;
+    const { avatarUrl, displayName, headline, location, organizationName, profileType } = parsed.data;
     const organizationDisplayName = organizationName ?? displayName;
     const publicDisplayName =
       profileType === "professional" ? displayName : organizationDisplayName;
@@ -41,6 +43,8 @@ export async function POST(request: Request) {
     const { error: profileError } = await supabase.from("profiles").upsert([
       {
         display_name: publicDisplayName,
+        avatar_url: avatarUrl ?? null,
+        headline: headline ?? null,
         id: user.id,
         location: location || null,
         onboarding_completed: true,
