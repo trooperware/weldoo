@@ -20,9 +20,41 @@ export type AuthActionState = {
 };
 
 const DEFAULT_ERROR = "Something went wrong. Please try again.";
+const feedRedirectPaths = new Set(["/", "/dashboard", "/onboarding"]);
 
 function getErrorState(message = DEFAULT_ERROR): AuthActionState {
   return { message, status: "error" };
+}
+
+async function getPostSignInRedirectPath(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  redirectTo: FormDataEntryValue | string | null | undefined,
+) {
+  const safeRedirectPath = getSafeRedirectPath(redirectTo);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return safeRedirectPath;
+  }
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .maybeSingle();
+  const profile = data as { onboarding_completed: boolean | null } | null;
+
+  if (profile?.onboarding_completed && feedRedirectPaths.has(safeRedirectPath)) {
+    return "/";
+  }
+
+  if (!profile?.onboarding_completed && ["/", "/dashboard"].includes(safeRedirectPath)) {
+    return "/onboarding";
+  }
+
+  return safeRedirectPath;
 }
 
 export async function signInAction(
@@ -49,7 +81,7 @@ export async function signInAction(
     return getErrorState(error.message);
   }
 
-  redirect(getSafeRedirectPath(parsed.data.redirectTo));
+  redirect(await getPostSignInRedirectPath(supabase, parsed.data.redirectTo));
 }
 
 export async function signUpAction(

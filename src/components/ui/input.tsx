@@ -11,7 +11,7 @@ export function Input({ className, error, id, label, ...props }: InputProps) {
   return (
     <label className="block" htmlFor={id}>
       {label ? (
-        <span className="mb-[5px] block text-[13.8px] font-semibold leading-[1.15] text-weldoo-ink">
+        <span className="mb-[6px] block text-[13.8px] font-semibold leading-[1.15] text-weldoo-ink">
           {label}
         </span>
       ) : null}

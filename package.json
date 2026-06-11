@@ -6,7 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "jira:check": "node scripts/sync-jira.mjs --check",
+    "jira:sprint": "node scripts/sync-jira.mjs --sprint",
+    "jira:issue": "node scripts/sync-jira.mjs --issue",
+    "jira:dry-run": "node scripts/sync-jira.mjs",
+    "jira:push": "node scripts/sync-jira.mjs --push"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

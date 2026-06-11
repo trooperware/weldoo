@@ -65,16 +65,16 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
           <strong className="mb-[3px] block font-bold text-weldoo-indigo">
             Demo access
           </strong>
-          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12.8px] leading-[1.45]">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[13.2px] leading-[1.45]">
             <span className="inline-flex items-center gap-1 whitespace-nowrap">
               Email:
-              <code className="rounded bg-weldoo-indigo/[0.08] px-1 py-px font-mono text-[12px]">
+              <code className="rounded bg-weldoo-indigo/[0.08] px-[6px] py-px font-mono text-[13.2px]">
                 demo@weldoo.net
               </code>
             </span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap">
               Password:
-              <code className="rounded bg-weldoo-indigo/[0.08] px-1 py-px font-mono text-[12px]">
+              <code className="rounded bg-weldoo-indigo/[0.08] px-[6px] py-px font-mono text-[13.2px]">
                 Weldoo2026
               </code>
             </span>
@@ -96,7 +96,7 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
           className="h-[42px] rounded-[10px] border-[1.5px] px-3.5 text-[15.4px] tracking-[-0.01em]"
         />
         <label className="mt-3.5 block" htmlFor="password">
-          <div className="mb-[5px] flex items-center justify-between gap-4 leading-[1.15]">
+          <div className="mb-[6px] flex items-center justify-between gap-4 leading-[1.15]">
             <span className="text-[13.8px] font-semibold text-weldoo-ink">Password</span>
             <Link
               className="text-[13.2px] font-medium text-weldoo-indigo hover:underline"

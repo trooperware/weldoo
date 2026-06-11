@@ -19,12 +19,12 @@ export function AuthCard({
   title,
 }: AuthCardProps) {
   return (
-    <main className="flex min-h-screen items-center justify-center overflow-hidden bg-[#f6f7ff] p-6">
+    <main className="flex min-h-screen items-center justify-center overflow-hidden bg-[#f6f7ff] p-6 max-[480px]:p-0">
       <section className="w-full max-w-[448px]">
-        <div className="overflow-hidden rounded-[18px] border border-weldoo-border-light bg-white shadow-weldoo-xl">
+        <div className="overflow-hidden rounded-[18px] border border-weldoo-border-light bg-white shadow-weldoo-xl max-[480px]:min-h-screen max-[480px]:rounded-none max-[480px]:border-0 max-[480px]:bg-transparent max-[480px]:shadow-none">
           <div className="h-[3px] bg-[linear-gradient(90deg,#3d3db4_0%,#7b7fe8_34%,#42b8d4_68%,#5ce8b4_100%)]" />
 
-          <div className="px-7 pb-8 pt-9 sm:px-10">
+          <div className="px-7 pb-8 pt-9 sm:px-10 max-[480px]:px-6 max-[480px]:pb-6 max-[480px]:pt-7">
             <Link className="mb-[26px] inline-flex items-center" href="/">
               <WeldooLogo />
             </Link>

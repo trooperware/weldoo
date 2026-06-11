@@ -172,7 +172,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ redirectTo: "/dashboard", status: "success" });
+    return NextResponse.json({ redirectTo: "/", status: "success" });
   } catch (error) {
     return NextResponse.json(
       {

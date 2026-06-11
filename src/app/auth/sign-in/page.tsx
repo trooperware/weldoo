@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignInForm } from "@/components/auth/sign-in-form";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getSafeRedirectPath } from "@/lib/auth/redirects";
+import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 
 type SignInPageProps = {
   searchParams: Promise<{
@@ -12,10 +13,27 @@ type SignInPageProps = {
 };
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ redirectTo }, user] = await Promise.all([searchParams, getCurrentUser()]);
+  const [{ redirectTo }, user, profile] = await Promise.all([
+    searchParams,
+    getCurrentUser(),
+    getCurrentProfile(),
+  ]);
 
   if (user) {
-    redirect(redirectTo ?? "/");
+    const redirectPath = getSafeRedirectPath(redirectTo);
+
+    if (
+      profile?.onboarding_completed &&
+      ["/", "/dashboard", "/onboarding"].includes(redirectPath)
+    ) {
+      redirect("/");
+    }
+
+    if (!profile?.onboarding_completed && ["/", "/dashboard"].includes(redirectPath)) {
+      redirect("/onboarding");
+    }
+
+    redirect(redirectPath);
   }
 
   return (

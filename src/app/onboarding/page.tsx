@@ -11,7 +11,7 @@ export default async function OnboardingPage() {
   const profile = await getCurrentProfile();
 
   if (profile?.onboarding_completed) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const defaultProfileType =
