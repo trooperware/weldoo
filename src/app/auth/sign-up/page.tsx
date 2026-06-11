@@ -3,13 +3,13 @@ import { redirect } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignUpForm } from "@/components/auth/sign-up-form";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 
 export default async function SignUpPage() {
-  const user = await getCurrentUser();
+  const [user, profile] = await Promise.all([getCurrentUser(), getCurrentProfile()]);
 
   if (user) {
-    redirect("/dashboard");
+    redirect(profile?.onboarding_completed ? "/" : "/onboarding");
   }
 
   return (
