@@ -3,19 +3,41 @@ import { redirect } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignInForm } from "@/components/auth/sign-in-form";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getPostAuthRedirectPath } from "@/lib/auth/redirects";
+import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 
 type SignInPageProps = {
   searchParams: Promise<{
+    error?: string;
+    message?: string;
     redirectTo?: string;
   }>;
 };
 
+function getOAuthErrorMessage(error?: string, message?: string) {
+  if (!error) return undefined;
+  const detail = message ? ` ${message}` : "";
+
+  if (error === "oauth_provider") return "Unsupported OAuth provider.";
+  if (error === "oauth_callback") return `OAuth sign in could not be completed.${detail}`;
+
+  return `OAuth sign in could not be started. Please try again.${detail}`;
+}
+
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ redirectTo }, user] = await Promise.all([searchParams, getCurrentUser()]);
+  const [{ error, message, redirectTo }, user, profile] = await Promise.all([
+    searchParams,
+    getCurrentUser(),
+    getCurrentProfile(),
+  ]);
 
   if (user) {
-    redirect(redirectTo ?? "/");
+    redirect(
+      getPostAuthRedirectPath({
+        onboardingCompleted: Boolean(profile?.onboarding_completed),
+        redirectTo,
+      }),
+    );
   }
 
   return (
@@ -37,7 +59,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       }
       title="Welcome back"
     >
-      <SignInForm redirectTo={redirectTo} />
+      <SignInForm oauthError={getOAuthErrorMessage(error, message)} redirectTo={redirectTo} />
     </AuthCard>
   );
 }

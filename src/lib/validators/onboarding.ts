@@ -4,7 +4,15 @@ import { getFieldErrors, type AuthFieldErrors } from "@/lib/validators/auth";
 
 export const onboardingSchema = z
   .object({
+    avatarUrl: z.preprocess(
+      (value) => (value === null || value === "" ? undefined : value),
+      z.url("Enter a valid image URL.").max(1000).optional(),
+    ),
     displayName: z.string().trim().min(2, "Enter a display name.").max(120),
+    headline: z.preprocess(
+      (value) => (value === null || value === "" ? undefined : value),
+      z.string().trim().max(180, "Use 180 characters or fewer.").optional(),
+    ),
     location: z.preprocess(
       (value) => (value === null || value === "" ? undefined : value),
       z.string().trim().max(160).optional(),

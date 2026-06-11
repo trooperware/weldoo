@@ -12,7 +12,7 @@ export function SubmitButton({ children, pendingLabel = "Working" }: SubmitButto
 
   return (
     <button
-      className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-[11px] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-4 text-[15.4px] font-bold tracking-[-0.01em] text-white shadow-[0_2px_8px_rgba(61,61,180,0.2),0_6px_20px_rgba(61,61,180,0.18)] transition hover:brightness-105 hover:shadow-[0_4px_14px_rgba(61,61,180,0.28),0_10px_28px_rgba(61,61,180,0.2)] disabled:cursor-not-allowed disabled:opacity-50"
+      className="mt-[6px] flex h-11 w-full items-center justify-center gap-2 rounded-[11px] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-4 text-[15.4px] font-bold tracking-[-0.01em] text-white shadow-[0_2px_8px_rgba(61,61,180,0.2),0_6px_20px_rgba(61,61,180,0.18)] transition hover:brightness-105 hover:shadow-[0_4px_14px_rgba(61,61,180,0.28),0_10px_28px_rgba(61,61,180,0.2)] disabled:cursor-not-allowed disabled:opacity-50"
       disabled={pending}
       type="submit"
     >

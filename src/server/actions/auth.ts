@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { getAuthCallbackUrl, getSafeRedirectPath } from "@/lib/auth/redirects";
+import { getAuthCallbackUrl, getPostAuthRedirectPath } from "@/lib/auth/redirects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   forgotPasswordSchema,
@@ -23,6 +23,31 @@ const DEFAULT_ERROR = "Something went wrong. Please try again.";
 
 function getErrorState(message = DEFAULT_ERROR): AuthActionState {
   return { message, status: "error" };
+}
+
+async function getPostSignInRedirectPath(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  redirectTo: FormDataEntryValue | string | null | undefined,
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return getPostAuthRedirectPath({ onboardingCompleted: false, redirectTo });
+  }
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .maybeSingle();
+  const profile = data as { onboarding_completed: boolean | null } | null;
+
+  return getPostAuthRedirectPath({
+    onboardingCompleted: Boolean(profile?.onboarding_completed),
+    redirectTo,
+  });
 }
 
 export async function signInAction(
@@ -49,7 +74,7 @@ export async function signInAction(
     return getErrorState(error.message);
   }
 
-  redirect(getSafeRedirectPath(parsed.data.redirectTo));
+  redirect(await getPostSignInRedirectPath(supabase, parsed.data.redirectTo));
 }
 
 export async function signUpAction(

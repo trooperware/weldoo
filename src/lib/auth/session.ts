@@ -5,7 +5,13 @@ import type { Tables } from "@/types/database";
 
 export type CurrentProfile = Pick<
   Tables<"profiles">,
-  "display_name" | "id" | "onboarding_completed" | "profile_type" | "status"
+  | "avatar_url"
+  | "display_name"
+  | "headline"
+  | "id"
+  | "onboarding_completed"
+  | "profile_type"
+  | "status"
 >;
 
 async function getCurrentProfileByUserId(userId: string): Promise<CurrentProfile | null> {
@@ -13,7 +19,7 @@ async function getCurrentProfileByUserId(userId: string): Promise<CurrentProfile
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, profile_type, status, display_name, onboarding_completed")
+      .select("id, profile_type, status, display_name, headline, avatar_url, onboarding_completed")
       .eq("id", userId)
       .maybeSingle();
 
@@ -89,10 +95,11 @@ export async function getAppShellAuth() {
 
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("id, profile_type, status, display_name, onboarding_completed")
+    .select("id, profile_type, status, display_name, headline, avatar_url, onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
   const profile = (profileData ?? null) as CurrentProfile | null;
+  let avatarUrl = profile?.avatar_url ?? null;
   let publicProfileHref: string | null = null;
   let unreadContactRequestCount = 0;
 
@@ -103,21 +110,23 @@ export async function getAppShellAuth() {
   if (profile?.profile_type === "company") {
     const { data } = await supabase
       .from("companies")
-      .select("id")
+      .select("id, logo_url")
       .eq("owner_profile_id", profile.id)
       .maybeSingle();
-    const company = data as Pick<Tables<"companies">, "id"> | null;
+    const company = data as Pick<Tables<"companies">, "id" | "logo_url"> | null;
     publicProfileHref = company?.id ? `/companies/${company.id}` : null;
+    avatarUrl = company?.logo_url ?? avatarUrl;
   }
 
   if (profile?.profile_type === "training_provider") {
     const { data } = await supabase
       .from("training_providers")
-      .select("id")
+      .select("id, logo_url")
       .eq("owner_profile_id", profile.id)
       .maybeSingle();
-    const provider = data as Pick<Tables<"training_providers">, "id"> | null;
+    const provider = data as Pick<Tables<"training_providers">, "id" | "logo_url"> | null;
     publicProfileHref = provider?.id ? `/training-providers/${provider.id}` : null;
+    avatarUrl = provider?.logo_url ?? avatarUrl;
   }
 
   if (profile?.id) {
@@ -131,6 +140,7 @@ export async function getAppShellAuth() {
   }
 
   return {
+    avatarUrl,
     displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "Weldoo member",
     email: user.email,
     profileId: profile?.id ?? user.id,

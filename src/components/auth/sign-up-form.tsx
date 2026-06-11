@@ -18,7 +18,11 @@ const purposeOptions = [
   "Mentorship",
 ];
 
-export function SignUpForm() {
+type SignUpFormProps = {
+  oauthError?: string;
+};
+
+export function SignUpForm({ oauthError }: SignUpFormProps) {
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +40,8 @@ export function SignUpForm() {
 
   return (
     <div>
-      <AuthSocialButtons />
+      <FormError className="mb-3">{oauthError}</FormError>
+      <AuthSocialButtons redirectTo="/onboarding" source="sign-up" />
       <AuthDivider />
 
       <form action={formAction}>
@@ -73,7 +78,7 @@ export function SignUpForm() {
             className="h-[42px] rounded-[10px] border-[1.5px] px-3.5 text-[15.4px] tracking-[-0.01em]"
           />
         </div>
-        <div className="mt-[18px]">
+        <div className="mt-3.5">
           <Input
             autoComplete="email"
             error={state.errors?.email}
@@ -86,7 +91,9 @@ export function SignUpForm() {
           />
         </div>
         <label className="mt-3.5 block" htmlFor="password">
-          <span className="mb-[5px] block text-[13.8px] font-semibold leading-[1.15] text-weldoo-ink">Password</span>
+          <span className="mb-[6px] block text-[13.8px] font-semibold leading-[1.15] text-weldoo-ink">
+            Password
+          </span>
           <div className="relative">
             <input
               aria-invalid={Boolean(state.errors?.password)}

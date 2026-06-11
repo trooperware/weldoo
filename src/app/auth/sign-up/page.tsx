@@ -3,13 +3,40 @@ import { redirect } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignUpForm } from "@/components/auth/sign-up-form";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getPostAuthRedirectPath } from "@/lib/auth/redirects";
+import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 
-export default async function SignUpPage() {
-  const user = await getCurrentUser();
+type SignUpPageProps = {
+  searchParams: Promise<{
+    error?: string;
+    message?: string;
+  }>;
+};
+
+function getOAuthErrorMessage(error?: string, message?: string) {
+  if (!error) return undefined;
+  const detail = message ? ` ${message}` : "";
+
+  if (error === "oauth_provider") return "Unsupported OAuth provider.";
+  if (error === "oauth_callback") return `OAuth sign up could not be completed.${detail}`;
+
+  return `OAuth sign up could not be started. Please try again.${detail}`;
+}
+
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const [{ error, message }, user, profile] = await Promise.all([
+    searchParams,
+    getCurrentUser(),
+    getCurrentProfile(),
+  ]);
 
   if (user) {
-    redirect("/dashboard");
+    redirect(
+      getPostAuthRedirectPath({
+        onboardingCompleted: Boolean(profile?.onboarding_completed),
+        redirectTo: "/",
+      }),
+    );
   }
 
   return (
@@ -31,7 +58,7 @@ export default async function SignUpPage() {
       }
       title="Join Weldoo"
     >
-      <SignUpForm />
+      <SignUpForm oauthError={getOAuthErrorMessage(error, message)} />
     </AuthCard>
   );
 }
