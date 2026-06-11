@@ -20,14 +20,31 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function HeaderIcon({ label }: { label: string }) {
+function NavIcon({ className = "h-4 w-4", label }: { className?: string; label: string }) {
   const pathClass = "stroke-current";
+
+  if (label === "Home") {
+    return (
+      <svg
+        aria-hidden="true"
+        className={className}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+        viewBox="0 0 24 24"
+      >
+        <path className={pathClass} d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline className={pathClass} points="9 22 9 12 15 12 15 22" />
+      </svg>
+    );
+  }
 
   if (label === "Network") {
     return (
       <svg
         aria-hidden="true"
-        className="h-4 w-4"
+        className={className}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -49,7 +66,7 @@ function HeaderIcon({ label }: { label: string }) {
     return (
       <svg
         aria-hidden="true"
-        className="h-4 w-4"
+        className={className}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -68,7 +85,7 @@ function HeaderIcon({ label }: { label: string }) {
     return (
       <svg
         aria-hidden="true"
-        className="h-4 w-4"
+        className={className}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -84,7 +101,7 @@ function HeaderIcon({ label }: { label: string }) {
   return (
     <svg
       aria-hidden="true"
-      className="h-4 w-4"
+      className={className}
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -117,8 +134,41 @@ export function MainNavigation({ items }: MainNavigationProps) {
                 }`}
                 href={item.href}
               >
-                <HeaderIcon label={item.label} />
+                <NavIcon label={item.label} />
                 {item.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
+export function MobileBottomNavigation({ items }: MainNavigationProps) {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      aria-label="Mobile navigation"
+      className="fixed inset-x-0 bottom-0 z-[400] flex items-center justify-around border-t border-weldoo-border-light bg-white shadow-[0_-2px_12px_rgba(61,61,180,0.06)] md:hidden"
+      style={{ paddingBottom: "max(6px, env(safe-area-inset-bottom))", paddingTop: 6 }}
+    >
+      <ul className="grid w-full grid-cols-5">
+        {items.map((item) => {
+          const active = isActivePath(pathname, item.href);
+
+          return (
+            <li key={item.label} className="min-w-0">
+              <Link
+                aria-current={active ? "page" : undefined}
+                className={`flex min-w-0 flex-1 flex-col items-center gap-[3px] px-1 py-1.5 text-[10px] font-medium leading-none transition ${
+                  active ? "text-weldoo-indigo" : "text-weldoo-muted hover:text-weldoo-indigo"
+                }`}
+                href={item.href}
+              >
+                <NavIcon className="h-[22px] w-[22px] shrink-0" label={item.label} />
+                <span className="truncate leading-none">{item.label}</span>
               </Link>
             </li>
           );
