@@ -151,7 +151,7 @@ export function MobileBottomNavigation({ items }: MainNavigationProps) {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-weldoo-border-light bg-white shadow-[0_-2px_12px_rgba(61,61,180,0.06)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-[400] flex items-center justify-around border-t border-weldoo-border-light bg-white shadow-[0_-2px_12px_rgba(61,61,180,0.06)] md:hidden"
       style={{ paddingBottom: "max(6px, env(safe-area-inset-bottom))", paddingTop: 6 }}
     >
       <ul className="grid w-full grid-cols-5">
