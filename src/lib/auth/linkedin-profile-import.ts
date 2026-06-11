@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { User, UserIdentity } from "@supabase/supabase-js";
 
 export type LinkedInProfileImport = {
   avatarUrl?: string;
@@ -21,19 +21,36 @@ function readString(metadata: Record<string, unknown>, keys: string[]) {
   return undefined;
 }
 
-function hasLinkedInProvider(user: User) {
+function isLinkedInProvider(provider: string | undefined) {
+  return provider === "linkedin_oidc" || provider === "linkedin";
+}
+
+function getLinkedInIdentity(user: User): UserIdentity | undefined {
+  return user.identities?.find((identity) => isLinkedInProvider(identity.provider));
+}
+
+export function hasLinkedInIdentity(user: User) {
   const provider = user.app_metadata.provider;
   const providers = user.app_metadata.providers ?? [];
 
-  return provider === "linkedin_oidc" || provider === "linkedin" || providers.includes("linkedin_oidc") || providers.includes("linkedin");
+  return (
+    isLinkedInProvider(provider) ||
+    providers.includes("linkedin_oidc") ||
+    providers.includes("linkedin") ||
+    Boolean(getLinkedInIdentity(user))
+  );
 }
 
 export function getLinkedInProfileImport(user: User): LinkedInProfileImport | null {
-  if (!hasLinkedInProvider(user)) {
+  if (!hasLinkedInIdentity(user)) {
     return null;
   }
 
-  const metadata = user.user_metadata as Record<string, unknown>;
+  const identityData = getLinkedInIdentity(user)?.identity_data ?? {};
+  const metadata = {
+    ...(user.user_metadata as Record<string, unknown>),
+    ...(identityData as Record<string, unknown>),
+  };
   const firstName = readString(metadata, ["given_name", "first_name", "firstName"]);
   const lastName = readString(metadata, ["family_name", "last_name", "lastName"]);
   const metadataDisplayName = readString(metadata, ["full_name", "name", "display_name"]);

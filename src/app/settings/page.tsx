@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
-import { getAppShellAuth } from "@/lib/auth/session";
+import { hasLinkedInIdentity } from "@/lib/auth/linkedin-profile-import";
+import { getAppShellAuth, getCurrentUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Settings | Weldoo",
 };
 
 export default async function SettingsPage() {
-  const appShellAuth = await getAppShellAuth();
+  const [appShellAuth, user] = await Promise.all([getAppShellAuth(), getCurrentUser()]);
+  const linkedInConnected = user ? hasLinkedInIdentity(user) : false;
 
   return (
     <AppShell auth={appShellAuth}>
@@ -111,6 +113,24 @@ export default async function SettingsPage() {
                     href="/saved/jobs"
                   >
                     Open
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between gap-4 px-5 py-4">
+                  <div>
+                    <p className="text-[13.2px] font-medium text-weldoo-ink">
+                      LinkedIn profile import
+                    </p>
+                    <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
+                      {linkedInConnected
+                        ? "Review and selectively import data returned by LinkedIn."
+                        : "Connect LinkedIn to review importable profile data."}
+                    </p>
+                  </div>
+                  <Link
+                    className="inline-flex h-9 items-center justify-center rounded-weldoo-sm border border-weldoo-border-light bg-white px-4 text-sm font-semibold text-weldoo-slate transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                    href="/settings/linkedin-import"
+                  >
+                    {linkedInConnected ? "Review" : "Connect"}
                   </Link>
                 </div>
                 {appShellAuth?.profileType === "company" ? (
