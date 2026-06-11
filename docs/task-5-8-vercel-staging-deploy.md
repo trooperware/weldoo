@@ -24,13 +24,15 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-Optional for later server-only admin/background tasks:
+Server-only:
 
 ```text
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
 Do not expose `SUPABASE_SERVICE_ROLE_KEY` in client components. It must remain server-only.
+
+OAuth provider client IDs and secrets are configured in Supabase Auth provider settings, not in Vercel.
 
 ## Supabase Auth URL Configuration
 
@@ -48,7 +50,7 @@ Add Redirect URLs:
 https://your-vercel-domain.vercel.app/**
 https://*.vercel.app/**
 http://localhost:3000/**
-http://127.0.0.1:3002/**
+http://127.0.0.1:3000/**
 ```
 
 Notes:
@@ -110,6 +112,28 @@ The production health route `/api/dev/health` intentionally returns 404 in produ
 9. Add the same URL to Supabase Auth Site URL and Redirect URLs.
 10. Redeploy after changing environment variables.
 
+## OAuth Provider Callback Setup
+
+For Google and LinkedIn, the callback registered in the external provider console must be the Supabase callback URL, not the Weldoo app URL:
+
+```text
+https://your-project-ref.supabase.co/auth/v1/callback
+```
+
+For the current Supabase project this is:
+
+```text
+https://wukwwzuoqqectjpknkds.supabase.co/auth/v1/callback
+```
+
+Supabase then redirects back to Weldoo through the allow-listed app URLs above, such as:
+
+```text
+https://your-vercel-domain.vercel.app/auth/callback
+http://localhost:3000/auth/callback
+http://127.0.0.1:3000/auth/callback
+```
+
 ## Post-Deploy Smoke Test
 
 Use the deployed URL and test:
@@ -137,7 +161,6 @@ Use the deployed URL and test:
 
 ## Known Staging Limitations
 
-- OAuth buttons are visual only until the OAuth sprint is implemented.
 - Integrated live video is not part of Phase 1.
 - Advanced real-time notifications are not part of Phase 1.
 - Admin area is planned for Sprint 6 and is not required for the first staging deploy.
