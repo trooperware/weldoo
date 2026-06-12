@@ -58,7 +58,6 @@ export async function GET(request: NextRequest) {
     provider,
     options: {
       redirectTo: callbackUrl,
-      scopes: provider === "linkedin_oidc" ? "openid profile email" : undefined,
     },
   });
 

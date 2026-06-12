@@ -11,13 +11,16 @@ export async function GET(request: NextRequest) {
   const next = getSafeRedirectPath(requestUrl.searchParams.get("next"));
 
   if (error) {
-    const signInUrl = new URL("/auth/sign-in", requestUrl.origin);
-    signInUrl.searchParams.set("error", "oauth_callback");
+    const errorUrl = new URL(
+      next === "/settings/linkedin-import" ? next : "/auth/sign-in",
+      requestUrl.origin,
+    );
+    errorUrl.searchParams.set("error", "oauth_callback");
     if (errorDescription) {
-      signInUrl.searchParams.set("message", errorDescription);
+      errorUrl.searchParams.set("message", errorDescription);
     }
 
-    return NextResponse.redirect(signInUrl);
+    return NextResponse.redirect(errorUrl);
   }
 
   if (code) {
