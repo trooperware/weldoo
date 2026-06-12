@@ -4,7 +4,7 @@ import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
 import { ReportContentButton } from "@/components/feed/report-content-button";
-import { Badge } from "@/components/ui";
+import { Avatar, Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
 
 type PostRow = Tables<"posts">;
@@ -81,14 +81,11 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
   return (
     <article className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white transition hover:border-[#d0d0e8] hover:shadow-[0_4px_16px_rgba(61,61,180,0.08)]">
       <header className="flex items-start gap-3 px-[18px] pt-[18px]">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-[15px] font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.2)]">
-          {author?.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img alt="" className="h-full w-full object-cover" src={author.avatar_url} />
-          ) : (
-            initials
-          )}
-        </div>
+        <Avatar
+          className="h-11 w-11 text-[15px] shadow-[0_2px_8px_rgba(61,61,180,0.2)]"
+          initials={initials}
+          src={author?.avatar_url}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             {authorHref ? (

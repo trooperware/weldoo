@@ -6,6 +6,7 @@ import { MainNavigation, MobileBottomNavigation } from "@/components/app/app-she
 import { MobileProfileDrawer } from "@/components/app/mobile-profile-drawer";
 import { NotificationsPopover } from "@/components/app/notifications-popover";
 import { WeldooLogo } from "@/components/auth/auth-card";
+import { Avatar } from "@/components/ui";
 import { signOutAction } from "@/server/actions/auth";
 
 type AppShellProps = {
@@ -46,16 +47,7 @@ function ProfileAvatar({
   className?: string;
 }) {
   return (
-    <span
-      className={`flex shrink-0 items-center justify-center overflow-hidden bg-[linear-gradient(135deg,#3d3db4,#5558e8)] font-bold text-white ${className}`}
-    >
-      {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img alt="" className="h-full w-full object-cover" src={avatarUrl} />
-      ) : (
-        avatarInitial
-      )}
-    </span>
+    <Avatar className={className} initials={avatarInitial} src={avatarUrl} />
   );
 }
 

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useId, useState, type ReactNode } from "react";
 
+import { Avatar } from "@/components/ui";
+
 type MobileProfileDrawerProps = {
   avatarInitial: string;
   avatarUrl?: string | null;
@@ -26,14 +28,11 @@ function DrawerAvatar({
   avatarUrl?: string | null;
 }) {
   return (
-    <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4,#5558e8)] text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)]">
-      {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img alt="" className="h-full w-full object-cover" src={avatarUrl} />
-      ) : (
-        avatarInitial
-      )}
-    </span>
+    <Avatar
+      className="h-[34px] w-[34px] text-[13px] shadow-[0_2px_8px_rgba(61,61,180,0.25)]"
+      initials={avatarInitial}
+      src={avatarUrl}
+    />
   );
 }
 

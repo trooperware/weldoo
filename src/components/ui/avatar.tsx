@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 type AvatarProps = HTMLAttributes<HTMLDivElement> & {
   initials: string;
   size?: "sm" | "md" | "lg";
+  src?: string | null;
 };
 
 const sizes = {
@@ -17,18 +18,31 @@ export function Avatar({
   className,
   initials,
   size = "md",
+  src,
   ...props
 }: AvatarProps) {
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4,#5558e8)] font-bold text-white shadow-weldoo-md",
+        "relative flex shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4,#5558e8)] font-bold text-white shadow-weldoo-md",
         sizes[size],
         className,
       )}
       {...props}
     >
-      {initials}
+      {src ? (
+        <span className="absolute inset-0 overflow-hidden rounded-[inherit] bg-white">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt=""
+            className="block h-full w-full scale-[1.01] object-cover"
+            draggable={false}
+            src={src}
+          />
+        </span>
+      ) : (
+        initials
+      )}
     </div>
   );
 }
