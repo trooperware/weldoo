@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         headline: headline ?? null,
         id: user.id,
         location: location || null,
-        onboarding_completed: true,
+        onboarding_completed: false,
         profile_type: profileType,
         status: "active",
       },
@@ -174,6 +174,21 @@ export async function POST(request: Request) {
           );
         }
       }
+    }
+
+    const { error: completionError } = await supabase
+      .from("profiles")
+      .update({
+        onboarding_completed: true,
+        profile_type: profileType,
+      } as never)
+      .eq("id", user.id);
+
+    if (completionError) {
+      return NextResponse.json(
+        { message: `Could not complete onboarding: ${completionError.message}`, status: "error" },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json({ redirectTo: "/", status: "success" });

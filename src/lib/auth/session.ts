@@ -9,6 +9,7 @@ export type CurrentProfile = Pick<
   | "display_name"
   | "headline"
   | "id"
+  | "location"
   | "onboarding_completed"
   | "profile_type"
   | "status"
@@ -19,7 +20,7 @@ async function getCurrentProfileByUserId(userId: string): Promise<CurrentProfile
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, profile_type, status, display_name, headline, avatar_url, onboarding_completed")
+      .select("id, profile_type, status, display_name, headline, avatar_url, location, onboarding_completed")
       .eq("id", userId)
       .maybeSingle();
 
@@ -95,7 +96,7 @@ export async function getAppShellAuth() {
 
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("id, profile_type, status, display_name, headline, avatar_url, onboarding_completed")
+    .select("id, profile_type, status, display_name, headline, avatar_url, location, onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
   const profile = (profileData ?? null) as CurrentProfile | null;
