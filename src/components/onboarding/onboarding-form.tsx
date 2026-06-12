@@ -14,6 +14,8 @@ type OnboardingFormProps = {
   defaultAvatarUrl?: string | null;
   defaultDisplayName?: string;
   defaultHeadline?: string | null;
+  defaultLocation?: string | null;
+  defaultOrganizationName?: string | null;
   defaultProfileType?: SelectableProfileType;
   importedLinkedInProfile?: LinkedInProfileImport | null;
 };
@@ -50,6 +52,8 @@ export function OnboardingForm({
   defaultAvatarUrl,
   defaultDisplayName = "",
   defaultHeadline,
+  defaultLocation,
+  defaultOrganizationName,
   defaultProfileType = "professional",
   importedLinkedInProfile,
 }: OnboardingFormProps) {
@@ -191,11 +195,13 @@ export function OnboardingForm({
           name="location"
           placeholder="Barcelona, Spain"
           type="text"
+          defaultValue={defaultLocation ?? ""}
         />
       </div>
 
       {needsOrganization ? (
         <Input
+          defaultValue={defaultOrganizationName ?? ""}
           error={state.errors?.organizationName}
           id="organizationName"
           label={selectedType === "company" ? "Company name" : "Training provider name"}

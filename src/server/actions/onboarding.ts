@@ -48,7 +48,7 @@ export async function completeOnboardingAction(
         display_name: publicDisplayName,
         id: user.id,
         location: location || null,
-        onboarding_completed: true,
+        onboarding_completed: false,
         profile_type: profileType,
         status: "active",
       },
@@ -154,6 +154,21 @@ export async function completeOnboardingAction(
           return { message: `Could not create training provider: ${error.message}`, status: "error" };
         }
       }
+    }
+
+    const { error: completionError } = await supabase
+      .from("profiles")
+      .update({
+        onboarding_completed: true,
+        profile_type: profileType,
+      } as never)
+      .eq("id", user.id);
+
+    if (completionError) {
+      return {
+        message: `Could not complete onboarding: ${completionError.message}`,
+        status: "error",
+      };
     }
 
     redirect("/dashboard");
