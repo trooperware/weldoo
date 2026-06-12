@@ -11,6 +11,8 @@ type AppShellProps = {
     avatarUrl?: string | null;
     displayName?: string | null;
     email?: string | null;
+    headline?: string | null;
+    location?: string | null;
     profileId?: string | null;
     publicProfileHref?: string | null;
     unreadContactRequestCount?: number;

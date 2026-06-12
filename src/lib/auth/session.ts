@@ -144,6 +144,8 @@ export async function getAppShellAuth() {
     avatarUrl,
     displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "Weldoo member",
     email: user.email,
+    headline: profile?.headline ?? null,
+    location: profile?.location ?? null,
     profileId: profile?.id ?? user.id,
     publicProfileHref,
     unreadContactRequestCount,
