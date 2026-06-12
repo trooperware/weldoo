@@ -8,7 +8,11 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const error = requestUrl.searchParams.get("error");
   const errorDescription = requestUrl.searchParams.get("error_description");
-  const next = getSafeRedirectPath(requestUrl.searchParams.get("next"));
+  const requestedNext = requestUrl.searchParams.get("next");
+  const next =
+    requestedNext === "/auth/reset-password"
+      ? requestedNext
+      : getSafeRedirectPath(requestedNext);
 
   if (error) {
     const errorUrl = new URL(
@@ -40,6 +44,10 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (user) {
+      if (next === "/auth/reset-password") {
+        return NextResponse.redirect(new URL(next, requestUrl.origin));
+      }
+
       const { data: profileData } = await supabase
         .from("profiles")
         .select("onboarding_completed")

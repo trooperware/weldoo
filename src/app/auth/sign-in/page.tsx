@@ -10,6 +10,7 @@ type SignInPageProps = {
   searchParams: Promise<{
     error?: string;
     message?: string;
+    passwordReset?: string;
     redirectTo?: string;
   }>;
 };
@@ -25,7 +26,7 @@ function getOAuthErrorMessage(error?: string, message?: string) {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ error, message, redirectTo }, user, profile] = await Promise.all([
+  const [{ error, message, passwordReset, redirectTo }, user, profile] = await Promise.all([
     searchParams,
     getCurrentUser(),
     getCurrentProfile(),
@@ -59,7 +60,15 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       }
       title="Welcome back"
     >
-      <SignInForm oauthError={getOAuthErrorMessage(error, message)} redirectTo={redirectTo} />
+      <SignInForm
+        oauthError={getOAuthErrorMessage(error, message)}
+        redirectTo={redirectTo}
+        successMessage={
+          passwordReset === "1"
+            ? "Password updated. Sign in again with your new password."
+            : undefined
+        }
+      />
     </AuthCard>
   );
 }

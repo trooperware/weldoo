@@ -25,6 +25,16 @@ function getErrorState(message = DEFAULT_ERROR): AuthActionState {
   return { message, status: "error" };
 }
 
+function getAuthErrorMessage(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes("rate limit")) {
+    return "Too many reset emails have been requested. Please wait a few minutes before trying again.";
+  }
+
+  return message;
+}
+
 async function getPostSignInRedirectPath(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   redirectTo: FormDataEntryValue | string | null | undefined,
@@ -140,7 +150,7 @@ export async function forgotPasswordAction(
   });
 
   if (error) {
-    return getErrorState(error.message);
+    return getErrorState(getAuthErrorMessage(error.message));
   }
 
   return {
@@ -171,7 +181,8 @@ export async function resetPasswordAction(
     return getErrorState(error.message);
   }
 
-  redirect("/dashboard");
+  await supabase.auth.signOut();
+  redirect("/auth/sign-in?passwordReset=1");
 }
 
 export async function signOutAction() {
