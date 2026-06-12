@@ -102,51 +102,63 @@ export async function getAppShellAuth() {
   const profile = (profileData ?? null) as CurrentProfile | null;
   let avatarUrl = profile?.avatar_url ?? null;
   let publicProfileHref: string | null = null;
-  let unreadContactRequestCount = 0;
 
   if (profile?.profile_type === "professional") {
     publicProfileHref = `/professionals/${profile.id}`;
   }
 
+  const entityPromise =
+    profile?.profile_type === "company"
+      ? supabase
+          .from("companies")
+          .select("id, logo_url")
+          .eq("owner_profile_id", profile.id)
+          .maybeSingle()
+      : profile?.profile_type === "training_provider"
+        ? supabase
+            .from("training_providers")
+            .select("id, logo_url")
+            .eq("owner_profile_id", profile.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null });
+  const unreadContactRequestPromise = profile?.id
+    ? supabase
+        .from("contact_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("recipient_profile_id", profile.id)
+        .is("read_at", null)
+        .is("archived_at", null)
+    : Promise.resolve({ count: 0 });
+
+  const [entityResult, unreadContactRequestResult] = await Promise.all([
+    entityPromise,
+    unreadContactRequestPromise,
+  ]);
+
   if (profile?.profile_type === "company") {
-    const { data } = await supabase
-      .from("companies")
-      .select("id, logo_url")
-      .eq("owner_profile_id", profile.id)
-      .maybeSingle();
-    const company = data as Pick<Tables<"companies">, "id" | "logo_url"> | null;
+    const company = entityResult.data as Pick<Tables<"companies">, "id" | "logo_url"> | null;
     publicProfileHref = company?.id ? `/companies/${company.id}` : null;
     avatarUrl = company?.logo_url ?? avatarUrl;
   }
 
   if (profile?.profile_type === "training_provider") {
-    const { data } = await supabase
-      .from("training_providers")
-      .select("id, logo_url")
-      .eq("owner_profile_id", profile.id)
-      .maybeSingle();
-    const provider = data as Pick<Tables<"training_providers">, "id" | "logo_url"> | null;
+    const provider = entityResult.data as Pick<
+      Tables<"training_providers">,
+      "id" | "logo_url"
+    > | null;
     publicProfileHref = provider?.id ? `/training-providers/${provider.id}` : null;
     avatarUrl = provider?.logo_url ?? avatarUrl;
-  }
-
-  if (profile?.id) {
-    const { count } = await supabase
-      .from("contact_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("recipient_profile_id", profile.id)
-      .is("read_at", null)
-      .is("archived_at", null);
-    unreadContactRequestCount = count ?? 0;
   }
 
   return {
     avatarUrl,
     displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "Weldoo member",
     email: user.email,
+    headline: profile?.headline ?? null,
+    location: profile?.location ?? null,
     profileId: profile?.id ?? user.id,
     publicProfileHref,
-    unreadContactRequestCount,
+    unreadContactRequestCount: unreadContactRequestResult.count ?? 0,
     onboardingCompleted: profile?.onboarding_completed ?? false,
     profileType: profile?.profile_type ?? null,
     status: profile?.status ?? null,

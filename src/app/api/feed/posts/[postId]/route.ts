@@ -100,7 +100,8 @@ export async function PATCH(request: Request, context: PostRouteContext) {
         image_url: data.imageUrl ?? null,
         tags: data.tags,
       } as never)
-      .eq("id", postId);
+      .eq("id", postId)
+      .eq("author_profile_id", ownerCheck.user.id);
 
     if (updateError) {
       return NextResponse.json(
@@ -136,7 +137,8 @@ export async function DELETE(_request: Request, context: PostRouteContext) {
     const { error: deleteError } = await ownerCheck.supabase
       .from("posts")
       .delete()
-      .eq("id", postId);
+      .eq("id", postId)
+      .eq("author_profile_id", ownerCheck.user.id);
 
     if (deleteError) {
       return NextResponse.json(
