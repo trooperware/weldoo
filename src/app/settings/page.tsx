@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
+import { DeleteTestAccountCard } from "@/components/settings/delete-test-account-card";
 import { hasLinkedInIdentity } from "@/lib/auth/linkedin-profile-import";
 import { getAppShellAuth, getCurrentUser } from "@/lib/auth/session";
 
@@ -169,6 +170,7 @@ export default async function SettingsPage() {
                   </div>
                   </>
                 ) : null}
+                <DeleteTestAccountCard />
               </div>
             </div>
           </div>

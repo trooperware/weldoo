@@ -92,13 +92,27 @@ export async function PATCH(request: Request, { params }: ConnectionRouteProps) 
     status: nextStatus,
   };
 
-  const { error } = await supabase
+  const { data: updatedConnection, error } = await supabase
     .from("connections")
     .update(updatePayload as never)
-    .eq("id", connectionId);
+    .eq("id", connectionId)
+    .eq("status", "pending")
+    .eq(
+      payload.action === "cancel" ? "requester_profile_id" : "recipient_profile_id",
+      user.id,
+    )
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ message: error.message, status: "error" }, { status: 400 });
+  }
+
+  if (!updatedConnection) {
+    return NextResponse.json(
+      { message: "Connection request could not be updated.", status: "error" },
+      { status: 409 },
+    );
   }
 
   return NextResponse.json({

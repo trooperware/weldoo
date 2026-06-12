@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { DeployInfoBar } from "@/components/app/deploy-info-bar";
 import { MainNavigation, MobileBottomNavigation } from "@/components/app/app-shell-nav";
 import { MobileProfileDrawer } from "@/components/app/mobile-profile-drawer";
 import { WeldooLogo } from "@/components/auth/auth-card";
@@ -234,8 +235,9 @@ export function AppShell({ auth, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-weldoo-bg text-weldoo-ink">
-      <header className="sticky top-0 z-30 h-16 border-b border-weldoo-border-light bg-white/95 shadow-[0_1px_0_#ebebf5,0_1px_3px_rgba(61,61,180,0.06)] backdrop-blur-[16px]">
-        <div className="mx-auto grid h-full max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:px-8 lg:gap-6">
+      <header className="sticky top-0 z-30 border-b border-weldoo-border-light bg-white/95 shadow-[0_1px_0_#ebebf5,0_1px_3px_rgba(61,61,180,0.06)] backdrop-blur-[16px]">
+        <DeployInfoBar />
+        <div className="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:px-8 lg:gap-6">
           <div className="flex items-center gap-4">
             <Link className="flex min-w-0 items-center" href="/">
               <WeldooLogo />
