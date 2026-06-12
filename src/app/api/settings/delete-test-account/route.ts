@@ -1,11 +1,27 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
+import { getServerSupabaseEnv } from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type DeleteAccountPayload = {
   confirmation?: string;
 };
+
+async function clearSupabaseAuthCookies() {
+  const { url } = getServerSupabaseEnv();
+  const projectRef = new URL(url).hostname.split(".")[0];
+  const authCookiePrefix = `sb-${projectRef}-auth-token`;
+  const cookieStore = await cookies();
+
+  cookieStore
+    .getAll()
+    .filter(
+      ({ name }) => name === authCookiePrefix || name.startsWith(`${authCookiePrefix}.`),
+    )
+    .forEach(({ name }) => cookieStore.delete(name));
+}
 
 export async function DELETE(request: Request) {
   try {
@@ -40,6 +56,9 @@ export async function DELETE(request: Request) {
         { status: 400 },
       );
     }
+
+    await supabase.auth.signOut().catch(() => undefined);
+    await clearSupabaseAuthCookies();
 
     return NextResponse.json({
       message: "Account deleted.",

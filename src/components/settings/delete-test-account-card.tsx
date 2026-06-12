@@ -39,9 +39,14 @@ export function DeleteTestAccountCard() {
         return;
       }
 
-      const supabase = createSupabaseBrowserClient();
-      await supabase.auth.signOut();
-      window.location.assign(payload.redirectTo ?? "/auth/sign-up");
+      try {
+        const supabase = createSupabaseBrowserClient();
+        await supabase.auth.signOut();
+      } catch {
+        // The server already deleted the user and cleared auth cookies. If the
+        // browser session is stale, still move the tester back to sign-up.
+      }
+      window.location.replace(payload.redirectTo ?? "/auth/sign-up");
     } catch (error) {
       setState({
         message: error instanceof Error ? error.message : "Could not delete account.",
