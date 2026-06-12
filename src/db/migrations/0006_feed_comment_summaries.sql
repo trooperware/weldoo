@@ -9,7 +9,7 @@ returns table (
   post_id uuid,
   author_profile_id uuid,
   body text,
-  status public.comment_status,
+  status public.publication_status,
   created_at timestamptz,
   updated_at timestamptz
 )
