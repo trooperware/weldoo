@@ -79,9 +79,21 @@ You are a senior architect with experience in social products at scale. You are 
 - WEL-125 - FEED-002 Create post
 - WEL-126 - FEED-003 Edit and delete own post
 
+## Implemented Product Areas To Include In Audits
+
+- Authentication and role-based onboarding
+- App shell, header navigation, mobile navigation, and profile menu
+- Professional, company, and training provider profiles
+- Feed posts, media, comments, reactions, saved posts, and reporting
+- Network directory, search/filtering, connections, and contact requests
+- Jobs listing, job detail, saved jobs, applications, and company job management
+- Academy and events discovery, detail pages, saved/interest flows, and provider management
+- LinkedIn OAuth sign-up import and existing-user LinkedIn import review flow
+
 ## Current Architectural Notes
 
 - Supabase RLS is part of the security model, but every protected API route must still perform server-side session checks.
 - Current feed pagination uses page/offset-style ranges. This is acceptable for MVP validation but should be revisited before scale testing.
+- Feed comment loading uses bounded preview RPCs plus exact count RPCs. Full comment pagination remains a future feed task.
 - LinkedIn data import must use official OAuth/OpenID Connect/API data only. Do not scrape LinkedIn pages.
 - Vercel currently deploys from `main`; sprint work is integrated through `WEL-sprint-1` and then `develop` before promotion.
