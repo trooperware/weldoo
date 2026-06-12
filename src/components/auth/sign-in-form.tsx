@@ -11,17 +11,26 @@ import { SubmitButton } from "./submit-button";
 type SignInFormProps = {
   oauthError?: string;
   redirectTo?: string;
+  successMessage?: string;
 };
 
 const initialState: AuthActionState = {};
 
-export function SignInForm({ oauthError, redirectTo }: SignInFormProps) {
+export function SignInForm({ oauthError, redirectTo, successMessage }: SignInFormProps) {
   const [state, formAction] = useActionState(signInAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div>
       <FormError className="mb-3">{oauthError}</FormError>
+      {successMessage ? (
+        <div
+          className="mb-3 rounded-[var(--weldoo-radius-sm)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
+          role="status"
+        >
+          {successMessage}
+        </div>
+      ) : null}
       <AuthSocialButtons redirectTo={redirectTo ?? "/"} />
       <AuthDivider />
 
