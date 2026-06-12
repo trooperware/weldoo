@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type PostImageUploadFieldProps = {
   currentUrl?: string | null;
+  variant?: "composer" | "editor";
 };
 
 function getFileExtension(file: File) {
@@ -21,7 +22,10 @@ function getFileExtension(file: File) {
   return "jpg";
 }
 
-export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) {
+export function PostImageUploadField({
+  currentUrl,
+  variant = "editor",
+}: PostImageUploadFieldProps) {
   const inputId = useId();
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -92,8 +96,20 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
     setRemoveModalOpen(false);
   }
 
+  const isComposer = variant === "composer";
+  const actionClassName = isComposer
+    ? "inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-5 py-[9px] text-[13px] font-medium tracking-[-0.01em] text-weldoo-ink transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
+    : "inline-flex cursor-pointer items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo";
+  const iconClassName = isComposer ? "h-[18px] w-[18px]" : "h-4 w-4";
+
   return (
-    <div className="flex flex-wrap items-center gap-1">
+    <div
+      className={
+        isComposer
+          ? "flex w-full flex-wrap items-center justify-center gap-0"
+          : "flex flex-wrap items-center gap-1"
+      }
+    >
       <input name="imageUrl" type="hidden" value={url} />
       <input
         accept="image/jpeg,image/png,image/webp"
@@ -104,30 +120,30 @@ export function PostImageUploadField({ currentUrl }: PostImageUploadFieldProps) 
         type="file"
       />
       <label
-        className="inline-flex cursor-pointer items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
+        className={actionClassName}
         htmlFor={inputId}
       >
-        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className={iconClassName} fill="none" viewBox="0 0 24 24">
           <path d="M4 5H20V19H4V5ZM8.5 10A1.5 1.5 0 1 0 8.5 7A1.5 1.5 0 0 0 8.5 10ZM20 15L16 11L6 19" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
         </svg>
         Photo
       </label>
       <button
-        className="inline-flex items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
+        className={actionClassName}
         disabled
         type="button"
       >
-        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className={iconClassName} fill="none" viewBox="0 0 24 24">
           <path d="M23 7L16 12L23 17V7ZM1 5H16V19H1V5Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
         </svg>
         Video
       </button>
       <button
-        className="inline-flex items-center gap-1.5 rounded-weldoo-sm px-3 py-[7px] text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
+        className={actionClassName}
         disabled
         type="button"
       >
-        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className={iconClassName} fill="none" viewBox="0 0 24 24">
           <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM14 2V8H20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
         </svg>
         Article
