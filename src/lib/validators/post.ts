@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { POST_BODY_MAX_LENGTH } from "@/lib/constants/posts";
 import { getFieldErrors, type AuthFieldErrors } from "@/lib/validators/auth";
 
 const optionalUrl = z.preprocess(
@@ -16,7 +17,11 @@ const commaList = z.preprocess((value) => {
 }, z.array(z.string().min(1).max(48)).max(12));
 
 export const postSchema = z.object({
-  body: z.string().trim().min(1, "Write something before publishing.").max(5000),
+  body: z
+    .string()
+    .trim()
+    .min(1, "Write something before publishing.")
+    .max(POST_BODY_MAX_LENGTH, `Keep posts under ${POST_BODY_MAX_LENGTH} characters.`),
   imageUrl: optionalUrl,
   tags: commaList,
 });
