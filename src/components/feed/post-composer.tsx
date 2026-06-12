@@ -1,12 +1,10 @@
 "use client";
-
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { PostImageUploadField } from "@/components/feed/post-image-upload-field";
-import { FormError } from "@/components/ui";
+import { Avatar, FormError } from "@/components/ui";
 import { POST_BODY_MAX_LENGTH } from "@/lib/constants/posts";
 import type { PostFieldErrors } from "@/lib/validators/post";
 
@@ -28,19 +26,11 @@ type ComposerAvatarProps = {
 
 function ComposerAvatar({ avatarUrl, initial }: ComposerAvatarProps) {
   return (
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-sm font-bold text-white shadow-[0_8px_20px_rgba(61,61,180,0.22)]">
-      {avatarUrl ? (
-        <Image
-          alt=""
-          className="object-cover"
-          fill
-          sizes="40px"
-          src={avatarUrl}
-        />
-      ) : (
-        initial
-      )}
-    </div>
+    <Avatar
+      className="h-10 w-10 text-sm shadow-[0_8px_20px_rgba(61,61,180,0.22)]"
+      initials={initial}
+      src={avatarUrl}
+    />
   );
 }
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app/app-shell";
 import { FeedPostCard } from "@/components/feed/feed-post-card";
 import { PostComposer } from "@/components/feed/post-composer";
-import { EmptyState } from "@/components/ui";
+import { Avatar, EmptyState } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
 import { FEED_PAGE_SIZE, getFeedPage } from "@/lib/feed/queries";
 
@@ -55,18 +55,11 @@ export default async function Home({ searchParams }: HomePageProps) {
             <section className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm">
               <div className="h-16 bg-[linear-gradient(135deg,#2a2a8a_0%,#3d3db4_35%,#42b8d4_70%,#5ce8b4_100%)]" />
               <div className="px-4 pb-4">
-                <div className="-mt-[22px] mb-2.5 flex h-12 w-12 items-center justify-center rounded-weldoo-md bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-base font-bold text-white shadow-weldoo-sm">
-                  {appShellAuth?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt=""
-                      className="h-full w-full object-cover"
-                      src={appShellAuth.avatarUrl}
-                    />
-                  ) : (
-                    initial
-                  )}
-                </div>
+                <Avatar
+                  className="-mt-[22px] mb-2.5 h-12 w-12 rounded-weldoo-md text-base shadow-weldoo-sm [&>span]:rounded-weldoo-md"
+                  initials={initial}
+                  src={appShellAuth?.avatarUrl}
+                />
                 <h2 className="mb-0.5 truncate text-[15px] font-bold tracking-[-0.01em] text-weldoo-ink">
                   {displayName}
                 </h2>
