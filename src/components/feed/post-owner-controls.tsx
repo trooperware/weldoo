@@ -112,7 +112,10 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
             <>
               <Button
                 disabled={pending}
-                onClick={() => setDeleteModalOpen(false)}
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setState({});
+                }}
                 variant="ghost"
               >
                 Cancel
@@ -126,9 +129,13 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
           open={deleteModalOpen}
           title="Delete post?"
         >
-          <p className="text-sm leading-6 text-weldoo-muted">
-            Are you sure you want to delete this post? This cannot be undone.
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm leading-6 text-weldoo-muted">
+              Are you sure you want to delete this post? This action is irreversible and cannot
+              be undone.
+            </p>
+            <FormError>{state.status === "error" ? state.message : null}</FormError>
+          </div>
         </Modal>
       </div>
     );
