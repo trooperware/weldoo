@@ -100,11 +100,13 @@ export function PostComposer({ initial }: PostComposerProps) {
 
       <input name="tags" type="hidden" value="" />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <PostImageUploadField />
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-[220px] flex-1">
+          <PostImageUploadField variant="composer" />
+        </div>
         {showPublish ? (
           <Button
-            className="h-[34px] rounded-weldoo-sm border border-weldoo-border-light bg-white px-3 text-xs font-semibold text-weldoo-indigo shadow-none hover:bg-weldoo-bg-strong"
+            className="h-[34px] rounded-full border border-weldoo-border-light bg-white px-4 text-[12.5px] font-semibold text-weldoo-indigo shadow-none hover:bg-weldoo-bg-strong"
             disabled={pending}
             size="sm"
             type="submit"
