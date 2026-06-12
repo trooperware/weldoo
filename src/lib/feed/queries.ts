@@ -9,6 +9,12 @@ type CommentRow = Tables<"comments">;
 type SavedItemRow = Tables<"saved_items">;
 
 export const FEED_PAGE_SIZE = 10;
+const COMMENT_PREVIEW_LIMIT = 3;
+
+type CommentCountRow = {
+  comment_count: number;
+  post_id: string;
+};
 
 function countByPostId(rows: Array<{ post_id: string }>) {
   return rows.reduce<Record<string, number>>((counts, row) => {
@@ -62,14 +68,15 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     };
   }
 
-  const [likesResult, commentsResult, savedResult] = await Promise.all([
+  const [likesResult, commentsResult, commentCountsResult, savedResult] = await Promise.all([
     supabase.from("likes").select("post_id, profile_id").in("post_id", postIds),
-    supabase
-      .from("comments")
-      .select("id, post_id, author_profile_id, body, status, created_at, updated_at")
-      .eq("status", "published")
-      .in("post_id", postIds)
-      .order("created_at", { ascending: true }),
+    supabase.rpc("feed_comment_preview" as never, {
+      preview_limit: COMMENT_PREVIEW_LIMIT,
+      target_post_ids: postIds,
+    } as never),
+    supabase.rpc("feed_comment_counts" as never, {
+      target_post_ids: postIds,
+    } as never),
     currentUserId
       ? supabase
           .from("saved_items")
@@ -82,6 +89,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
 
   if (likesResult.error) throw new Error(likesResult.error.message);
   if (commentsResult.error) throw new Error(commentsResult.error.message);
+  if (commentCountsResult.error) throw new Error(commentCountsResult.error.message);
   if (savedResult.error) throw new Error(savedResult.error.message);
 
   const comments = (commentsResult.data ?? []) as CommentRow[];
@@ -102,7 +110,12 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     return byId;
   }, {});
   const likeCounts = countByPostId((likesResult.data ?? []) as LikeRow[]);
-  const commentCounts = countByPostId(comments);
+  const commentCounts = ((commentCountsResult.data ?? []) as CommentCountRow[]).reduce<
+    Record<string, number>
+  >((counts, row) => {
+    counts[row.post_id] = Number(row.comment_count);
+    return counts;
+  }, {});
   const commentsByPostId = groupCommentsByPostId(comments, profiles, currentUserId);
   const likedPostIds = new Set(
     ((likesResult.data ?? []) as LikeRow[])
