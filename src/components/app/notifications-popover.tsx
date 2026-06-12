@@ -25,7 +25,7 @@ function BellIcon() {
 
 export function NotificationsPopover() {
   return (
-    <details className="group relative hidden lg:block">
+    <details className="group relative hidden lg:block" data-weldoo-popover>
       <summary
         aria-haspopup="dialog"
         aria-label="Notifications"

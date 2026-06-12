@@ -5,6 +5,7 @@ import { DeployInfoBar } from "@/components/app/deploy-info-bar";
 import { MainNavigation, MobileBottomNavigation } from "@/components/app/app-shell-nav";
 import { MobileProfileDrawer } from "@/components/app/mobile-profile-drawer";
 import { NotificationsPopover } from "@/components/app/notifications-popover";
+import { PopoverDismissListener } from "@/components/app/popover-dismiss-listener";
 import { WeldooLogo } from "@/components/auth/auth-card";
 import { Avatar } from "@/components/ui";
 import { signOutAction } from "@/server/actions/auth";
@@ -29,13 +30,14 @@ type AppShellProps = {
 type AppShellAuth = NonNullable<AppShellProps["auth"]>;
 
 const mainNavItems = [
+  { label: "Home", href: "/" },
   { label: "Network", href: "/network" },
   { label: "Events", href: "/events" },
   { label: "Jobs", href: "/jobs" },
   { label: "Academy", href: "/academy" },
 ];
 
-const mobileNavItems = [{ label: "Home", href: "/" }, ...mainNavItems];
+const mobileNavItems = mainNavItems;
 
 function ProfileAvatar({
   avatarInitial,
@@ -88,7 +90,7 @@ function ProfileMenu({
   const profileTargetHref = auth.publicProfileHref ?? profileHref;
 
   return (
-    <details className="group relative ml-1 hidden md:block">
+    <details className="group relative ml-1 hidden md:block" data-weldoo-popover>
       <summary
         aria-haspopup="menu"
         aria-label="My profile menu"
@@ -228,6 +230,7 @@ export function AppShell({ auth, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-weldoo-bg text-weldoo-ink">
+      <PopoverDismissListener />
       <header className="sticky top-0 z-30 border-b border-weldoo-border-light bg-white/95 shadow-[0_1px_0_#ebebf5,0_1px_3px_rgba(61,61,180,0.06)] backdrop-blur-[16px]">
         <DeployInfoBar />
         <div className="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:px-8 lg:gap-6">
