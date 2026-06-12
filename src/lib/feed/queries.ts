@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/database";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Tables } from "@/types/database";
 import type { FeedComment, FeedPost } from "@/components/feed/feed-post-card";
 
@@ -16,11 +18,82 @@ type CommentCountRow = {
   post_id: string;
 };
 
+type FeedSupabaseClient = SupabaseClient<Database>;
+
 function countByPostId(rows: Array<{ post_id: string }>) {
   return rows.reduce<Record<string, number>>((counts, row) => {
     counts[row.post_id] = (counts[row.post_id] ?? 0) + 1;
     return counts;
   }, {});
+}
+
+function isMissingFeedRpc(error: { code?: string; message?: string } | null | undefined) {
+  return (
+    error?.code === "PGRST202" ||
+    Boolean(error?.message?.includes("schema cache") && error.message.includes("feed_comment"))
+  );
+}
+
+async function getCommentPreviewRows(supabase: FeedSupabaseClient, postIds: string[]) {
+  const commentsResult = await supabase.rpc("feed_comment_preview" as never, {
+    preview_limit: COMMENT_PREVIEW_LIMIT,
+    target_post_ids: postIds,
+  } as never);
+
+  if (!commentsResult.error) {
+    return (commentsResult.data ?? []) as CommentRow[];
+  }
+
+  if (!isMissingFeedRpc(commentsResult.error)) {
+    throw new Error(commentsResult.error.message);
+  }
+
+  const fallbackResult = await supabase
+    .from("comments")
+    .select("id, post_id, author_profile_id, body, status, created_at, updated_at")
+    .eq("status", "published")
+    .in("post_id", postIds)
+    .order("post_id", { ascending: true })
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (fallbackResult.error) {
+    throw new Error(fallbackResult.error.message);
+  }
+
+  const perPostCount: Record<string, number> = {};
+
+  return ((fallbackResult.data ?? []) as CommentRow[]).filter((comment) => {
+    perPostCount[comment.post_id] = (perPostCount[comment.post_id] ?? 0) + 1;
+    return perPostCount[comment.post_id] <= COMMENT_PREVIEW_LIMIT;
+  });
+}
+
+async function getCommentCountRows(supabase: FeedSupabaseClient, postIds: string[]) {
+  const commentCountsResult = await supabase.rpc("feed_comment_counts" as never, {
+    target_post_ids: postIds,
+  } as never);
+
+  if (!commentCountsResult.error) {
+    return (commentCountsResult.data ?? []) as CommentCountRow[];
+  }
+
+  if (!isMissingFeedRpc(commentCountsResult.error)) {
+    throw new Error(commentCountsResult.error.message);
+  }
+
+  const fallbackResult = await supabase
+    .from("comments")
+    .select("post_id")
+    .eq("status", "published")
+    .in("post_id", postIds);
+
+  if (fallbackResult.error) {
+    throw new Error(fallbackResult.error.message);
+  }
+
+  return Object.entries(countByPostId((fallbackResult.data ?? []) as Array<{ post_id: string }>))
+    .map(([post_id, comment_count]) => ({ comment_count, post_id }));
 }
 
 function groupCommentsByPostId(
@@ -70,13 +143,8 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
 
   const [likesResult, commentsResult, commentCountsResult, savedResult] = await Promise.all([
     supabase.from("likes").select("post_id, profile_id").in("post_id", postIds),
-    supabase.rpc("feed_comment_preview" as never, {
-      preview_limit: COMMENT_PREVIEW_LIMIT,
-      target_post_ids: postIds,
-    } as never),
-    supabase.rpc("feed_comment_counts" as never, {
-      target_post_ids: postIds,
-    } as never),
+    getCommentPreviewRows(supabase, postIds),
+    getCommentCountRows(supabase, postIds),
     currentUserId
       ? supabase
           .from("saved_items")
@@ -88,11 +156,9 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
   ]);
 
   if (likesResult.error) throw new Error(likesResult.error.message);
-  if (commentsResult.error) throw new Error(commentsResult.error.message);
-  if (commentCountsResult.error) throw new Error(commentCountsResult.error.message);
   if (savedResult.error) throw new Error(savedResult.error.message);
 
-  const comments = (commentsResult.data ?? []) as CommentRow[];
+  const comments = commentsResult;
   const profileIds = Array.from(
     new Set([...authorIds, ...comments.map((comment) => comment.author_profile_id)]),
   );
@@ -110,9 +176,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     return byId;
   }, {});
   const likeCounts = countByPostId((likesResult.data ?? []) as LikeRow[]);
-  const commentCounts = ((commentCountsResult.data ?? []) as CommentCountRow[]).reduce<
-    Record<string, number>
-  >((counts, row) => {
+  const commentCounts = commentCountsResult.reduce<Record<string, number>>((counts, row) => {
     counts[row.post_id] = Number(row.comment_count);
     return counts;
   }, {});
