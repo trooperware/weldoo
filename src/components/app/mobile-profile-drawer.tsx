@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { Avatar } from "@/components/ui";
@@ -145,7 +145,9 @@ export function MobileProfileDrawer({
   roleLabel,
   signOutAction,
 }: MobileProfileDrawerProps) {
-  const [open, setOpen] = useState(false);
+  const [rendered, setRendered] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
   const titleId = useId();
   const links: DrawerLink[] = [
     { href: profileHref, icon: <DrawerIcon name="profile" />, label: "My profile" },
@@ -158,8 +160,34 @@ export function MobileProfileDrawer({
     { href: "/settings", icon: <DrawerIcon name="settings" />, label: "Settings" },
   ];
 
+  const clearCloseTimeout = useCallback(() => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const openDrawer = useCallback(() => {
+    clearCloseTimeout();
+    setRendered(true);
+    window.requestAnimationFrame(() => setVisible(true));
+  }, [clearCloseTimeout]);
+
+  const closeDrawer = useCallback(() => {
+    setVisible(false);
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setRendered(false);
+      closeTimeoutRef.current = null;
+    }, 280);
+  }, [clearCloseTimeout]);
+
   useEffect(() => {
-    if (!open) {
+    return () => clearCloseTimeout();
+  }, [clearCloseTimeout]);
+
+  useEffect(() => {
+    if (!rendered) {
       return;
     }
 
@@ -168,7 +196,7 @@ export function MobileProfileDrawer({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setOpen(false);
+        closeDrawer();
       }
     }
 
@@ -178,20 +206,24 @@ export function MobileProfileDrawer({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [open]);
+  }, [closeDrawer, rendered]);
 
-  const drawer = open ? createPortal(
+  const drawer = rendered ? createPortal(
     <>
       <button
         aria-label="Close profile menu"
-        className="fixed inset-0 z-[900] cursor-default bg-[rgba(12,12,24,0.45)] animate-in fade-in duration-200"
-        onClick={() => setOpen(false)}
+        className={`fixed inset-0 z-[900] cursor-default bg-[rgba(12,12,24,0.45)] transition-opacity duration-200 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={closeDrawer}
         type="button"
       />
       <aside
         aria-labelledby={titleId}
         aria-modal="true"
-        className="fixed inset-y-0 right-0 z-[1000] flex h-dvh w-[min(300px,85vw)] flex-col bg-white shadow-[-4px_0_24px_rgba(0,0,0,0.12)] animate-in slide-in-from-right duration-300"
+        className={`fixed inset-y-0 right-0 z-[1000] flex h-dvh w-[min(300px,85vw)] transform flex-col bg-white shadow-[-4px_0_24px_rgba(0,0,0,0.12)] transition-transform duration-[280ms] ease-[cubic-bezier(.22,1,.36,1)] ${
+          visible ? "translate-x-0" : "translate-x-full"
+        }`}
         role="dialog"
       >
         <div className="flex shrink-0 items-center justify-between border-b border-weldoo-border-light px-5 pb-4 pt-5">
@@ -209,7 +241,7 @@ export function MobileProfileDrawer({
           <button
             aria-label="Close profile menu"
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-weldoo-bg text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-weldoo-indigo"
-            onClick={() => setOpen(false)}
+            onClick={closeDrawer}
             type="button"
           >
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -222,7 +254,7 @@ export function MobileProfileDrawer({
           {links.map((item, index) => (
             <div key={item.label}>
               {index === 1 || index === 6 ? <div className="my-2 h-px bg-weldoo-border-light" /> : null}
-              <DrawerItem href={item.href} icon={item.icon} label={item.label} onClick={() => setOpen(false)}>
+              <DrawerItem href={item.href} icon={item.icon} label={item.label} onClick={closeDrawer}>
                 {item.label}
               </DrawerItem>
             </div>
@@ -246,11 +278,11 @@ export function MobileProfileDrawer({
   return (
     <div className="md:hidden">
       <button
-        aria-expanded={open}
+        aria-expanded={rendered}
         aria-haspopup="dialog"
         aria-label="My profile menu"
         className="flex h-[34px] w-[34px] items-center justify-center rounded-full transition hover:scale-[1.03] hover:shadow-weldoo-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-weldoo-indigo"
-        onClick={() => setOpen(true)}
+        onClick={openDrawer}
         title="My profile"
         type="button"
       >
