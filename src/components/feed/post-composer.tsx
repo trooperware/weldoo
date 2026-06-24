@@ -1,6 +1,15 @@
 "use client";
+
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 
 import { PostImageUploadField } from "@/components/feed/post-image-upload-field";
@@ -98,8 +107,16 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
       textareaRef.current?.focus();
     });
 
-    return () => window.cancelAnimationFrame(frame);
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
   }, [open]);
+
+  function handleModalKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") {
+      closeComposer();
+    }
+  }
 
   function openComposer() {
     setOpen(true);
@@ -118,6 +135,8 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
+
     setPending(true);
     setState({});
 
@@ -157,6 +176,7 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
     ? createPortal(
         <div
           className="fixed inset-0 z-[600] flex items-center justify-center bg-[rgba(12,12,24,0.45)] p-4"
+          onKeyDown={handleModalKeyDown}
           onMouseDown={handleOverlayMouseDown}
         >
           <form
