@@ -17,6 +17,8 @@ type ActionState = {
   status?: "error" | "success";
 };
 
+type InteractionKind = "like" | "save";
+
 export function FeedPostActions({
   initialIsLiked,
   initialIsSaved,
@@ -27,11 +29,16 @@ export function FeedPostActions({
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
-  const [pendingAction, setPendingAction] = useState<"like" | "save" | null>(null);
+  const [pendingActions, setPendingActions] = useState<Record<InteractionKind, boolean>>({
+    like: false,
+    save: false,
+  });
   const [state, setState] = useState<ActionState>({});
 
-  async function submitInteraction(kind: "like" | "save", nextActive: boolean) {
-    setPendingAction(kind);
+  async function submitInteraction(kind: InteractionKind, nextActive: boolean) {
+    if (pendingActions[kind]) return;
+
+    setPendingActions((current) => ({ ...current, [kind]: true }));
     setState({});
 
     const previousLiked = isLiked;
@@ -40,7 +47,7 @@ export function FeedPostActions({
 
     if (kind === "like") {
       setIsLiked(nextActive);
-      setLikeCount((current) => current + (nextActive ? 1 : -1));
+      setLikeCount((current) => Math.max(0, current + (nextActive ? 1 : -1)));
     } else {
       setIsSaved(nextActive);
     }
@@ -52,9 +59,12 @@ export function FeedPostActions({
       const payload = (await response.json()) as ActionState;
 
       if (!response.ok || payload.status === "error") {
-        setIsLiked(previousLiked);
-        setIsSaved(previousSaved);
-        setLikeCount(previousLikeCount);
+        if (kind === "like") {
+          setIsLiked(previousLiked);
+          setLikeCount(previousLikeCount);
+        } else {
+          setIsSaved(previousSaved);
+        }
         setState({
           message: payload.message ?? "Could not update post interaction.",
           status: "error",
@@ -64,16 +74,19 @@ export function FeedPostActions({
 
       router.refresh();
     } catch (error) {
-      setIsLiked(previousLiked);
-      setIsSaved(previousSaved);
-      setLikeCount(previousLikeCount);
+      if (kind === "like") {
+        setIsLiked(previousLiked);
+        setLikeCount(previousLikeCount);
+      } else {
+        setIsSaved(previousSaved);
+      }
       setState({
         message:
           error instanceof Error ? error.message : "Could not update post interaction.",
         status: "error",
       });
     } finally {
-      setPendingAction(null);
+      setPendingActions((current) => ({ ...current, [kind]: false }));
     }
   }
 
@@ -85,7 +98,8 @@ export function FeedPostActions({
           className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
             isLiked ? "text-weldoo-indigo" : "text-weldoo-ink"
           }`}
-          disabled={pendingAction !== null}
+          aria-busy={pendingActions.like}
+          disabled={pendingActions.like}
           onClick={() => submitInteraction("like", !isLiked)}
           type="button"
         >
@@ -152,7 +166,8 @@ export function FeedPostActions({
           className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
             isSaved ? "text-weldoo-indigo" : "text-weldoo-ink"
           }`}
-          disabled={pendingAction !== null}
+          aria-busy={pendingActions.save}
+          disabled={pendingActions.save}
           onClick={() => submitInteraction("save", !isSaved)}
           type="button"
         >

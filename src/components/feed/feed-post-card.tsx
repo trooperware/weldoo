@@ -157,6 +157,7 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
             initialIsLiked={isLiked}
             initialIsSaved={isSaved}
             initialLikeCount={likeCount}
+            key={`${post.id}:${isLiked ? "liked" : "not-liked"}:${isSaved ? "saved" : "not-saved"}:${likeCount}`}
             postId={post.id}
           />
         </div>
