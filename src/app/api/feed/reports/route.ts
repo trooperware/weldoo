@@ -67,9 +67,9 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           message: "You have already reported this content. The report is pending review.",
-          status: "error",
+          status: "success",
         },
-        { status: 409 },
+        { status: 200 },
       );
     }
 

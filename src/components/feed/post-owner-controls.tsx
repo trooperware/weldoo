@@ -26,12 +26,15 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
+  const [updatePending, setUpdatePending] = useState(false);
   const [state, setState] = useState<SaveState>({});
 
   async function handleUpdate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
+    if (updatePending) return;
+
+    setUpdatePending(true);
     setState({});
 
     try {
@@ -58,12 +61,14 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
         status: "error",
       });
     } finally {
-      setPending(false);
+      setUpdatePending(false);
     }
   }
 
   async function handleDelete() {
-    setPending(true);
+    if (deletePending) return;
+
+    setDeletePending(true);
     setState({});
 
     try {
@@ -85,7 +90,7 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
         status: "error",
       });
     } finally {
-      setPending(false);
+      setDeletePending(false);
     }
   }
 
@@ -93,13 +98,32 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
     return (
       <div className="mt-4 border-t border-[var(--weldoo-border-light)] pt-4">
         <FormError>{state.status === "error" ? state.message : null}</FormError>
+        {state.status === "success" && state.message ? (
+          <div
+            className="mb-3 rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12.5px] font-semibold text-emerald-700"
+            role="status"
+          >
+            {state.message}
+          </div>
+        ) : null}
         <div className="flex flex-wrap gap-2">
-          <Button disabled={pending} onClick={() => setEditing(true)} size="sm" variant="ghost">
+          <Button
+            disabled={deletePending}
+            onClick={() => {
+              setEditing(true);
+              setState({});
+            }}
+            size="sm"
+            variant="ghost"
+          >
             Edit
           </Button>
           <Button
-            disabled={pending}
-            onClick={() => setDeleteModalOpen(true)}
+            disabled={deletePending}
+            onClick={() => {
+              setState({});
+              setDeleteModalOpen(true);
+            }}
             size="sm"
             variant="danger"
           >
@@ -111,7 +135,7 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
           footer={
             <>
               <Button
-                disabled={pending}
+                disabled={deletePending}
                 onClick={() => {
                   setDeleteModalOpen(false);
                   setState({});
@@ -120,12 +144,16 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
               >
                 Cancel
               </Button>
-              <Button disabled={pending} onClick={handleDelete} variant="danger">
-                {pending ? "Deleting" : "Delete permanently"}
+              <Button disabled={deletePending} onClick={handleDelete} variant="danger">
+                {deletePending ? "Deleting" : "Delete permanently"}
               </Button>
             </>
           }
-          onOpenChange={setDeleteModalOpen}
+          onOpenChange={(open) => {
+            if (deletePending) return;
+            setDeleteModalOpen(open);
+            if (!open) setState({});
+          }}
           open={deleteModalOpen}
           title="Delete post?"
         >
@@ -134,6 +162,9 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
               Are you sure you want to delete this post? This action is irreversible and cannot
               be undone.
             </p>
+            <div className="rounded-weldoo-sm border border-red-100 bg-red-50 px-3 py-2 text-[12.5px] font-semibold leading-5 text-red-700">
+              The post and its media reference will be permanently removed from the feed.
+            </div>
             <FormError>{state.status === "error" ? state.message : null}</FormError>
           </div>
         </Modal>
@@ -161,13 +192,15 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
         label="Tags"
         name="tags"
       />
-      <PostImageUploadField currentUrl={defaultValues.imageUrl} />
+      <div className="rounded-weldoo-sm border border-weldoo-border-light px-3 py-2">
+        <PostImageUploadField currentUrl={defaultValues.imageUrl} />
+      </div>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={pending} size="sm" type="submit">
-          {pending ? "Saving" : "Save changes"}
+        <Button disabled={updatePending} size="sm" type="submit">
+          {updatePending ? "Saving" : "Save changes"}
         </Button>
         <Button
-          disabled={pending}
+          disabled={updatePending}
           onClick={() => {
             setEditing(false);
             setState({});

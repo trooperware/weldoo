@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { Button, FormError, Modal, Textarea } from "@/components/ui";
+import { Avatar, Button, FormError, Modal, Textarea } from "@/components/ui";
 import { ReportContentButton } from "@/components/feed/report-content-button";
 import type { CommentFieldErrors } from "@/lib/validators/comment";
 import type { FeedComment } from "@/components/feed/feed-post-card";
@@ -12,6 +12,8 @@ type FeedCommentsProps = {
   canComment: boolean;
   comments: FeedComment[];
   postId: string;
+  viewerAvatarUrl?: string | null;
+  viewerInitial?: string;
 };
 
 type CommentState = {
@@ -21,21 +23,42 @@ type CommentState = {
 };
 
 function formatCommentDate(value: string) {
+  const createdAt = new Date(value);
+  const diffMs = Date.now() - createdAt.getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+    day: "numeric",
+    month: "short",
+  }).format(createdAt);
 }
 
-export function FeedComments({ canComment, comments, postId }: FeedCommentsProps) {
+export function FeedComments({
+  canComment,
+  comments,
+  postId,
+  viewerAvatarUrl,
+  viewerInitial = "W",
+}: FeedCommentsProps) {
   const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const [submitPending, setSubmitPending] = useState(false);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
   const [state, setState] = useState<CommentState>({});
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
+    setSubmitPending(true);
     setState({});
 
     try {
@@ -59,14 +82,14 @@ export function FeedComments({ canComment, comments, postId }: FeedCommentsProps
         status: "error",
       });
     } finally {
-      setPending(false);
+      setSubmitPending(false);
     }
   }
 
   async function handleDeleteComment() {
     if (!deleteCommentId) return;
 
-    setPending(true);
+    setDeletePending(true);
     setState({});
 
     try {
@@ -88,35 +111,39 @@ export function FeedComments({ canComment, comments, postId }: FeedCommentsProps
         status: "error",
       });
     } finally {
-      setPending(false);
+      setDeletePending(false);
     }
   }
 
   return (
-    <section className="border-t border-weldoo-border-light">
-      <FormError>{state.status === "error" ? state.message : null}</FormError>
+    <section className="border-t border-weldoo-border-light bg-white">
+      <div className="px-[18px] pt-3">
+        <FormError>{state.status === "error" ? state.message : null}</FormError>
+      </div>
 
       {comments.length > 0 ? (
-        <div className="space-y-0.5 py-1">
+        <div className="space-y-2 px-[18px] py-3">
           {comments.map((comment) => (
             <article
-              className="flex gap-2 px-4 py-2"
+              className="flex gap-2.5"
               key={comment.comment.id}
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-xs font-bold text-white">
-                {(comment.author?.display_name ?? "W").slice(0, 1).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] border border-weldoo-border-light bg-weldoo-bg px-3 py-2">
+              <Avatar
+                className="h-8 w-8 text-[11px] shadow-none"
+                initials={(comment.author?.display_name ?? "W").slice(0, 1).toUpperCase()}
+                src={comment.author?.avatar_url}
+              />
+              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] bg-weldoo-bg px-3 py-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold leading-tight text-weldoo-ink">
-                    {comment.author?.display_name ?? "Weldoo member"}
+                    <p className="text-[13px] font-bold leading-tight text-weldoo-ink">
+                      {comment.author?.display_name ?? "Weldoo member"}
                     </p>
                     <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
-                    {formatCommentDate(comment.comment.created_at)}
+                      {formatCommentDate(comment.comment.created_at)}
                     </p>
                   </div>
-                  <div className="flex shrink-0 flex-wrap gap-2">
+                  <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                     {canComment ? (
                       <ReportContentButton
                         commentId={comment.comment.id}
@@ -126,47 +153,55 @@ export function FeedComments({ canComment, comments, postId }: FeedCommentsProps
                     ) : null}
                     {comment.canDelete ? (
                       <Button
-                        disabled={pending}
+                        className="h-7 rounded-full px-2 text-[11.5px]"
+                        disabled={deletePending}
                         onClick={() => setDeleteCommentId(comment.comment.id)}
                         size="sm"
-                        variant="danger"
+                        variant="ghost"
                       >
                         Delete
                       </Button>
                     ) : null}
                   </div>
                 </div>
-                <p className="mt-1 whitespace-pre-line text-sm leading-6 text-weldoo-ink">
+                <p className="mt-1 whitespace-pre-line text-[13px] leading-5 text-weldoo-ink">
                   {comment.comment.body}
                 </p>
               </div>
             </article>
           ))}
         </div>
-      ) : (
-        <p className="mx-4 my-3 rounded-weldoo-sm border border-dashed border-weldoo-border-light bg-white p-3 text-sm text-weldoo-muted">
-          No comments yet.
-        </p>
-      )}
+      ) : null}
 
       {canComment ? (
-        <form className="flex items-start gap-2 border-t border-weldoo-border-light px-[18px] py-3" onSubmit={handleSubmit}>
-          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-xs font-bold text-white">
-            W
-          </div>
-          <div className="min-w-0 flex-1">
-          <Textarea
-            aria-label="Add comment"
-            error={state.errors?.body}
-            id={`comment-${postId}`}
-            className="min-h-11 rounded-full px-4 py-2"
-            name="body"
-            placeholder="Add a professional comment..."
-            rows={1}
+        <form
+          className="flex items-start gap-2.5 border-t border-weldoo-border-light px-[18px] py-3"
+          onSubmit={handleSubmit}
+        >
+          <Avatar
+            className="mt-0.5 h-8 w-8 text-[11px] shadow-none"
+            initials={viewerInitial}
+            src={viewerAvatarUrl}
           />
+          <div className="min-w-0 flex-1">
+            <Textarea
+              aria-label="Add comment"
+              className="min-h-10 resize-none rounded-[20px] px-4 py-2 text-[13px] leading-5"
+              error={state.errors?.body}
+              id={`comment-${postId}`}
+              maxLength={2000}
+              name="body"
+              placeholder="Add a professional comment..."
+              rows={1}
+            />
           </div>
-          <Button className="mt-1 h-9 shrink-0" disabled={pending} size="sm" type="submit">
-            {pending ? "Posting" : "Post comment"}
+          <Button
+            className="mt-0.5 h-8 shrink-0 rounded-full px-3 text-[12px]"
+            disabled={submitPending}
+            size="sm"
+            type="submit"
+          >
+            {submitPending ? "Posting" : "Post"}
           </Button>
         </form>
       ) : null}
@@ -176,14 +211,14 @@ export function FeedComments({ canComment, comments, postId }: FeedCommentsProps
         footer={
           <>
             <Button
-              disabled={pending}
+              disabled={deletePending}
               onClick={() => setDeleteCommentId(null)}
               variant="ghost"
             >
               Cancel
             </Button>
-            <Button disabled={pending} onClick={handleDeleteComment} variant="danger">
-              {pending ? "Deleting" : "Delete permanently"}
+            <Button disabled={deletePending} onClick={handleDeleteComment} variant="danger">
+              {deletePending ? "Deleting" : "Delete permanently"}
             </Button>
           </>
         }
