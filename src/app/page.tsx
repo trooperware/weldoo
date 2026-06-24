@@ -153,6 +153,7 @@ export default async function Home() {
 
             <FeedList
               initialFeed={feed}
+              key={feed.items.map((item) => item.post.id).join(":")}
               viewerAvatarUrl={appShellAuth?.avatarUrl}
               viewerInitial={initial}
             />
