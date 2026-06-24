@@ -146,6 +146,31 @@ function BriefcaseIcon({ className = "h-3 w-3" }: { className?: string }) {
   );
 }
 
+function LocationIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 function DetailPill({
   children,
   icon,
@@ -165,23 +190,41 @@ function FilterLink({
   active,
   children,
   href,
+  icon,
 }: {
   active: boolean;
-  children: string;
+  children: ReactNode;
   href: string;
+  icon?: ReactNode;
 }) {
   return (
     <Link
       className={[
-        "inline-flex h-8 items-center rounded-full border-[1.5px] px-3 text-[12.5px] font-medium tracking-[-0.01em] shadow-weldoo-sm transition",
+        "inline-flex h-8 items-center gap-1.5 rounded-full border-[1.5px] px-3 text-[12.5px] font-medium tracking-[-0.01em] shadow-weldoo-sm transition",
         active
           ? "border-weldoo-indigo bg-weldoo-indigo/[0.08] font-semibold text-weldoo-indigo"
           : "border-weldoo-border-light bg-white text-weldoo-ink hover:border-[#c8c8e4] hover:text-weldoo-indigo",
       ].join(" ")}
       href={href}
     >
+      {icon}
       {children}
     </Link>
+  );
+}
+
+function JobCompactBadge({
+  children,
+  icon,
+}: {
+  children: string;
+  icon: ReactNode;
+}) {
+  return (
+    <span className="inline-flex h-[22px] items-center gap-1 rounded-full bg-weldoo-bg-strong px-2 text-[11px] font-medium text-weldoo-ink">
+      {icon}
+      {children}
+    </span>
   );
 }
 
@@ -285,10 +328,7 @@ function JobDetailPanel({
           <div className="min-w-0">
             <div className="text-[15px] font-bold text-weldoo-ink">{companyName}</div>
             <div className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-weldoo-muted">
-              <svg aria-hidden="true" className="h-[13px] w-[13px]" fill="none" viewBox="0 0 24 24">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-                <circle cx="12" cy="10" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-              </svg>
+              <LocationIcon className="h-[13px] w-[13px]" />
               <span>{companyLocation ?? "Location not set"}</span>
             </div>
           </div>
@@ -410,9 +450,7 @@ function JobDetailPanel({
               {job.benefits.map((benefit) => (
                 <div className="flex items-center gap-2 text-[13.5px] text-weldoo-ink" key={benefit}>
                   <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-weldoo-indigo/10 text-weldoo-indigo">
-                    <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24">
-                      <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                    </svg>
+                    <CheckIcon />
                   </span>
                   {benefit}
                 </div>
@@ -470,15 +508,28 @@ function JobCard({
           {job.company?.name ?? "Weldoo company"}
         </p>
         <p className="mb-1.5 flex items-center gap-1 text-xs text-weldoo-muted">
-          <svg aria-hidden="true" className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-            <circle cx="12" cy="10" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-          </svg>
+          <LocationIcon className="h-3 w-3 shrink-0" />
           <span>
             {job.location ?? job.company?.location ?? "Location not set"}
-            {job.work_mode ? ` · ${workModeLabels[job.work_mode]}` : ""}
           </span>
         </p>
+        <div className="mb-1.5 flex flex-wrap gap-1">
+          {job.work_mode ? (
+            <JobCompactBadge icon={<MonitorIcon />}>
+              {workModeLabels[job.work_mode]}
+            </JobCompactBadge>
+          ) : null}
+          {job.contract_type ? (
+            <JobCompactBadge icon={<ClockIcon />}>
+              {contractTypeLabels[job.contract_type]}
+            </JobCompactBadge>
+          ) : null}
+          {job.travel_required ? (
+            <JobCompactBadge icon={<BriefcaseIcon />}>
+              Travel
+            </JobCompactBadge>
+          ) : null}
+        </div>
         {tags.length ? (
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (
@@ -493,7 +544,6 @@ function JobCard({
         ) : null}
         <p className="mt-1.5 text-[11px] text-weldoo-muted">
           Posted {formatPostedDate(job.published_at, job.created_at)}
-          {job.contract_type ? ` · ${contractTypeLabels[job.contract_type]}` : ""}
           {salary ? ` · ${salary}` : ""}
         </p>
       </div>
@@ -524,7 +574,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
   return (
     <AppShell auth={appShellAuth}>
-      <main className="mx-auto max-w-[1128px] px-4 pb-20 pt-7">
+      <main className="mx-auto max-w-[1128px] px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-7 lg:pb-20">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-[18px] font-extrabold tracking-[-0.3px] text-weldoo-ink">
             Jobs in Spain
@@ -533,8 +583,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             </span>
           </h1>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <form action="/jobs" className="flex h-10 w-[220px] items-center gap-2 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 shadow-weldoo-sm transition focus-within:border-weldoo-indigo focus-within:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            <form action="/jobs" className="flex h-10 w-full items-center gap-2 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 shadow-weldoo-sm transition focus-within:border-weldoo-indigo focus-within:shadow-[0_0_0_3px_rgba(61,61,180,0.09)] sm:w-[220px]">
               {filters.location ? <input name="location" type="hidden" value={filters.location} /> : null}
               {filters.process ? <input name="process" type="hidden" value={filters.process} /> : null}
               {filters.contractType ? <input name="contractType" type="hidden" value={filters.contractType} /> : null}
@@ -558,24 +608,28 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             <FilterLink
               active={filters.workMode === "remote"}
               href={getJobsHref({ ...filters, workMode: filters.workMode === "remote" ? undefined : "remote" })}
+              icon={<MonitorIcon />}
             >
               Remote
             </FilterLink>
             <FilterLink
               active={filters.workMode === "hybrid"}
               href={getJobsHref({ ...filters, workMode: filters.workMode === "hybrid" ? undefined : "hybrid" })}
+              icon={<MonitorIcon />}
             >
               Hybrid
             </FilterLink>
             <FilterLink
               active={filters.workMode === "on_site"}
               href={getJobsHref({ ...filters, workMode: filters.workMode === "on_site" ? undefined : "on_site" })}
+              icon={<BriefcaseIcon />}
             >
               On-site
             </FilterLink>
             <details className="relative">
-              <summary className="inline-flex h-8 cursor-pointer list-none items-center rounded-full border-[1.5px] border-weldoo-border-light bg-white px-3 text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-ink shadow-weldoo-sm transition hover:border-[#c8c8e4] hover:text-weldoo-indigo">
+              <summary className="inline-flex h-8 cursor-pointer list-none items-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-3 text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-ink shadow-weldoo-sm transition hover:border-[#c8c8e4] hover:text-weldoo-indigo marker:content-none">
                 More filters
+                <ChevronDownIcon />
               </summary>
               <div className="absolute right-0 top-10 z-20 w-[min(760px,calc(100vw-32px))] rounded-weldoo-md border border-weldoo-border-light bg-white p-4 shadow-weldoo-lg">
                 <form action="/jobs" className="grid gap-3 md:grid-cols-4">
@@ -598,7 +652,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                     <option value="false">No travel required</option>
                   </select>
                   <input className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.experienceLevel ?? ""} name="experience" placeholder="Experience level" />
-                  <button className="h-10 rounded-weldoo-sm bg-weldoo-indigo px-4 text-sm font-semibold text-white" type="submit">
+                  <button className="h-10 rounded-weldoo-sm bg-weldoo-indigo px-4 text-[13px] font-semibold text-white" type="submit">
                     Apply filters
                   </button>
                 </form>
