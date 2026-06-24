@@ -58,6 +58,16 @@ function normalizeLike(value: string) {
   return `%${value.replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;
 }
 
+function includesText(value: string | null | undefined, filter?: string) {
+  if (!filter) return true;
+  return Boolean(value?.toLowerCase().includes(filter.toLowerCase()));
+}
+
+function arrayIncludesText(values: string[], filter?: string) {
+  if (!filter) return true;
+  return values.some((value) => value.toLowerCase().includes(filter.toLowerCase()));
+}
+
 function isContractType(value?: string): value is Enums<"contract_type"> {
   return (
     value === "full_time" ||
@@ -142,19 +152,8 @@ export async function getJobsListing(
     .order("created_at", { ascending: false })
     .limit(100);
 
-  if (filters.query) {
-    const like = normalizeLike(filters.query);
-    jobsQuery = jobsQuery.or(
-      `title.ilike.${like},description.ilike.${like},location.ilike.${like},experience_level.ilike.${like}`,
-    );
-  }
-
   if (filters.location) {
     jobsQuery = jobsQuery.ilike("location", normalizeLike(filters.location));
-  }
-
-  if (filters.process) {
-    jobsQuery = jobsQuery.contains("welding_processes", [filters.process]);
   }
 
   if (filters.contractType) {
@@ -169,10 +168,6 @@ export async function getJobsListing(
     jobsQuery = jobsQuery.eq("travel_required", filters.travelRequired === "true");
   }
 
-  if (filters.experienceLevel) {
-    jobsQuery = jobsQuery.ilike("experience_level", normalizeLike(filters.experienceLevel));
-  }
-
   const { data, error } = await jobsQuery;
 
   if (error) {
@@ -184,15 +179,35 @@ export async function getJobsListing(
       companies: CompanySummary | null;
     }
   >;
-  const companyFilter = filters.company?.toLowerCase();
   const items = rows
     .map<JobListItem>((row) => ({
       ...row,
       company: row.companies,
     }))
-    .filter((job) =>
-      companyFilter ? job.company?.name.toLowerCase().includes(companyFilter) : true,
-    );
+    .filter((job) => {
+      const query = filters.query;
+      const queryMatches =
+        !query ||
+        includesText(job.title, query) ||
+        includesText(job.description, query) ||
+        includesText(job.location, query) ||
+        includesText(job.experience_level, query) ||
+        includesText(job.company?.name, query) ||
+        arrayIncludesText(job.welding_processes, query) ||
+        arrayIncludesText(job.materials, query) ||
+        arrayIncludesText(job.required_certifications, query);
+
+      return (
+        queryMatches &&
+        includesText(job.company?.name, filters.company) &&
+        includesText(job.experience_level, filters.experienceLevel) &&
+        (
+          arrayIncludesText(job.welding_processes, filters.process) ||
+          arrayIncludesText(job.materials, filters.process) ||
+          arrayIncludesText(job.required_certifications, filters.process)
+        )
+      );
+    });
 
   return {
     items,
