@@ -74,4 +74,10 @@ Seed files live in `seeds/` and are intended for development/demo data only.
    - Requires at least one existing training provider profile in `public.training_providers`.
    - Safe to run multiple times; it avoids duplicate events with the same title for the same provider.
 
+4. `seeds/0004_demo_feed_posts.sql`
+   - Inserts 36 realistic published welding-sector feed posts with demo comments, likes, and saved post records.
+   - Requires at least one active profile in `public.profiles`; works best with several profile types already created.
+   - Safe to run multiple times; it avoids duplicate posts, comments, likes, and saved records.
+   - Useful for validating infinite feed loading because the default feed page size is 10 posts.
+
 Apply seed SQL manually in the Supabase SQL editor after migrations are applied and the required profile type exists.
