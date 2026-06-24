@@ -61,6 +61,27 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
+    const { data: job, error: jobError } = await supabase
+      .from("jobs")
+      .select("id")
+      .eq("id", jobId)
+      .eq("status", "published")
+      .maybeSingle();
+
+    if (jobError) {
+      return NextResponse.json(
+        { message: `Could not load job: ${jobError.message}`, status: "error" },
+        { status: 400 },
+      );
+    }
+
+    if (!job) {
+      return NextResponse.json(
+        { message: "This job is not available for applications.", status: "error" },
+        { status: 404 },
+      );
+    }
+
     const data = parsed.data;
     const { data: application, error } = await supabase
       .from("job_applications")

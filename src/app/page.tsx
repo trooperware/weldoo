@@ -28,6 +28,33 @@ function getPublicProfileHref(profileType?: string | null, profileId?: string | 
   return null;
 }
 
+function getFeedRefreshKey(feed: Awaited<ReturnType<typeof getFeedPage>>) {
+  return feed.items
+    .map((item) =>
+      [
+        item.post.id,
+        item.post.body,
+        item.post.image_url ?? "",
+        item.post.tags.join(","),
+        item.post.updated_at ?? item.post.created_at,
+        item.likeCount,
+        item.commentCount,
+        item.isLiked ? "liked" : "not-liked",
+        item.isSaved ? "saved" : "not-saved",
+        item.comments
+          .map((comment) =>
+            [
+              comment.comment.id,
+              comment.comment.body,
+              comment.comment.updated_at ?? comment.comment.created_at,
+            ].join("~"),
+          )
+          .join("|"),
+      ].join("::"),
+    )
+    .join("||");
+}
+
 const upcomingEvents = [
   {
     city: "Bilbao",
@@ -153,7 +180,7 @@ export default async function Home() {
 
             <FeedList
               initialFeed={feed}
-              key={feed.items.map((item) => item.post.id).join(":")}
+              key={getFeedRefreshKey(feed)}
               viewerAvatarUrl={appShellAuth?.avatarUrl}
               viewerInitial={initial}
             />

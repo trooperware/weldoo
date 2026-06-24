@@ -72,7 +72,7 @@ export default async function SavedJobsPage() {
               return (
                 <Link
                   className="rounded-[16px] border border-weldoo-border-light bg-white p-5 shadow-weldoo-sm transition hover:border-weldoo-indigo/40 hover:shadow-weldoo-md"
-                  href={`/jobs?job=${job.id}`}
+                  href={`/jobs/${job.id}`}
                   key={item.id}
                 >
                   <div className="flex items-start gap-4">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 
-import { Button, FormError, Input, Select, Textarea } from "@/components/ui";
+import { Button, FormError, Input, Modal, Select, Textarea } from "@/components/ui";
 import type { CompanyForJobs, CompanyJob } from "@/lib/jobs/company-management";
 import type { JobFieldErrors } from "@/lib/validators/job";
 
@@ -19,6 +19,15 @@ type CompanyJobManagerProps = {
   company: CompanyForJobs;
   jobs: CompanyJob[];
 };
+
+type JobStatusAction = "close" | "draft" | "publish" | "reopen";
+
+type ConfirmationState = {
+  action: Exclude<JobStatusAction, "publish" | "reopen">;
+  description: string;
+  jobId: string;
+  title: string;
+} | null;
 
 const emptyJob = {
   benefits: [],
@@ -63,6 +72,7 @@ function formatDate(value?: string | null) {
 export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
   const router = useRouter();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<ConfirmationState>(null);
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<SaveState>({});
 
@@ -112,7 +122,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
     }
   }
 
-  async function updateStatus(jobId: string, action: "close" | "draft" | "publish" | "reopen") {
+  async function updateStatus(jobId: string, action: JobStatusAction) {
     setPending(true);
     setState({});
 
@@ -133,6 +143,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
         message: payload.message ?? "Job status updated.",
         status: "success",
       });
+      setConfirmation(null);
       router.refresh();
     } catch (error) {
       setState({
@@ -144,9 +155,69 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
     }
   }
 
+  function requestStatusConfirmation(
+    jobId: string,
+    action: Exclude<JobStatusAction, "publish" | "reopen">,
+  ) {
+    const job = jobs.find((item) => item.id === jobId);
+    const jobTitle = job?.title ?? "this job";
+
+    setConfirmation({
+      action,
+      description:
+        action === "close"
+          ? "This will remove the job from active hiring and candidates will no longer be able to apply. This action changes the public state of the job."
+          : "This will unpublish the job and remove it from the public jobs board. Existing applications remain stored, but the job will no longer be visible publicly.",
+      jobId,
+      title: action === "close" ? `Close ${jobTitle}?` : `Move ${jobTitle} to draft?`,
+    });
+  }
+
   return (
-    <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-      <aside className="rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
+    <>
+      <Modal
+        description={confirmation?.description}
+        footer={
+          <>
+            <Button
+              disabled={pending}
+              onClick={() => setConfirmation(null)}
+              type="button"
+              variant="ghost"
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={pending}
+              onClick={() =>
+                confirmation
+                  ? updateStatus(confirmation.jobId, confirmation.action)
+                  : undefined
+              }
+              type="button"
+              variant="danger"
+            >
+              {pending
+                ? "Updating"
+                : confirmation?.action === "close"
+                  ? "Close job"
+                  : "Move to draft"}
+            </Button>
+          </>
+        }
+        onOpenChange={(open) => {
+          if (!open && !pending) setConfirmation(null);
+        }}
+        open={Boolean(confirmation)}
+        title={confirmation?.title ?? "Confirm job status change"}
+      >
+        <div className="rounded-weldoo-sm border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium leading-5 text-red-700">
+          This action affects the public job posting. Review it carefully before continuing.
+        </div>
+      </Modal>
+
+      <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <aside className="rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
         <div className="border-b border-weldoo-border-light px-5 py-4">
           <h2 className="text-[15px] font-bold text-weldoo-ink">Company jobs</h2>
           <p className="mt-1 text-[12.5px] text-weldoo-muted">
@@ -212,9 +283,9 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             </button>
           ))}
         </div>
-      </aside>
+        </aside>
 
-      <section className="rounded-[16px] border border-weldoo-border-light bg-white p-5 shadow-weldoo-sm sm:p-6">
+        <section className="rounded-[16px] border border-weldoo-border-light bg-white p-5 shadow-weldoo-sm sm:p-6">
         <div className="mb-5 flex flex-col gap-3 border-b border-weldoo-border-light pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-weldoo-indigo">
@@ -247,7 +318,12 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
           </div>
         ) : null}
 
-        <form className="space-y-5" key={selectedJob.id || "new-job"} onSubmit={handleSubmit}>
+        <form
+          className="space-y-5"
+          key={selectedJob.id || "new-job"}
+          noValidate
+          onSubmit={handleSubmit}
+        >
           <input name="jobId" type="hidden" value={selectedJob.id} />
 
           <Input
@@ -425,7 +501,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             {selectedJobId && selectedJob.status === "published" ? (
               <Button
                 disabled={pending}
-                onClick={() => updateStatus(selectedJobId, "close")}
+                onClick={() => requestStatusConfirmation(selectedJobId, "close")}
                 size="sm"
                 type="button"
                 variant="secondary"
@@ -447,7 +523,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             {selectedJobId && selectedJob.status !== "draft" ? (
               <Button
                 disabled={pending}
-                onClick={() => updateStatus(selectedJobId, "draft")}
+                onClick={() => requestStatusConfirmation(selectedJobId, "draft")}
                 size="sm"
                 type="button"
                 variant="ghost"
@@ -457,7 +533,8 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             ) : null}
           </div>
         </form>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }
