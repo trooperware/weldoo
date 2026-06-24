@@ -1,22 +1,11 @@
 import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
-import { FeedPostCard } from "@/components/feed/feed-post-card";
+import { FeedList } from "@/components/feed/feed-list";
 import { PostComposer } from "@/components/feed/post-composer";
-import { Avatar, EmptyState } from "@/components/ui";
+import { Avatar } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
-import { FEED_PAGE_SIZE, getFeedPage } from "@/lib/feed/queries";
-
-type HomePageProps = {
-  searchParams: Promise<{
-    page?: string;
-  }>;
-};
-
-function parsePage(value?: string) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1;
-}
+import { getFeedPage } from "@/lib/feed/queries";
 
 function getProfileTypeLabel(profileType?: string | null) {
   if (profileType === "company") return "Company";
@@ -31,13 +20,9 @@ function getEditProfileHref(profileType?: string | null) {
   return "/profile/edit";
 }
 
-export default async function Home({ searchParams }: HomePageProps) {
-  const [{ page: requestedPage }, appShellAuth] = await Promise.all([
-    searchParams,
-    getAppShellAuth(),
-  ]);
-  const page = parsePage(requestedPage);
-  const feed = await getFeedPage(page, appShellAuth?.profileId);
+export default async function Home() {
+  const appShellAuth = await getAppShellAuth();
+  const feed = await getFeedPage(1, appShellAuth?.profileId);
   const displayEmail = appShellAuth?.email ?? "Weldoo member";
   const displayName = appShellAuth?.displayName ?? displayEmail;
   const initial = displayName.slice(0, 1).toUpperCase();
@@ -123,49 +108,11 @@ export default async function Home({ searchParams }: HomePageProps) {
               </section>
             )}
 
-            {feed.items.length > 0 ? (
-              <div className="flex flex-col gap-5">
-                {feed.items.map((item) => (
-                  <FeedPostCard
-                    item={item}
-                    key={item.post.id}
-                    viewerAvatarUrl={appShellAuth?.avatarUrl}
-                    viewerInitial={initial}
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                description="Posts will appear here once members start publishing. Post creation is the next feed task."
-                title="No posts yet"
-              />
-            )}
-
-            <nav className="flex items-center justify-between gap-3" aria-label="Feed pagination">
-              {page > 1 ? (
-                <Link
-                  className="inline-flex h-10 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-4 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-                  href={page === 2 ? "/" : `/?page=${page - 1}`}
-                >
-                  Previous
-                </Link>
-              ) : (
-                <span />
-              )}
-              <span className="text-xs font-semibold text-[var(--weldoo-muted)]">
-                Page {feed.page} · {FEED_PAGE_SIZE} posts per page
-              </span>
-              {feed.hasNextPage ? (
-                <Link
-                  className="inline-flex h-10 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border)] bg-white px-4 text-sm font-semibold text-[var(--weldoo-slate)] shadow-weldoo-sm transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-                  href={`/?page=${page + 1}`}
-                >
-                  Next
-                </Link>
-              ) : (
-                <span />
-              )}
-            </nav>
+            <FeedList
+              initialFeed={feed}
+              viewerAvatarUrl={appShellAuth?.avatarUrl}
+              viewerInitial={initial}
+            />
           </div>
 
           <aside className="hidden lg:sticky lg:top-20 lg:block">
