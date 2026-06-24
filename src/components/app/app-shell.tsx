@@ -233,7 +233,7 @@ export function AppShell({ auth, children }: AppShellProps) {
       <PopoverDismissListener />
       <header className="sticky top-0 z-30 border-b border-weldoo-border-light bg-white/95 shadow-[0_1px_0_#ebebf5,0_1px_3px_rgba(61,61,180,0.06)] backdrop-blur-[16px]">
         <DeployInfoBar />
-        <div className="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:px-8 lg:gap-6">
+        <div className="mx-auto grid h-16 max-w-[1200px] grid-cols-[auto_1fr_auto] items-center gap-3 px-5 sm:px-8 md:grid-cols-[1fr_auto_1fr] lg:gap-6">
           <div className="flex items-center gap-4">
             <Link className="flex min-w-0 items-center" href="/">
               <WeldooLogo />
@@ -250,12 +250,12 @@ export function AppShell({ auth, children }: AppShellProps) {
 
           <MainNavigation items={mainNavItems} />
 
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center justify-end gap-1.5 md:gap-1">
             {isSignedIn ? (
               <>
                 <Link
                   aria-label="Contact requests"
-                  className="relative hidden h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo lg:flex"
+                  className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
                   href="/contact-requests"
                 >
                   <svg aria-hidden="true" className="h-[19px] w-[19px]" fill="none" viewBox="0 0 24 24">
