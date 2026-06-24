@@ -20,6 +20,41 @@ function getEditProfileHref(profileType?: string | null) {
   return "/profile/edit";
 }
 
+function getPublicProfileHref(profileType?: string | null, profileId?: string | null) {
+  if (!profileId) return null;
+  if (profileType === "professional") return `/professionals/${profileId}`;
+  if (profileType === "company") return `/companies/${profileId}`;
+  if (profileType === "training_provider") return `/training-providers/${profileId}`;
+  return null;
+}
+
+const upcomingEvents = [
+  {
+    city: "Bilbao",
+    day: "18",
+    href: "/events",
+    month: "JUL",
+    title: "Welding Innovation Forum",
+    type: "In person",
+  },
+  {
+    city: "Online",
+    day: "23",
+    href: "/events",
+    month: "JUL",
+    title: "WPS Review Clinic",
+    type: "Virtual",
+  },
+  {
+    city: "Valencia",
+    day: "02",
+    href: "/events",
+    month: "AUG",
+    title: "Structural Welding Meetup",
+    type: "In person",
+  },
+];
+
 export default async function Home() {
   const appShellAuth = await getAppShellAuth();
   const feed = await getFeedPage(1, appShellAuth?.profileId);
@@ -31,11 +66,19 @@ export default async function Home() {
   const profileActionHref = appShellAuth
     ? getEditProfileHref(appShellAuth.profileType)
     : "/auth/sign-in";
+  const sidebarProfiles = feed.items
+    .map((item) => item.author)
+    .filter((author) => Boolean(author && author.id !== appShellAuth?.profileId))
+    .filter(
+      (author, index, authors) =>
+        authors.findIndex((candidate) => candidate?.id === author?.id) === index,
+    )
+    .slice(0, 4);
 
   return (
     <AppShell auth={appShellAuth}>
       <main>
-        <section className="mx-auto grid max-w-[1128px] grid-cols-1 items-start gap-6 px-4 pb-20 pt-7 lg:grid-cols-[225px_minmax(0,1fr)_280px]">
+        <section className="mx-auto grid max-w-[1128px] grid-cols-1 items-start gap-5 px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-7 md:px-5 lg:grid-cols-[225px_minmax(0,1fr)_280px] lg:gap-6 lg:pb-20">
           <aside className="hidden flex-col gap-3 lg:sticky lg:top-20 lg:flex">
             <section className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm">
               <div className="h-16 bg-[linear-gradient(135deg,#2a2a8a_0%,#3d3db4_35%,#42b8d4_70%,#5ce8b4_100%)]" />
@@ -115,11 +158,94 @@ export default async function Home() {
             />
           </div>
 
-          <aside className="hidden lg:sticky lg:top-20 lg:block">
-            <section className="flex h-[250px] items-center justify-center rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-sm">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-weldoo-border-light">
-                  Right sidebar
-                </span>
+          <aside className="hidden flex-col gap-3 lg:sticky lg:top-20 lg:flex">
+            <section className="rounded-weldoo-md border border-weldoo-border-light bg-white px-4 py-[18px] shadow-weldoo-sm">
+              <h2 className="mb-3.5 text-[13.2px] font-bold leading-none text-weldoo-ink">
+                People you may know
+              </h2>
+              <div className="flex flex-col gap-3">
+                {sidebarProfiles.length > 0 ? (
+                  sidebarProfiles.map((author) => {
+                    const href = getPublicProfileHref(author?.profile_type, author?.id);
+                    const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
+                    const content = (
+                      <>
+                        <Avatar
+                          className="h-9 w-9 text-[12px] shadow-[0_4px_12px_rgba(61,61,180,0.18)]"
+                          initials={initials}
+                          src={author?.avatar_url}
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[12.5px] font-semibold leading-[1.3] text-weldoo-ink">
+                            {author?.display_name ?? "Weldoo member"}
+                          </span>
+                          <span className="block truncate text-[11px] leading-[1.35] text-weldoo-muted">
+                            {author?.headline ?? getProfileTypeLabel(author?.profile_type)}
+                          </span>
+                        </span>
+                      </>
+                    );
+
+                    return href ? (
+                      <Link
+                        className="flex items-center gap-2.5 rounded-[10px] transition hover:text-weldoo-indigo"
+                        href={href}
+                        key={author?.id}
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2.5" key={author?.id}>
+                        {content}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-[12.5px] leading-5 text-weldoo-muted">
+                    New member suggestions will appear as the community grows.
+                  </p>
+                )}
+              </div>
+              <Link
+                className="mt-3.5 flex h-[34px] w-full items-center justify-center rounded-[8px] border-[1.5px] border-weldoo-border-light bg-white text-[12.5px] font-semibold text-weldoo-indigo transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/5"
+                href="/network"
+              >
+                View all
+              </Link>
+            </section>
+
+            <section className="rounded-weldoo-md border border-weldoo-border-light bg-white px-4 py-[18px] shadow-weldoo-sm">
+              <h2 className="mb-3.5 text-[13.2px] font-bold leading-none text-weldoo-ink">
+                Upcoming events
+              </h2>
+              <div className="flex flex-col gap-3">
+                {upcomingEvents.map((event) => (
+                  <Link className="flex gap-2.5 rounded-[10px] transition hover:text-weldoo-indigo" href={event.href} key={`${event.month}-${event.day}-${event.title}`}>
+                    <span className="w-9 shrink-0 text-center">
+                      <span className="block text-[16px] font-extrabold leading-none text-weldoo-indigo">
+                        {event.day}
+                      </span>
+                      <span className="block text-[10px] font-semibold uppercase leading-[1.4] text-weldoo-muted">
+                        {event.month}
+                      </span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[12.5px] font-semibold leading-[1.35] text-weldoo-ink">
+                        {event.title}
+                      </span>
+                      <span className="block text-[11px] leading-[1.35] text-weldoo-muted">
+                        {event.type} · {event.city}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <Link
+                className="mt-3.5 flex h-[34px] w-full items-center justify-center rounded-[8px] border-[1.5px] border-weldoo-border-light bg-white text-[12.5px] font-semibold text-weldoo-indigo transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/5"
+                href="/events"
+              >
+                View all events
+              </Link>
             </section>
           </aside>
         </section>
