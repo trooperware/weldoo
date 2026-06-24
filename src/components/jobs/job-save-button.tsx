@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ type JobSaveButtonProps = {
 };
 
 export function JobSaveButton({ initialSaved, jobId, signedIn }: JobSaveButtonProps) {
+  const router = useRouter();
   const [state, setState] = useState({
     error: "",
     isSaved: initialSaved,
@@ -35,14 +37,17 @@ export function JobSaveButton({ initialSaved, jobId, signedIn }: JobSaveButtonPr
       });
 
       if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         setState({
-          error: "Could not update saved state.",
+          error: payload?.message ?? "Could not update saved state.",
           isSaved: previousSaved,
           jobId,
           pending: false,
         });
         return;
       }
+
+      router.refresh();
     } catch {
       setState({
         error: "Could not update saved state.",
