@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { Button, FormError, Input, Modal, Textarea } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import type { JobApplicationFieldErrors } from "@/lib/validators/job-application";
 
 type ApplyState = {
@@ -28,6 +29,12 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+const jobActionButtonClass =
+  "inline-flex h-9 items-center justify-center rounded-full px-5 text-[12px] font-semibold leading-none tracking-[-0.01em] transition";
+
+const primaryJobActionButtonClass =
+  "bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] hover:brightness-105";
+
 export function JobApplyButton({
   existingApplication,
   jobId,
@@ -41,9 +48,11 @@ export function JobApplyButton({
   if (existingApplication) {
     return (
       <button
-        className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo px-5 font-semibold tracking-[-0.01em] text-weldoo-indigo opacity-80"
+        className={cn(
+          jobActionButtonClass,
+          "border-[1.5px] border-weldoo-indigo text-weldoo-indigo opacity-80",
+        )}
         disabled
-        style={{ fontSize: "12px", lineHeight: 1 }}
         type="button"
       >
         Applied {formatDate(existingApplication.createdAt)}
@@ -54,9 +63,8 @@ export function JobApplyButton({
   if (profileType !== "professional") {
     return (
       <button
-        className="inline-flex h-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 font-bold tracking-[-0.01em] text-white opacity-50 shadow-[0_2px_8px_rgba(61,61,180,0.25)]"
+        className={cn(jobActionButtonClass, primaryJobActionButtonClass, "opacity-50")}
         disabled
-        style={{ fontSize: "12px", lineHeight: 1 }}
         type="button"
       >
         Apply now
@@ -99,9 +107,8 @@ export function JobApplyButton({
   return (
     <>
       <button
-        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 font-bold tracking-[-0.01em] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)]"
+        className={cn(jobActionButtonClass, primaryJobActionButtonClass, "gap-1.5")}
         onClick={() => setOpen(true)}
-        style={{ fontSize: "12px", lineHeight: 1 }}
         type="button"
       >
         <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24">

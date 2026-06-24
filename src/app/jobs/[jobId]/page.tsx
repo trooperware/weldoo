@@ -92,6 +92,35 @@ function BriefcaseIcon({ className = "h-3 w-3" }: { className?: string }) {
   );
 }
 
+function LocationIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function ShareIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <circle cx="18" cy="5" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <circle cx="6" cy="12" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <circle cx="18" cy="19" r="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 function DetailPill({
   children,
   icon,
@@ -151,15 +180,15 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
   return (
     <AppShell auth={appShellAuth}>
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[900px] px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-7 sm:px-6 lg:px-8 lg:pb-20">
         <Link
-          className="mb-4 inline-flex text-[12.5px] font-semibold text-weldoo-indigo hover:underline"
+          className="mb-4 inline-flex h-8 items-center rounded-full border-[1.5px] border-weldoo-border-light bg-white px-3 text-[12.5px] font-semibold text-weldoo-indigo shadow-weldoo-sm transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04]"
           href={`/jobs?job=${job.id}`}
         >
           Back to jobs
         </Link>
-        <article className="rounded-[16px] border border-weldoo-border-light bg-white p-6 shadow-weldoo-sm sm:p-8">
-          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <article className="rounded-[16px] border border-weldoo-border-light bg-white px-5 py-6 shadow-weldoo-sm sm:px-8 sm:py-7">
+          <div className="mb-4 flex items-start justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
                 {job.company?.logo_url ? (
@@ -171,23 +200,33 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </div>
               <div>
                 <div className="text-[15px] font-bold text-weldoo-ink">{companyName}</div>
-                <div className="mt-0.5 text-[12.5px] text-weldoo-muted">
-                  {companyLocation ?? "Location not set"}
+                <div className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-weldoo-muted">
+                  <LocationIcon className="h-[13px] w-[13px]" />
+                  <span>{companyLocation ?? "Location not set"}</span>
                 </div>
               </div>
             </div>
+            <button
+              aria-label="Share job"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted opacity-60"
+              disabled
+              title="Share"
+              type="button"
+            >
+              <ShareIcon />
+            </button>
           </div>
 
-          <h1 className="mb-2 text-3xl font-extrabold leading-[1.2] tracking-[-0.4px] text-weldoo-ink">
+          <h1 className="mb-2 text-2xl font-extrabold leading-[1.2] tracking-[-0.4px] text-weldoo-ink sm:text-[28px]">
             {job.title}
           </h1>
-          <p className="mb-5 text-[13px] leading-[1.7] text-weldoo-muted">
+          <p className="mb-4 text-[13px] leading-[1.7] text-weldoo-muted">
             {job.location ?? companyLocation ?? "Location not set"} · Posted{" "}
             {formatPostedDate(job.published_at, job.created_at)}
             {job.contract_type ? ` · ${contractTypeLabels[job.contract_type]}` : ""}
           </p>
 
-          <div className="mb-6 flex flex-wrap gap-2">
+          <div className="mb-5 flex flex-wrap gap-2">
             {job.work_mode ? (
               <DetailPill icon={<MonitorIcon />}>
                 {workModeLabels[job.work_mode]}
@@ -210,7 +249,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             ) : null}
           </div>
 
-          <div className="mb-6 flex items-center gap-2">
+          <div className="mb-6 flex flex-wrap items-start gap-2">
             <JobApplyButton
               existingApplication={
                 application
@@ -227,7 +266,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             />
           </div>
 
-          <div className="space-y-6 border-t border-weldoo-border-light pt-6">
+          <div className="space-y-0 border-t border-weldoo-border-light pt-6">
             <section>
               <h2 className="mb-3 text-base font-bold text-weldoo-ink">About the role</h2>
               <p className="whitespace-pre-line text-sm leading-[1.75] text-weldoo-ink">
@@ -235,7 +274,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </p>
             </section>
             {job.responsibilities ? (
-              <section>
+              <section className="mt-6 border-t border-weldoo-border-light pt-6">
                 <h2 className="mb-3 text-base font-bold text-weldoo-ink">Responsibilities</h2>
                 <p className="whitespace-pre-line text-sm leading-[1.75] text-weldoo-ink">
                   {job.responsibilities}
@@ -243,7 +282,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </section>
             ) : null}
             {job.requirements ? (
-              <section>
+              <section className="mt-6 border-t border-weldoo-border-light pt-6">
                 <h2 className="mb-3 text-base font-bold text-weldoo-ink">Requirements</h2>
                 <p className="whitespace-pre-line text-sm leading-[1.75] text-weldoo-ink">
                   {job.requirements}
@@ -251,15 +290,13 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </section>
             ) : null}
             {job.benefits.length ? (
-              <section>
+              <section className="mt-6 border-t border-weldoo-border-light pt-6">
                 <h2 className="mb-3 text-base font-bold text-weldoo-ink">Benefits</h2>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {job.benefits.map((benefit) => (
                     <div className="flex items-center gap-2 text-[13.5px] text-weldoo-ink" key={benefit}>
                       <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-weldoo-indigo/10 text-weldoo-indigo">
-                        <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24">
-                          <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                        </svg>
+                        <CheckIcon />
                       </span>
                       {benefit}
                     </div>
@@ -267,17 +304,23 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 </div>
               </section>
             ) : null}
-            <section className="rounded-weldoo-md border border-weldoo-indigo/15 bg-weldoo-indigo/[0.04] px-4 py-4">
+            <section className="mt-6 rounded-weldoo-md border border-weldoo-indigo/15 bg-weldoo-indigo/[0.04] px-4 py-4">
               <h2 className="mb-2 text-[13.5px] font-bold text-weldoo-ink">
                 Welding match fields
               </h2>
-              <div className="flex flex-wrap gap-1.5">
-                {[...job.welding_processes, ...job.materials, ...job.required_certifications].map((tag) => (
-                  <span className="inline-flex h-[30px] items-center rounded-full border border-weldoo-indigo/20 bg-weldoo-indigo/[0.07] px-3 text-[12.5px] font-medium text-weldoo-indigo" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {[...job.welding_processes, ...job.materials, ...job.required_certifications].length ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {[...job.welding_processes, ...job.materials, ...job.required_certifications].map((tag) => (
+                    <span className="inline-flex h-[30px] items-center rounded-full border border-weldoo-indigo/20 bg-weldoo-indigo/[0.07] px-3 text-[12.5px] font-medium text-weldoo-indigo" key={tag}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[13px] leading-[1.65] text-weldoo-muted">
+                  This job does not include welding match tags yet.
+                </p>
+              )}
             </section>
           </div>
         </article>
