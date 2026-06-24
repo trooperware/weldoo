@@ -129,7 +129,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
   const supabase = await createSupabaseServerClient();
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
   const from = (safePage - 1) * FEED_PAGE_SIZE;
-  const to = from + FEED_PAGE_SIZE - 1;
+  const to = from + FEED_PAGE_SIZE;
 
   const { data: postsData, error: postsError } = await supabase
     .from("posts")
@@ -142,7 +142,8 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
     throw new Error(postsError.message);
   }
 
-  const posts = (postsData ?? []) as PostRow[];
+  const fetchedPosts = (postsData ?? []) as PostRow[];
+  const posts = fetchedPosts.slice(0, FEED_PAGE_SIZE);
   const postIds = posts.map((post) => post.id);
   const authorIds = Array.from(new Set(posts.map((post) => post.author_profile_id)));
 
@@ -206,7 +207,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
   );
 
   return {
-    hasNextPage: posts.length === FEED_PAGE_SIZE,
+    hasNextPage: fetchedPosts.length > FEED_PAGE_SIZE,
     items: posts.map((post) => ({
       author: profiles[post.author_profile_id] ?? null,
       canManage: currentUserId === post.author_profile_id,
