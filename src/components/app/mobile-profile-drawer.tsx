@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import { Avatar } from "@/components/ui";
 
@@ -179,6 +180,69 @@ export function MobileProfileDrawer({
     };
   }, [open]);
 
+  const drawer = open ? createPortal(
+    <>
+      <button
+        aria-label="Close profile menu"
+        className="fixed inset-0 z-[900] cursor-default bg-[rgba(12,12,24,0.45)] animate-in fade-in duration-200"
+        onClick={() => setOpen(false)}
+        type="button"
+      />
+      <aside
+        aria-labelledby={titleId}
+        aria-modal="true"
+        className="fixed inset-y-0 right-0 z-[1000] flex h-dvh w-[min(300px,85vw)] flex-col bg-white shadow-[-4px_0_24px_rgba(0,0,0,0.12)] animate-in slide-in-from-right duration-300"
+        role="dialog"
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-weldoo-border-light px-5 pb-4 pt-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <DrawerAvatar avatarInitial={avatarInitial} avatarUrl={avatarUrl} />
+            <div className="min-w-0">
+              <div className="truncate text-[14.3px] font-bold text-weldoo-ink" id={titleId}>
+                {displayName}
+              </div>
+              <div className="mt-0.5 truncate text-[11px] font-medium text-weldoo-muted">
+                {roleLabel}
+              </div>
+            </div>
+          </div>
+          <button
+            aria-label="Close profile menu"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-weldoo-bg text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-weldoo-indigo"
+            onClick={() => setOpen(false)}
+            type="button"
+          >
+            <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <line stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="18" x2="6" y1="6" y2="18" />
+              <line stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="6" x2="18" y1="6" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto py-2">
+          {links.map((item, index) => (
+            <div key={item.label}>
+              {index === 1 || index === 6 ? <div className="my-2 h-px bg-weldoo-border-light" /> : null}
+              <DrawerItem href={item.href} icon={item.icon} label={item.label} onClick={() => setOpen(false)}>
+                {item.label}
+              </DrawerItem>
+            </div>
+          ))}
+          <div className="my-2 h-px bg-weldoo-border-light" />
+          <form action={signOutAction}>
+            <button
+              className="flex w-full items-center gap-3 px-5 py-3.5 text-left text-[14.3px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo focus-visible:bg-weldoo-bg focus-visible:text-weldoo-indigo focus-visible:outline-none"
+              type="submit"
+            >
+              <DrawerIcon name="logout" />
+              Log out
+            </button>
+          </form>
+        </div>
+      </aside>
+    </>,
+    document.body,
+  ) : null;
+
   return (
     <div className="md:hidden">
       <button
@@ -192,68 +256,7 @@ export function MobileProfileDrawer({
       >
         <DrawerAvatar avatarInitial={avatarInitial} avatarUrl={avatarUrl} />
       </button>
-
-      {open ? (
-        <>
-          <button
-            aria-label="Close profile menu"
-            className="fixed inset-0 z-50 cursor-default bg-[rgba(12,12,24,0.45)] animate-in fade-in duration-200"
-            onClick={() => setOpen(false)}
-            type="button"
-          />
-          <aside
-            aria-labelledby={titleId}
-            aria-modal="true"
-            className="fixed bottom-0 right-0 top-0 z-50 flex w-[min(300px,85vw)] flex-col bg-white shadow-[-4px_0_24px_rgba(0,0,0,0.12)] animate-in slide-in-from-right duration-300"
-            role="dialog"
-          >
-            <div className="flex shrink-0 items-center justify-between border-b border-weldoo-border-light px-5 pb-4 pt-5">
-              <div className="flex min-w-0 items-center gap-3">
-                <DrawerAvatar avatarInitial={avatarInitial} avatarUrl={avatarUrl} />
-                <div className="min-w-0">
-                  <div className="truncate text-[14.3px] font-bold text-weldoo-ink" id={titleId}>
-                    {displayName}
-                  </div>
-                  <div className="mt-0.5 truncate text-[11px] font-medium text-weldoo-muted">
-                    {roleLabel}
-                  </div>
-                </div>
-              </div>
-              <button
-                aria-label="Close profile menu"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-weldoo-bg text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-weldoo-indigo"
-                onClick={() => setOpen(false)}
-                type="button"
-              >
-                <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <line stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="18" x2="6" y1="6" y2="18" />
-                  <line stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="6" x2="18" y1="6" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-2">
-              {links.map((item, index) => (
-                <div key={item.label}>
-                  {index === 1 || index === 6 ? <div className="my-2 h-px bg-weldoo-border-light" /> : null}
-                  <DrawerItem href={item.href} icon={item.icon} label={item.label} onClick={() => setOpen(false)}>
-                    {item.label}
-                  </DrawerItem>
-                </div>
-              ))}
-              <div className="my-2 h-px bg-weldoo-border-light" />
-              <form action={signOutAction}>
-                <button
-                  className="flex w-full items-center gap-3 px-5 py-3.5 text-left text-[14.3px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg hover:text-weldoo-indigo focus-visible:bg-weldoo-bg focus-visible:text-weldoo-indigo focus-visible:outline-none"
-                  type="submit"
-                >
-                  <DrawerIcon name="logout" />
-                  Log out
-                </button>
-              </form>
-            </div>
-          </aside>
-        </>
-      ) : null}
+      {drawer}
     </div>
   );
 }
