@@ -12,7 +12,7 @@ type CommentRow = Tables<"comments">;
 type ProfileRow = Tables<"profiles">;
 
 export type FeedComment = {
-  author: Pick<ProfileRow, "display_name" | "id"> | null;
+  author: Pick<ProfileRow, "avatar_url" | "display_name" | "id"> | null;
   canDelete: boolean;
   comment: CommentRow;
 };
@@ -30,6 +30,12 @@ export type FeedPost = {
   isSaved: boolean;
   likeCount: number;
   post: PostRow;
+};
+
+type FeedPostCardProps = {
+  item: FeedPost;
+  viewerAvatarUrl?: string | null;
+  viewerInitial?: string;
 };
 
 function formatPostDate(value: string) {
@@ -63,7 +69,11 @@ function getProfileHref(author: FeedPost["author"]) {
   return null;
 }
 
-export function FeedPostCard({ item }: { item: FeedPost }) {
+export function FeedPostCard({
+  item,
+  viewerAvatarUrl,
+  viewerInitial,
+}: FeedPostCardProps) {
   const {
     author,
     canInteract,
@@ -178,7 +188,13 @@ export function FeedPostCard({ item }: { item: FeedPost }) {
         />
         </div>
       ) : null}
-      <FeedComments canComment={canInteract} comments={comments} postId={post.id} />
+      <FeedComments
+        canComment={canInteract}
+        comments={comments}
+        postId={post.id}
+        viewerAvatarUrl={viewerAvatarUrl}
+        viewerInitial={viewerInitial}
+      />
     </article>
   );
 }

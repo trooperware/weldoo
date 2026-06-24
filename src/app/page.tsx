@@ -126,7 +126,12 @@ export default async function Home({ searchParams }: HomePageProps) {
             {feed.items.length > 0 ? (
               <div className="flex flex-col gap-5">
                 {feed.items.map((item) => (
-                  <FeedPostCard item={item} key={item.post.id} />
+                  <FeedPostCard
+                    item={item}
+                    key={item.post.id}
+                    viewerAvatarUrl={appShellAuth?.avatarUrl}
+                    viewerInitial={initial}
+                  />
                 ))}
               </div>
             ) : (

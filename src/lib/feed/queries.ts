@@ -54,8 +54,8 @@ async function getCommentPreviewRows(supabase: FeedSupabaseClient, postIds: stri
     .eq("status", "published")
     .in("post_id", postIds)
     .order("post_id", { ascending: true })
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
 
   if (fallbackResult.error) {
     throw new Error(fallbackResult.error.message);
@@ -63,10 +63,17 @@ async function getCommentPreviewRows(supabase: FeedSupabaseClient, postIds: stri
 
   const perPostCount: Record<string, number> = {};
 
-  return ((fallbackResult.data ?? []) as CommentRow[]).filter((comment) => {
+  return ((fallbackResult.data ?? []) as CommentRow[])
+    .filter((comment) => {
     perPostCount[comment.post_id] = (perPostCount[comment.post_id] ?? 0) + 1;
     return perPostCount[comment.post_id] <= COMMENT_PREVIEW_LIMIT;
-  });
+    })
+    .sort((a, b) => {
+      if (a.post_id !== b.post_id) return a.post_id.localeCompare(b.post_id);
+      const createdAtDiff =
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return createdAtDiff || a.id.localeCompare(b.id);
+    });
 }
 
 async function getCommentCountRows(supabase: FeedSupabaseClient, postIds: string[]) {
@@ -104,7 +111,13 @@ function groupCommentsByPostId(
   return comments.reduce<Record<string, FeedComment[]>>((byPost, comment) => {
     byPost[comment.post_id] = byPost[comment.post_id] ?? [];
     byPost[comment.post_id].push({
-      author: profiles[comment.author_profile_id] ?? null,
+      author: profiles[comment.author_profile_id]
+        ? {
+            avatar_url: profiles[comment.author_profile_id].avatar_url,
+            display_name: profiles[comment.author_profile_id].display_name,
+            id: profiles[comment.author_profile_id].id,
+          }
+        : null,
       canDelete: currentUserId === comment.author_profile_id,
       comment,
     });
