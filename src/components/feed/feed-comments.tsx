@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { Avatar, Button, FormError, Modal } from "@/components/ui";
-import { ReportContentButton } from "@/components/feed/report-content-button";
 import type { CommentFieldErrors } from "@/lib/validators/comment";
 import type { FeedComment } from "@/components/feed/feed-post-card";
 
@@ -51,10 +50,44 @@ export function FeedComments({
   viewerInitial = "W",
 }: FeedCommentsProps) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [submitPending, setSubmitPending] = useState(false);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
   const [deletePending, setDeletePending] = useState(false);
   const [state, setState] = useState<CommentState>({});
+
+  useEffect(() => {
+    function handleToggleComments(event: Event) {
+      const detail = (event as CustomEvent<{
+        focus?: boolean;
+        open?: boolean;
+        postId?: string;
+      }>).detail;
+
+      if (detail?.postId !== postId) return;
+
+      setOpen((currentOpen) => {
+        const nextOpen = detail.open ?? !currentOpen;
+
+        if (nextOpen && detail.focus) {
+          window.requestAnimationFrame(() => {
+            const commentInput = document.getElementById(`comment-${postId}`);
+
+            commentInput?.scrollIntoView({ behavior: "smooth", block: "center" });
+            commentInput?.focus();
+          });
+        }
+
+        return nextOpen;
+      });
+    }
+
+    window.addEventListener("weldoo:toggle-comments", handleToggleComments);
+
+    return () => {
+      window.removeEventListener("weldoo:toggle-comments", handleToggleComments);
+    };
+  }, [postId]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -75,6 +108,7 @@ export function FeedComments({
       }
 
       form.reset();
+      setOpen(true);
       router.refresh();
     } catch (error) {
       setState({
@@ -116,66 +150,20 @@ export function FeedComments({
   }
 
   return (
-    <section className="border-t border-weldoo-border-light bg-white">
+    <section
+      className={
+        open
+          ? "border-t border-weldoo-border-light bg-white"
+          : "hidden border-t border-weldoo-border-light bg-white"
+      }
+    >
       <div className="px-[18px] pt-3">
         <FormError>{state.status === "error" ? state.message : null}</FormError>
       </div>
 
-      {comments.length > 0 ? (
-        <div className="flex flex-col py-1">
-          {comments.map((comment) => (
-            <article
-              className="flex items-start gap-2.5 border-weldoo-border-light/70 px-4 py-2.5 not-first:border-t"
-              key={comment.comment.id}
-            >
-              <Avatar
-                className="h-[34px] w-[34px] text-xs shadow-none"
-                initials={(comment.author?.display_name ?? "W").slice(0, 1).toUpperCase()}
-                src={comment.author?.avatar_url}
-              />
-              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] border border-weldoo-border-light bg-weldoo-bg px-3.5 py-2.5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-bold leading-[1.3] text-weldoo-ink">
-                      {comment.author?.display_name ?? "Weldoo member"}
-                    </p>
-                    <p className="mb-1 mt-0.5 text-[11.5px] font-normal leading-[1.3] text-weldoo-muted">
-                      {formatCommentDate(comment.comment.created_at)}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                    {canComment ? (
-                      <ReportContentButton
-                        commentId={comment.comment.id}
-                        targetLabel="comment"
-                        targetType="comment"
-                      />
-                    ) : null}
-                    {comment.canDelete ? (
-                      <Button
-                        className="h-7 rounded-full px-2 text-[11.5px]"
-                        disabled={deletePending}
-                        onClick={() => setDeleteCommentId(comment.comment.id)}
-                        size="sm"
-                        variant="ghost"
-                      >
-                        Delete
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
-                <p className="whitespace-pre-line text-[13.5px] leading-[1.55] text-weldoo-ink">
-                  {comment.comment.body}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : null}
-
       {canComment ? (
         <form
-          className="flex items-start gap-2.5 border-t border-weldoo-border-light px-[18px] pb-3.5 pt-2.5"
+          className="flex items-start gap-2.5 px-[18px] pb-3.5 pt-2.5"
           onSubmit={handleSubmit}
         >
           <Avatar
@@ -227,6 +215,49 @@ export function FeedComments({
             ) : null}
           </div>
         </form>
+      ) : null}
+
+      {comments.length > 0 ? (
+        <div className="flex flex-col border-t border-weldoo-border-light py-1">
+          {comments.map((comment) => (
+            <article
+              className="flex items-start gap-2.5 border-weldoo-border-light/70 px-4 py-2.5 not-first:border-t"
+              key={comment.comment.id}
+            >
+              <Avatar
+                className="h-[34px] w-[34px] text-xs shadow-none"
+                initials={(comment.author?.display_name ?? "W").slice(0, 1).toUpperCase()}
+                src={comment.author?.avatar_url}
+              />
+              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] border border-weldoo-border-light bg-weldoo-bg px-3.5 py-2.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold leading-[1.3] text-weldoo-ink">
+                      {comment.author?.display_name ?? "Weldoo member"}
+                    </p>
+                    <p className="mb-1 mt-0.5 text-[11.5px] font-normal leading-[1.3] text-weldoo-muted">
+                      {formatCommentDate(comment.comment.created_at)}
+                    </p>
+                  </div>
+                  {comment.canDelete ? (
+                    <Button
+                      className="h-7 shrink-0 rounded-full px-2 text-[11.5px]"
+                      disabled={deletePending}
+                      onClick={() => setDeleteCommentId(comment.comment.id)}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      Delete
+                    </Button>
+                  ) : null}
+                </div>
+                <p className="whitespace-pre-line text-[13.5px] leading-[1.55] text-weldoo-ink">
+                  {comment.comment.body}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : null}
 
       <Modal

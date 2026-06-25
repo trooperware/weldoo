@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FeedCommentTrigger } from "@/components/feed/feed-comment-trigger";
 import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostImageCarousel } from "@/components/feed/post-image-carousel";
@@ -159,7 +160,7 @@ export function FeedPostCard({
           ) : null}
           <span>{likeCount}</span>
         </div>
-        <span className="font-semibold">{commentCount} comments</span>
+        <FeedCommentTrigger commentCount={commentCount} postId={post.id} />
       </footer>
       {canInteract ? (
         <>

@@ -94,10 +94,15 @@ export function FeedPostActions({
   }
 
   function focusCommentInput() {
-    const commentInput = document.getElementById(`comment-${postId}`);
-
-    commentInput?.scrollIntoView({ behavior: "smooth", block: "center" });
-    commentInput?.focus();
+    window.dispatchEvent(
+      new CustomEvent("weldoo:toggle-comments", {
+        detail: {
+          focus: true,
+          open: true,
+          postId,
+        },
+      }),
+    );
   }
 
   return (
