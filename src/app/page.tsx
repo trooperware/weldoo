@@ -186,6 +186,8 @@ export default async function Home() {
               initialFeed={feed}
               key={getFeedRefreshKey(feed)}
               viewerAvatarUrl={appShellAuth?.avatarUrl}
+              viewerDisplayName={appShellAuth?.displayName}
+              viewerHeadline={appShellAuth?.headline}
               viewerInitial={initial}
             />
           </div>

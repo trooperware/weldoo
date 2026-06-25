@@ -40,14 +40,18 @@ export async function POST(request: Request, context: CommentCreateContext) {
       );
     }
 
-    const { error: insertError } = await supabase.from("comments").insert([
-      {
-        author_profile_id: user.id,
-        body: parsed.data.body,
-        post_id: postId,
-        status: "published",
-      },
-    ] as never[]);
+    const { data: comment, error: insertError } = await supabase
+      .from("comments")
+      .insert([
+        {
+          author_profile_id: user.id,
+          body: parsed.data.body,
+          post_id: postId,
+          status: "published",
+        },
+      ] as never[])
+      .select("id, post_id, author_profile_id, body, status, created_at, updated_at")
+      .single();
 
     if (insertError) {
       return NextResponse.json(
@@ -57,6 +61,7 @@ export async function POST(request: Request, context: CommentCreateContext) {
     }
 
     return NextResponse.json({
+      comment,
       message: "Comment posted.",
       status: "success",
     });

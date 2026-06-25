@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { Avatar, FormError } from "@/components/ui";
@@ -12,17 +11,27 @@ type FeedCommentsProps = {
   comments: FeedComment[];
   postId: string;
   viewerAvatarUrl?: string | null;
+  viewerDisplayName?: string | null;
+  viewerHeadline?: string | null;
   viewerInitial?: string;
 };
 
 type CommentState = {
+  comment?: FeedComment["comment"];
   errors?: CommentFieldErrors;
   message?: string;
   status?: "error" | "success";
 };
 
-function getOpenAfterSubmitKey(postId: string) {
-  return `weldoo:open-comments-after-submit:${postId}`;
+function emitCommentCountChange(postId: string) {
+  window.dispatchEvent(
+    new CustomEvent("weldoo:post-comment-count", {
+      detail: {
+        delta: 1,
+        postId,
+      },
+    }),
+  );
 }
 
 export function FeedComments({
@@ -30,27 +39,14 @@ export function FeedComments({
   comments,
   postId,
   viewerAvatarUrl,
+  viewerDisplayName,
+  viewerHeadline,
   viewerInitial = "W",
 }: FeedCommentsProps) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [submitPending, setSubmitPending] = useState(false);
+  const [visibleComments, setVisibleComments] = useState(comments);
   const [state, setState] = useState<CommentState>({});
-
-  useEffect(() => {
-    const openAfterSubmitKey = getOpenAfterSubmitKey(postId);
-
-    if (window.sessionStorage.getItem(openAfterSubmitKey) !== "true") return;
-
-    window.sessionStorage.removeItem(openAfterSubmitKey);
-    const frameId = window.requestAnimationFrame(() => {
-      setOpen(true);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-    };
-  }, [postId]);
 
   useEffect(() => {
     function handleToggleComments(event: Event) {
@@ -104,9 +100,34 @@ export function FeedComments({
       }
 
       form.reset();
-      window.sessionStorage.setItem(getOpenAfterSubmitKey(postId), "true");
+      if (payload.comment) {
+        const createdComment = payload.comment;
+
+        setVisibleComments((currentComments) => {
+          if (currentComments.some((item) => item.comment.id === createdComment.id)) {
+            return currentComments;
+          }
+
+          const nextComments = [
+            {
+              author: {
+                avatar_url: viewerAvatarUrl ?? null,
+                display_name: viewerDisplayName ?? "Weldoo member",
+                headline: viewerHeadline ?? null,
+                id: createdComment.author_profile_id,
+              },
+              canDelete: false,
+              comment: createdComment,
+            },
+            ...currentComments,
+          ];
+
+          emitCommentCountChange(postId);
+
+          return nextComments;
+        });
+      }
       setOpen(true);
-      router.refresh();
     } catch (error) {
       setState({
         message: error instanceof Error ? error.message : "Could not post comment.",
@@ -185,9 +206,9 @@ export function FeedComments({
         </form>
       ) : null}
 
-      {comments.length > 0 ? (
+      {visibleComments.length > 0 ? (
         <div className="flex flex-col border-t border-weldoo-border-light py-1">
-          {comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <article
               className="flex items-start gap-2.5 border-weldoo-border-light/70 px-4 py-2.5 not-first:border-t"
               key={comment.comment.id}

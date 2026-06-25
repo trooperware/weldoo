@@ -36,6 +36,8 @@ export type FeedPost = {
 type FeedPostCardProps = {
   item: FeedPost;
   viewerAvatarUrl?: string | null;
+  viewerDisplayName?: string | null;
+  viewerHeadline?: string | null;
   viewerInitial?: string;
 };
 
@@ -73,6 +75,8 @@ function getProfileHref(author: FeedPost["author"]) {
 export function FeedPostCard({
   item,
   viewerAvatarUrl,
+  viewerDisplayName,
+  viewerHeadline,
   viewerInitial,
 }: FeedPostCardProps) {
   const {
@@ -168,6 +172,8 @@ export function FeedPostCard({
         comments={comments}
         postId={post.id}
         viewerAvatarUrl={viewerAvatarUrl}
+        viewerDisplayName={viewerDisplayName}
+        viewerHeadline={viewerHeadline}
         viewerInitial={viewerInitial}
       />
     </article>

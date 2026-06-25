@@ -15,12 +15,18 @@ type LikeCountEvent = CustomEvent<{
   postId: string;
 }>;
 
+type CommentCountEvent = CustomEvent<{
+  delta: number;
+  postId: string;
+}>;
+
 export function FeedPostCounts({
   commentCount,
   initialLikeCount,
   postId,
 }: FeedPostCountsProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
+  const [visibleCommentCount, setVisibleCommentCount] = useState(commentCount);
 
   useEffect(() => {
     function handleLikeCountChange(event: Event) {
@@ -35,6 +41,24 @@ export function FeedPostCounts({
 
     return () => {
       window.removeEventListener("weldoo:post-like-count", handleLikeCountChange);
+    };
+  }, [postId]);
+
+  useEffect(() => {
+    function handleCommentCountChange(event: Event) {
+      const detail = (event as CommentCountEvent).detail;
+
+      if (detail?.postId !== postId) return;
+
+      setVisibleCommentCount((currentCount) =>
+        Math.max(0, currentCount + detail.delta),
+      );
+    }
+
+    window.addEventListener("weldoo:post-comment-count", handleCommentCountChange);
+
+    return () => {
+      window.removeEventListener("weldoo:post-comment-count", handleCommentCountChange);
     };
   }, [postId]);
 
@@ -57,7 +81,7 @@ export function FeedPostCounts({
           </span>
         ) : null}
       </div>
-      <FeedCommentTrigger commentCount={commentCount} postId={postId} />
+      <FeedCommentTrigger commentCount={visibleCommentCount} postId={postId} />
     </footer>
   );
 }
