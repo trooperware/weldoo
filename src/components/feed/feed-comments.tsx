@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { Avatar, Button, FormError, Modal, Textarea } from "@/components/ui";
+import { Avatar, Button, FormError, Modal } from "@/components/ui";
 import { ReportContentButton } from "@/components/feed/report-content-button";
 import type { CommentFieldErrors } from "@/lib/validators/comment";
 import type { FeedComment } from "@/components/feed/feed-post-card";
@@ -122,24 +122,24 @@ export function FeedComments({
       </div>
 
       {comments.length > 0 ? (
-        <div className="space-y-2 px-[18px] py-3">
+        <div className="flex flex-col py-1">
           {comments.map((comment) => (
             <article
-              className="flex gap-2.5"
+              className="flex items-start gap-2.5 border-weldoo-border-light/70 px-4 py-2.5 not-first:border-t"
               key={comment.comment.id}
             >
               <Avatar
-                className="h-8 w-8 text-[11px] shadow-none"
+                className="h-[34px] w-[34px] text-xs shadow-none"
                 initials={(comment.author?.display_name ?? "W").slice(0, 1).toUpperCase()}
                 src={comment.author?.avatar_url}
               />
-              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] bg-weldoo-bg px-3 py-2">
+              <div className="min-w-0 flex-1 rounded-[4px_14px_14px_14px] border border-weldoo-border-light bg-weldoo-bg px-3.5 py-2.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[13px] font-bold leading-tight text-weldoo-ink">
+                    <p className="text-[13px] font-bold leading-[1.3] text-weldoo-ink">
                       {comment.author?.display_name ?? "Weldoo member"}
                     </p>
-                    <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
+                    <p className="mb-1 mt-0.5 text-[11.5px] font-normal leading-[1.3] text-weldoo-muted">
                       {formatCommentDate(comment.comment.created_at)}
                     </p>
                   </div>
@@ -164,7 +164,7 @@ export function FeedComments({
                     ) : null}
                   </div>
                 </div>
-                <p className="mt-1 whitespace-pre-line text-[13px] leading-5 text-weldoo-ink">
+                <p className="whitespace-pre-line text-[13.5px] leading-[1.55] text-weldoo-ink">
                   {comment.comment.body}
                 </p>
               </div>
@@ -175,34 +175,55 @@ export function FeedComments({
 
       {canComment ? (
         <form
-          className="flex items-start gap-2.5 border-t border-weldoo-border-light px-[18px] py-3"
+          className="flex items-start gap-2.5 border-t border-weldoo-border-light px-[18px] pb-3.5 pt-2.5"
           onSubmit={handleSubmit}
         >
           <Avatar
-            className="mt-0.5 h-8 w-8 text-[11px] shadow-none"
+            className="h-[34px] w-[34px] text-xs shadow-none"
             initials={viewerInitial}
             src={viewerAvatarUrl}
           />
-          <div className="min-w-0 flex-1">
-            <Textarea
+          <div className="group relative min-w-0 flex-1">
+            <textarea
               aria-label="Add comment"
-              className="min-h-10 resize-none rounded-[20px] px-4 py-2 text-[13px] leading-5"
-              error={state.errors?.body}
+              aria-invalid={Boolean(state.errors?.body)}
+              className="box-border min-h-[42px] max-h-[140px] w-full resize-none overflow-y-auto rounded-full border-[1.5px] border-weldoo-border-light bg-weldoo-bg px-[18px] py-2.5 pr-12 font-sans text-[13.5px] leading-[1.45] text-weldoo-ink outline-none transition placeholder:text-[#b8b8cc] focus:rounded-[14px] focus:border-weldoo-indigo focus:bg-white focus:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]"
               id={`comment-${postId}`}
               maxLength={2000}
               name="body"
-              placeholder="Add a professional comment..."
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }}
+              placeholder="Add a comment…"
               rows={1}
             />
+            <button
+              aria-label={submitPending ? "Posting comment" : "Post comment"}
+              className="absolute bottom-[7px] right-2 flex h-[30px] w-[30px] scale-[0.85] cursor-pointer items-center justify-center rounded-full border-0 bg-weldoo-indigo text-white opacity-0 transition group-focus-within:scale-100 group-focus-within:opacity-100 disabled:cursor-wait disabled:opacity-60"
+              disabled={submitPending}
+              type="submit"
+            >
+              <svg
+                aria-hidden="true"
+                className="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <line x1="22" x2="11" y1="2" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+            {state.errors?.body ? (
+              <p className="mt-1.5 text-xs font-medium text-red-600">{state.errors.body}</p>
+            ) : null}
           </div>
-          <Button
-            className="mt-0.5 h-8 shrink-0 rounded-full px-3 text-[12px]"
-            disabled={submitPending}
-            size="sm"
-            type="submit"
-          >
-            {submitPending ? "Posting" : "Post"}
-          </Button>
         </form>
       ) : null}
 
