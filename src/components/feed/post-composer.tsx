@@ -328,7 +328,7 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
                       <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="1.5" />
                       <path d="M21 15l-5-5L5 21" stroke="currentColor" strokeWidth="1.5" />
                     </svg>
-                    <span className="mt-3 text-[13.5px] font-semibold text-weldoo-ink">
+                    <span className="mt-3 text-[16px] font-semibold text-weldoo-ink">
                       Select photos
                     </span>
                     <span className="mt-1 text-[13px] text-weldoo-muted">
