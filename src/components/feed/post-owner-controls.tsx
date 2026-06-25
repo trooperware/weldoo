@@ -11,6 +11,7 @@ type PostOwnerControlsProps = {
   defaultValues: {
     body: string;
     imageUrl?: string | null;
+    imageUrls?: string[];
     tags: string[];
   };
   postId: string;
@@ -192,6 +193,7 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
         label="Tags"
         name="tags"
       />
+      <input name="imageUrls" type="hidden" value={JSON.stringify(defaultValues.imageUrls ?? [])} />
       <div className="rounded-weldoo-sm border border-weldoo-border-light px-3 py-2">
         <PostImageUploadField currentUrl={defaultValues.imageUrl} />
       </div>
