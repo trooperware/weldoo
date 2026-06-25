@@ -28,6 +28,8 @@ type PostComposerProps = {
   initial: string;
 };
 
+type ComposerMode = "photo" | "text" | "video";
+
 type ComposerAvatarProps = {
   avatarUrl?: string | null;
   initial: string;
@@ -80,25 +82,22 @@ function VideoIcon() {
   );
 }
 
-function ArticleIcon() {
-  return (
-    <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
-      <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM14 2V8H20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
 export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [body, setBody] = useState("");
   const [formKey, setFormKey] = useState(0);
+  const [mode, setMode] = useState<ComposerMode>("text");
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<SaveState>({});
 
   const characterCount = body.length;
-  const canSubmit = body.trim().length > 0 && characterCount <= POST_BODY_MAX_LENGTH && !pending;
+  const canSubmit =
+    mode !== "video" &&
+    body.trim().length > 0 &&
+    characterCount <= POST_BODY_MAX_LENGTH &&
+    !pending;
 
   useEffect(() => {
     if (!open) return;
@@ -118,7 +117,8 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
     }
   }
 
-  function openComposer() {
+  function openComposer(nextMode: ComposerMode = "text") {
+    setMode(nextMode);
     setOpen(true);
     setState({});
   }
@@ -184,7 +184,9 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
             onSubmit={handleSubmit}
           >
             <header className="flex shrink-0 items-center justify-between border-b border-weldoo-border-light px-5 py-4">
-              <h2 className="text-[16.5px] font-bold leading-none text-weldoo-ink">Create post</h2>
+              <h2 className="text-[16.5px] font-bold leading-none text-weldoo-ink">
+                {mode === "photo" ? "Create photo post" : mode === "video" ? "Add video" : "Create post"}
+              </h2>
               <button
                 aria-label="Close post composer"
                 className="flex h-8 w-8 items-center justify-center rounded-full border-0 bg-weldoo-bg text-[22px] leading-none text-weldoo-slate transition hover:bg-weldoo-bg-strong hover:text-weldoo-ink"
@@ -200,25 +202,37 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
               <div className="flex gap-3">
                 <ComposerAvatar avatarUrl={avatarUrl} initial={initial} />
                 <div className="min-w-0 flex-1">
-                  <textarea
-                    aria-label="Post text"
-                    className="min-h-[120px] w-full resize-none border-0 bg-transparent p-0 text-[14.3px] leading-[1.6] text-weldoo-ink outline-none placeholder:text-weldoo-muted"
-                    maxLength={POST_BODY_MAX_LENGTH}
-                    name="body"
-                    onChange={(event) => setBody(event.target.value)}
-                    placeholder="What would you like to share?"
-                    ref={textareaRef}
-                    value={body}
-                  />
+                  {mode === "video" ? (
+                    <div className="rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-4 py-3 text-[13.5px] leading-6 text-weldoo-muted">
+                      Video upload is not connected to the MVP data model yet. This action is kept visible to match the prototype flow, but it will be enabled when video posts are implemented.
+                    </div>
+                  ) : (
+                    <textarea
+                      aria-label="Post text"
+                      className="min-h-[120px] w-full resize-none border-0 bg-transparent p-0 text-[14.3px] leading-[1.6] text-weldoo-ink outline-none placeholder:text-weldoo-muted"
+                      maxLength={POST_BODY_MAX_LENGTH}
+                      name="body"
+                      onChange={(event) => setBody(event.target.value)}
+                      placeholder={
+                        mode === "photo"
+                          ? "What do you want to say about these photos?"
+                          : "What do you want to share with the community?"
+                      }
+                      ref={textareaRef}
+                      value={body}
+                    />
+                  )}
                   <FormError className="mt-2">{state.errors?.body}</FormError>
                 </div>
               </div>
 
               <input name="tags" type="hidden" value="" />
 
-              <div className="mt-3 rounded-weldoo-sm border border-weldoo-border-light px-3 py-2">
-                <PostImageUploadField key={formKey} variant="editor" />
-              </div>
+              {mode === "photo" ? (
+                <div className="mt-3 rounded-weldoo-sm border border-weldoo-border-light px-3 py-2">
+                  <PostImageUploadField key={formKey} variant="editor" />
+                </div>
+              ) : null}
 
               <FormError className="mt-3">{state.status === "error" ? state.message : null}</FormError>
             </div>
@@ -253,8 +267,8 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
         <div className="mb-3 flex items-center gap-3">
           <ComposerAvatar avatarUrl={avatarUrl} initial={initial} />
           <button
-            className="h-10 min-w-0 flex-1 rounded-full border-[1.5px] border-weldoo-border-light bg-weldoo-bg-strong px-[18px] text-left text-sm leading-5 tracking-[-0.01em] text-weldoo-muted transition hover:border-[#c8c8e0] hover:bg-weldoo-bg"
-            onClick={openComposer}
+            className="h-10 min-w-0 flex-1 cursor-pointer rounded-full border-[1.5px] border-weldoo-border-light bg-weldoo-bg-strong px-[18px] text-left text-sm leading-5 tracking-[-0.01em] text-weldoo-muted transition hover:border-[#c8c8e0] hover:bg-weldoo-bg"
+            onClick={() => openComposer("text")}
             type="button"
           >
             Share something with the community...
@@ -271,14 +285,11 @@ export function PostComposer({ avatarUrl, initial }: PostComposerProps) {
         ) : null}
 
         <div className="flex flex-wrap items-center justify-center gap-0">
-          <ComposerActionButton icon={<PhotoIcon />} onClick={openComposer}>
+          <ComposerActionButton icon={<PhotoIcon />} onClick={() => openComposer("photo")}>
             Photo
           </ComposerActionButton>
-          <ComposerActionButton icon={<VideoIcon />} onClick={openComposer}>
+          <ComposerActionButton icon={<VideoIcon />} onClick={() => openComposer("video")}>
             Video
-          </ComposerActionButton>
-          <ComposerActionButton icon={<ArticleIcon />} onClick={openComposer}>
-            Article
           </ComposerActionButton>
         </div>
       </section>
