@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
+import { PostImageCarousel } from "@/components/feed/post-image-carousel";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
 import { ReportContentButton } from "@/components/feed/report-content-button";
 import { Avatar, Badge } from "@/components/ui";
@@ -87,6 +88,12 @@ export function FeedPostCard({
   } = item;
   const authorHref = getProfileHref(author);
   const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
+  const imageUrls =
+    Array.isArray(post.image_urls) && post.image_urls.length > 0
+      ? post.image_urls
+      : post.image_url
+        ? [post.image_url]
+        : [];
 
   return (
     <article className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white transition hover:border-[#d0d0e8] hover:shadow-[0_4px_16px_rgba(61,61,180,0.08)]">
@@ -138,10 +145,7 @@ export function FeedPostCard({
         ) : null}
       </div>
 
-      {post.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img alt="" className="mt-1.5 aspect-video w-full object-cover" src={post.image_url} />
-      ) : null}
+      <PostImageCarousel imageUrls={imageUrls} />
 
       <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs tracking-[-0.01em] text-weldoo-muted">
         <div className="flex items-center gap-1">
@@ -182,6 +186,7 @@ export function FeedPostCard({
           defaultValues={{
             body: post.body,
             imageUrl: post.image_url,
+            imageUrls,
             tags: post.tags,
           }}
           postId={post.id}

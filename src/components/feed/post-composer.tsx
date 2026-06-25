@@ -40,6 +40,12 @@ type SelectedVideo = {
   objectUrl: string;
 };
 
+type SelectedPhoto = {
+  file: File;
+  id: string;
+  previewUrl: string;
+};
+
 type ComposerAvatarProps = {
   avatarUrl?: string | null;
   initial: string;
@@ -117,17 +123,18 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
   const [mode, setMode] = useState<ComposerMode>("text");
   const [photoStep, setPhotoStep] = useState<PhotoStep>("select");
   const [videoStep, setVideoStep] = useState<VideoStep>("select");
-  const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
-  const [selectedPhotoPreview, setSelectedPhotoPreview] = useState<string | null>(null);
+  const [selectedPhotos, setSelectedPhotos] = useState<SelectedPhoto[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<SelectedVideo | null>(null);
+  const [photoPreviewIndex, setPhotoPreviewIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<SaveState>({});
 
   const characterCount = body.length;
+  const selectedPhotoPreviews = selectedPhotos.map((photo) => photo.previewUrl);
   const canSubmit =
     body.trim().length > 0 &&
-    (mode !== "photo" || Boolean(selectedPhotoFile)) &&
+    (mode !== "photo" || selectedPhotos.length > 0) &&
     (mode !== "video" || Boolean(selectedVideo)) &&
     characterCount <= POST_BODY_MAX_LENGTH &&
     !pending;
@@ -160,8 +167,7 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
     setMode(nextMode);
     setPhotoStep("select");
     setVideoStep("select");
-    setSelectedPhotoFile(null);
-    setSelectedPhotoPreview(null);
+    clearSelectedPhotos();
     clearSelectedVideo();
     setBody("");
     setOpen(true);
@@ -171,6 +177,9 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
   function closeComposer() {
     if (!pending) {
       setOpen(false);
+      if (mode === "photo") {
+        clearSelectedPhotos();
+      }
       if (mode === "video") {
         clearSelectedVideo();
       }
@@ -183,39 +192,74 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
     }
   }
 
-  function setSelectedPhoto(file?: File) {
-    if (!file) return;
+  function clearSelectedPhotos() {
+    selectedPhotos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+    setSelectedPhotos([]);
+    setPhotoPreviewIndex(0);
 
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setState({ message: "Use a JPG, PNG, or WebP image.", status: "error" });
-      return;
+    if (photoInputRef.current) {
+      photoInputRef.current.value = "";
     }
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setState({ message: "Use an image smaller than 5 MB.", status: "error" });
-      return;
+  function setSelectedPhotoFiles(fileList?: FileList | File[]) {
+    const files = Array.from(fileList ?? []);
+    if (files.length === 0) return;
+
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        setState({ message: "Use JPG, PNG, or WebP images.", status: "error" });
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setState({ message: "Use images smaller than 5 MB.", status: "error" });
+        return;
+      }
+
+      validFiles.push(file);
     }
 
     setState({});
-    setSelectedPhotoFile(file);
+    selectedPhotos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+    setSelectedPhotos(
+      validFiles.map((file, index) => ({
+        file,
+        id: `${file.name}-${file.lastModified}-${index}`,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    );
+    setPhotoPreviewIndex(0);
+  }
 
-    const reader = new FileReader();
-    reader.onload = (readerEvent) => {
-      setSelectedPhotoPreview(
-        typeof readerEvent.target?.result === "string" ? readerEvent.target.result : null,
-      );
-    };
-    reader.readAsDataURL(file);
+  function removeSelectedPhoto(photoId: string) {
+    setSelectedPhotos((currentPhotos) => {
+      const photo = currentPhotos.find((item) => item.id === photoId);
+      if (photo) {
+        URL.revokeObjectURL(photo.previewUrl);
+      }
+
+      const nextPhotos = currentPhotos.filter((item) => item.id !== photoId);
+      if (nextPhotos.length === 0) {
+        setPhotoPreviewIndex(0);
+      } else {
+        setPhotoPreviewIndex((currentIndex) => Math.min(currentIndex, nextPhotos.length - 1));
+      }
+
+      return nextPhotos;
+    });
   }
 
   function handlePhotoSelected(event: ChangeEvent<HTMLInputElement>) {
-    setSelectedPhoto(event.target.files?.[0]);
+    setSelectedPhotoFiles(event.target.files ?? undefined);
   }
 
   function handlePhotoDrop(event: DragEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setSelectedPhoto(event.dataTransfer.files?.[0]);
+    setSelectedPhotoFiles(event.dataTransfer.files);
   }
 
   function clearSelectedVideo() {
@@ -288,7 +332,7 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
       throw new Error("Sign in again before uploading images.");
     }
 
-    const path = `${user.id}/post-${Date.now()}.${getFileExtension(file)}`;
+    const path = `${user.id}/post-${Date.now()}-${crypto.randomUUID()}.${getFileExtension(file)}`;
     const { error: uploadError } = await supabase.storage
       .from("post-images")
       .upload(path, file, {
@@ -301,6 +345,10 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
     }
 
     return supabase.storage.from("post-images").getPublicUrl(path).data.publicUrl;
+  }
+
+  async function uploadSelectedPhotos(photos: SelectedPhoto[]) {
+    return Promise.all(photos.map((photo) => uploadSelectedPhoto(photo.file)));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -337,13 +385,14 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
       }
 
       if (mode === "photo") {
-        if (!selectedPhotoFile) {
+        if (selectedPhotos.length === 0) {
           setState({ message: "Select a photo before publishing.", status: "error" });
           return;
         }
 
-        const imageUrl = await uploadSelectedPhoto(selectedPhotoFile);
-        formData.set("imageUrl", imageUrl);
+        const imageUrls = await uploadSelectedPhotos(selectedPhotos);
+        formData.set("imageUrl", imageUrls[0] ?? "");
+        formData.set("imageUrls", JSON.stringify(imageUrls));
       }
 
       const response = await fetch("/api/feed/posts", {
@@ -359,8 +408,7 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
 
       form.reset();
       setBody("");
-      setSelectedPhotoFile(null);
-      setSelectedPhotoPreview(null);
+      clearSelectedPhotos();
       setOpen(false);
       setState({
         message: payload.message ?? "Post published.",
@@ -467,28 +515,31 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
                     accept="image/jpeg,image/png,image/webp"
                     className="sr-only"
                     onChange={handlePhotoSelected}
+                    multiple
                     ref={photoInputRef}
                     type="file"
                   />
-                  {selectedPhotoPreview ? (
+                  {selectedPhotos.length > 0 ? (
                     <div className="mt-4 grid grid-cols-3 gap-2">
-                      <button
-                        className="cursor-pointer overflow-hidden rounded-lg border-2 border-weldoo-indigo"
-                        onClick={() => {
-                          setSelectedPhotoFile(null);
-                          setSelectedPhotoPreview(null);
-                          if (photoInputRef.current) photoInputRef.current.value = "";
-                        }}
-                        title="Click to remove"
-                        type="button"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          alt=""
-                          className="h-20 w-full object-cover"
-                          src={selectedPhotoPreview}
-                        />
-                      </button>
+                      {selectedPhotos.map((photo) => (
+                        <button
+                          className="group relative cursor-pointer overflow-hidden rounded-lg border-2 border-transparent transition hover:border-weldoo-indigo"
+                          key={photo.id}
+                          onClick={() => removeSelectedPhoto(photo.id)}
+                          title="Click to remove"
+                          type="button"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            alt=""
+                            className="h-20 w-full object-cover"
+                            src={photo.previewUrl}
+                          />
+                          <span className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white opacity-0 transition group-hover:opacity-100">
+                            &times;
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   ) : null}
                   <FormError className="mt-3">{state.status === "error" ? state.message : null}</FormError>
@@ -504,7 +555,7 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
                   </button>
                   <button
                     className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full bg-weldoo-indigo px-5 text-[13.2px] font-semibold text-white shadow-weldoo-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={!selectedPhotoFile}
+                    disabled={selectedPhotos.length === 0}
                     onClick={() => setPhotoStep("compose")}
                     type="button"
                   >
@@ -631,14 +682,73 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
                     </div>
                   </div>
                   <input name="tags" type="hidden" value="" />
-                  {mode === "photo" && selectedPhotoPreview ? (
+                  {mode === "photo" && selectedPhotoPreviews.length === 1 ? (
                     <div className="mt-3 overflow-hidden rounded-[10px]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         alt=""
                         className="max-h-80 w-full object-cover"
-                        src={selectedPhotoPreview}
+                        src={selectedPhotoPreviews[0]}
                       />
+                    </div>
+                  ) : null}
+                  {mode === "photo" && selectedPhotoPreviews.length > 1 ? (
+                    <div className="mt-3 overflow-hidden rounded-[10px] bg-[#0c0c18]">
+                      <div className="relative overflow-hidden">
+                        <div
+                          className="flex transition-transform duration-300 ease-out"
+                          style={{ transform: `translateX(-${photoPreviewIndex * 100}%)` }}
+                        >
+                          {selectedPhotoPreviews.map((previewUrl) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              alt=""
+                              className="max-h-80 min-w-full flex-shrink-0 object-cover"
+                              key={previewUrl}
+                              src={previewUrl}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          aria-label="Previous image"
+                          className="absolute left-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-black/55 text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-30"
+                          disabled={photoPreviewIndex === 0}
+                          onClick={() => setPhotoPreviewIndex((index) => Math.max(0, index - 1))}
+                          type="button"
+                        >
+                          <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <polyline points="15 18 9 12 15 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+                          </svg>
+                        </button>
+                        <button
+                          aria-label="Next image"
+                          className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-black/55 text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-30"
+                          disabled={photoPreviewIndex === selectedPhotoPreviews.length - 1}
+                          onClick={() =>
+                            setPhotoPreviewIndex((index) =>
+                              Math.min(selectedPhotoPreviews.length - 1, index + 1),
+                            )
+                          }
+                          type="button"
+                        >
+                          <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="flex justify-center gap-[5px] bg-black py-1.5">
+                        {selectedPhotoPreviews.map((previewUrl, index) => (
+                          <button
+                            aria-label={`Show image ${index + 1}`}
+                            className={`h-1.5 w-1.5 cursor-pointer rounded-full border-0 p-0 transition ${
+                              photoPreviewIndex === index ? "bg-white" : "bg-white/40"
+                            }`}
+                            key={previewUrl}
+                            onClick={() => setPhotoPreviewIndex(index)}
+                            type="button"
+                          />
+                        ))}
+                      </div>
                     </div>
                   ) : null}
                   {mode === "video" && selectedVideo ? (

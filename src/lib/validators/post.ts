@@ -8,6 +8,22 @@ const optionalUrl = z.preprocess(
   z.url("Enter a valid image URL.").optional(),
 );
 
+const optionalUrlList = z.preprocess((value) => {
+  if (value === null || value === "") return [];
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}, z.array(z.url("Enter a valid image URL.")).max(12));
+
 const commaList = z.preprocess((value) => {
   if (typeof value !== "string") return [];
   return value
@@ -23,6 +39,7 @@ export const postSchema = z.object({
     .min(1, "Write something before publishing.")
     .max(POST_BODY_MAX_LENGTH, `Keep posts under ${POST_BODY_MAX_LENGTH} characters.`),
   imageUrl: optionalUrl,
+  imageUrls: optionalUrlList,
   tags: commaList,
 });
 
