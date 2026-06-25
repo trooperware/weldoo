@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostImageCarousel } from "@/components/feed/post-image-carousel";
+import { PostText } from "@/components/feed/post-text";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
 import { Avatar, Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
@@ -129,9 +130,7 @@ export function FeedPostCard({
       </header>
 
       <div className="px-[18px] py-3">
-        <p className="whitespace-pre-line text-[15px] font-normal leading-[1.6] text-weldoo-ink">
-          {post.body}
-        </p>
+        <PostText body={post.body} />
 
         {post.tags.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
