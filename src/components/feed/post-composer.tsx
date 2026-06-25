@@ -114,7 +114,8 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
   const characterCount = body.length;
   const canSubmit =
     mode !== "video" &&
-    (mode === "photo" ? Boolean(selectedPhotoFile) : body.trim().length > 0) &&
+    body.trim().length > 0 &&
+    (mode !== "photo" || Boolean(selectedPhotoFile)) &&
     characterCount <= POST_BODY_MAX_LENGTH &&
     !pending;
 
