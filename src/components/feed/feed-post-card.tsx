@@ -4,7 +4,6 @@ import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { PostImageCarousel } from "@/components/feed/post-image-carousel";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
-import { ReportContentButton } from "@/components/feed/report-content-button";
 import { Avatar, Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
 
@@ -174,9 +173,6 @@ export function FeedPostCard({
             key={`${post.id}:${isLiked ? "liked" : "not-liked"}:${isSaved ? "saved" : "not-saved"}:${likeCount}`}
             postId={post.id}
           />
-        </div>
-        <div className="px-[18px] pb-2">
-          <ReportContentButton postId={post.id} targetLabel="post" targetType="post" />
         </div>
         </>
       ) : null}

@@ -103,7 +103,7 @@ export function FeedPostActions({
   return (
     <div className="w-full">
       <FormError>{state.status === "error" ? state.message : null}</FormError>
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-3">
         <button
           aria-busy={pendingActions.like}
           aria-pressed={isLiked}
@@ -159,27 +159,6 @@ export function FeedPostActions({
             />
           </svg>
           <span>Comment</span>
-        </button>
-        <button
-          className={`${actionButtonClass} text-weldoo-ink`}
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            className="h-[18px] w-[18px]"
-            fill="none"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M18 5A3 3 0 1 0 18 11A3 3 0 0 0 18 5ZM6 9A3 3 0 1 0 6 15A3 3 0 0 0 6 9ZM18 13A3 3 0 1 0 18 19A3 3 0 0 0 18 13ZM8.6 13.5L15.4 16.5M15.4 7.5L8.6 10.5"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-          <span>Share</span>
         </button>
         <button
           aria-busy={pendingActions.save}
