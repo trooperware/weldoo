@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type DragEvent,
   type FormEvent,
   type KeyboardEvent,
   type MouseEvent,
@@ -157,9 +158,7 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
     }
   }
 
-  function handlePhotoSelected(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
+  function setSelectedPhoto(file?: File) {
     if (!file) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -182,6 +181,16 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
       );
     };
     reader.readAsDataURL(file);
+  }
+
+  function handlePhotoSelected(event: ChangeEvent<HTMLInputElement>) {
+    setSelectedPhoto(event.target.files?.[0]);
+  }
+
+  function handlePhotoDrop(event: DragEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setSelectedPhoto(event.dataTransfer.files?.[0]);
   }
 
   async function uploadSelectedPhoto(file: File) {
@@ -312,6 +321,11 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
                 <div className="min-h-0 flex-1 overflow-y-auto p-6">
                   <button
                     className="flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#c7c7e8] px-6 py-12 text-center transition hover:border-weldoo-indigo hover:bg-[#f4f4fc]"
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "copy";
+                    }}
+                    onDrop={handlePhotoDrop}
                     onClick={() => photoInputRef.current?.click()}
                     type="button"
                   >
