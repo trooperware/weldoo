@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { FeedCommentTrigger } from "@/components/feed/feed-comment-trigger";
 import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
+import { FeedPostCounts } from "@/components/feed/feed-post-counts";
 import { PostImageCarousel } from "@/components/feed/post-image-carousel";
 import { PostText } from "@/components/feed/post-text";
 import { PostOwnerControls } from "@/components/feed/post-owner-controls";
@@ -146,22 +146,11 @@ export function FeedPostCard({
 
       <PostImageCarousel imageUrls={imageUrls} />
 
-      <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs tracking-[-0.01em] text-weldoo-muted">
-        <div className="flex items-center gap-1">
-          {likeCount > 0 ? (
-            <div className="flex">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white bg-[linear-gradient(135deg,#3d3db4,#7b7fe8)] text-[8px]">
-                👍
-              </span>
-              <span className="-ml-1 flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white bg-[linear-gradient(135deg,#e05c7e,#f59b42)] text-[8px]">
-                ❤️
-              </span>
-            </div>
-          ) : null}
-          <span>{likeCount}</span>
-        </div>
-        <FeedCommentTrigger commentCount={commentCount} postId={post.id} />
-      </footer>
+      <FeedPostCounts
+        commentCount={commentCount}
+        initialLikeCount={likeCount}
+        postId={post.id}
+      />
       {canInteract ? (
         <>
         <div className="mx-4 h-px bg-weldoo-border-light" />

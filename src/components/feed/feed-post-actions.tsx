@@ -22,6 +22,17 @@ type InteractionKind = "like" | "save";
 const actionButtonClass =
   "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo active:scale-[0.97] disabled:cursor-wait disabled:opacity-70";
 
+function emitLikeCountChange(postId: string, likeCount: number) {
+  window.dispatchEvent(
+    new CustomEvent("weldoo:post-like-count", {
+      detail: {
+        likeCount,
+        postId,
+      },
+    }),
+  );
+}
+
 export function FeedPostActions({
   initialIsLiked,
   initialIsSaved,
@@ -49,8 +60,11 @@ export function FeedPostActions({
     const previousLikeCount = likeCount;
 
     if (kind === "like") {
+      const nextLikeCount = Math.max(0, previousLikeCount + (nextActive ? 1 : -1));
+
       setIsLiked(nextActive);
-      setLikeCount((current) => Math.max(0, current + (nextActive ? 1 : -1)));
+      setLikeCount(nextLikeCount);
+      emitLikeCountChange(postId, nextLikeCount);
     } else {
       setIsSaved(nextActive);
     }
@@ -65,6 +79,7 @@ export function FeedPostActions({
         if (kind === "like") {
           setIsLiked(previousLiked);
           setLikeCount(previousLikeCount);
+          emitLikeCountChange(postId, previousLikeCount);
         } else {
           setIsSaved(previousSaved);
         }
@@ -80,6 +95,7 @@ export function FeedPostActions({
       if (kind === "like") {
         setIsLiked(previousLiked);
         setLikeCount(previousLikeCount);
+        emitLikeCountChange(postId, previousLikeCount);
       } else {
         setIsSaved(previousSaved);
       }
