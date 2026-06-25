@@ -202,7 +202,7 @@ export function FeedComments({
             />
             <button
               aria-label={submitPending ? "Posting comment" : "Post comment"}
-              className="absolute bottom-[7px] right-2 flex h-[30px] w-[30px] scale-[0.85] cursor-pointer items-center justify-center rounded-full border-0 bg-weldoo-indigo text-white opacity-0 transition group-focus-within:scale-100 group-focus-within:opacity-100 disabled:cursor-wait disabled:opacity-60"
+              className="absolute right-2 top-[21px] flex h-[30px] w-[30px] -translate-y-1/2 scale-[0.85] cursor-pointer items-center justify-center rounded-full border-0 bg-weldoo-indigo text-white opacity-0 transition group-focus-within:scale-100 group-focus-within:opacity-100 disabled:cursor-wait disabled:opacity-60"
               disabled={submitPending}
               type="submit"
             >
