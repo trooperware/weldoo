@@ -19,6 +19,20 @@ type ActionState = {
 
 type InteractionKind = "like" | "save";
 
+const actionButtonClass =
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo active:scale-[0.97] disabled:cursor-wait disabled:opacity-70";
+
+function emitLikeCountChange(postId: string, likeCount: number) {
+  window.dispatchEvent(
+    new CustomEvent("weldoo:post-like-count", {
+      detail: {
+        likeCount,
+        postId,
+      },
+    }),
+  );
+}
+
 export function FeedPostActions({
   initialIsLiked,
   initialIsSaved,
@@ -46,8 +60,11 @@ export function FeedPostActions({
     const previousLikeCount = likeCount;
 
     if (kind === "like") {
+      const nextLikeCount = Math.max(0, previousLikeCount + (nextActive ? 1 : -1));
+
       setIsLiked(nextActive);
-      setLikeCount((current) => Math.max(0, current + (nextActive ? 1 : -1)));
+      setLikeCount(nextLikeCount);
+      emitLikeCountChange(postId, nextLikeCount);
     } else {
       setIsSaved(nextActive);
     }
@@ -62,6 +79,7 @@ export function FeedPostActions({
         if (kind === "like") {
           setIsLiked(previousLiked);
           setLikeCount(previousLikeCount);
+          emitLikeCountChange(postId, previousLikeCount);
         } else {
           setIsSaved(previousSaved);
         }
@@ -77,6 +95,7 @@ export function FeedPostActions({
       if (kind === "like") {
         setIsLiked(previousLiked);
         setLikeCount(previousLikeCount);
+        emitLikeCountChange(postId, previousLikeCount);
       } else {
         setIsSaved(previousSaved);
       }
@@ -90,15 +109,28 @@ export function FeedPostActions({
     }
   }
 
+  function focusCommentInput() {
+    window.dispatchEvent(
+      new CustomEvent("weldoo:toggle-comments", {
+        detail: {
+          focus: true,
+          open: true,
+          postId,
+        },
+      }),
+    );
+  }
+
   return (
     <div className="w-full">
       <FormError>{state.status === "error" ? state.message : null}</FormError>
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-3">
         <button
-          className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
+          aria-busy={pendingActions.like}
+          aria-pressed={isLiked}
+          className={`${actionButtonClass} ${
             isLiked ? "text-weldoo-indigo" : "text-weldoo-ink"
           }`}
-          aria-busy={pendingActions.like}
           disabled={pendingActions.like}
           onClick={() => submitInteraction("like", !isLiked)}
           type="button"
@@ -106,12 +138,19 @@ export function FeedPostActions({
           <svg
             aria-hidden="true"
             className="h-[18px] w-[18px]"
-            fill="none"
+            fill={isLiked ? "currentColor" : "none"}
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M7 10V21M7 10L11 3C12.1 3 13 3.9 13 5V8H18.2C19.5 8 20.4 9.2 20.1 10.5L18.7 18.5C18.5 19.9 17.3 21 15.9 21H7M7 10H4V21H7"
+              d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+            />
+            <path
+              d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
               stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -121,7 +160,8 @@ export function FeedPostActions({
           <span>Like</span>
         </button>
         <button
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
+          className={`${actionButtonClass} text-weldoo-ink`}
+          onClick={focusCommentInput}
           type="button"
         >
           <svg
@@ -142,31 +182,11 @@ export function FeedPostActions({
           <span>Comment</span>
         </button>
         <button
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium text-weldoo-ink transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            className="h-[18px] w-[18px]"
-            fill="none"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M18 5A3 3 0 1 0 18 11A3 3 0 0 0 18 5ZM6 9A3 3 0 1 0 6 15A3 3 0 0 0 6 9ZM18 13A3 3 0 1 0 18 19A3 3 0 0 0 18 13ZM8.6 13.5L15.4 16.5M15.4 7.5L8.6 10.5"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-          <span>Share</span>
-        </button>
-        <button
-          className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-1.5 py-[9px] text-[13px] font-medium transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo ${
+          aria-busy={pendingActions.save}
+          aria-pressed={isSaved}
+          className={`${actionButtonClass} ${
             isSaved ? "text-weldoo-indigo" : "text-weldoo-ink"
           }`}
-          aria-busy={pendingActions.save}
           disabled={pendingActions.save}
           onClick={() => submitInteraction("save", !isSaved)}
           type="button"

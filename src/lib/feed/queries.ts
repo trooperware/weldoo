@@ -115,6 +115,7 @@ function groupCommentsByPostId(
         ? {
             avatar_url: profiles[comment.author_profile_id].avatar_url,
             display_name: profiles[comment.author_profile_id].display_name,
+            headline: profiles[comment.author_profile_id].headline,
             id: profiles[comment.author_profile_id].id,
           }
         : null,
@@ -133,7 +134,7 @@ export async function getFeedPage(page: number, currentUserId?: string | null) {
 
   const { data: postsData, error: postsError } = await supabase
     .from("posts")
-    .select("id, author_profile_id, body, image_url, status, tags, created_at, updated_at")
+    .select("id, author_profile_id, body, image_url, image_urls, status, tags, created_at, updated_at")
     .eq("status", "published")
     .order("created_at", { ascending: false })
     .range(from, to);
