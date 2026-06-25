@@ -14,7 +14,7 @@ type CommentRow = Tables<"comments">;
 type ProfileRow = Tables<"profiles">;
 
 export type FeedComment = {
-  author: Pick<ProfileRow, "avatar_url" | "display_name" | "id"> | null;
+  author: Pick<ProfileRow, "avatar_url" | "display_name" | "headline" | "id"> | null;
   canDelete: boolean;
   comment: CommentRow;
 };

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
-import { Avatar, Button, FormError, Modal } from "@/components/ui";
+import { Avatar, FormError } from "@/components/ui";
 import type { CommentFieldErrors } from "@/lib/validators/comment";
 import type { FeedComment } from "@/components/feed/feed-post-card";
 
@@ -21,27 +21,6 @@ type CommentState = {
   status?: "error" | "success";
 };
 
-function formatCommentDate(value: string) {
-  const createdAt = new Date(value);
-  const diffMs = Date.now() - createdAt.getTime();
-  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
-
-  if (diffMinutes < 1) return "Just now";
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-  }).format(createdAt);
-}
-
 export function FeedComments({
   canComment,
   comments,
@@ -52,8 +31,6 @@ export function FeedComments({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [submitPending, setSubmitPending] = useState(false);
-  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
-  const [deletePending, setDeletePending] = useState(false);
   const [state, setState] = useState<CommentState>({});
 
   useEffect(() => {
@@ -117,35 +94,6 @@ export function FeedComments({
       });
     } finally {
       setSubmitPending(false);
-    }
-  }
-
-  async function handleDeleteComment() {
-    if (!deleteCommentId) return;
-
-    setDeletePending(true);
-    setState({});
-
-    try {
-      const response = await fetch(`/api/feed/comments/${deleteCommentId}`, {
-        method: "DELETE",
-      });
-      const payload = (await response.json()) as CommentState;
-
-      if (!response.ok || payload.status === "error") {
-        setState(payload);
-        return;
-      }
-
-      setDeleteCommentId(null);
-      router.refresh();
-    } catch (error) {
-      setState({
-        message: error instanceof Error ? error.message : "Could not delete comment.",
-        status: "error",
-      });
-    } finally {
-      setDeletePending(false);
     }
   }
 
@@ -236,20 +184,9 @@ export function FeedComments({
                       {comment.author?.display_name ?? "Weldoo member"}
                     </p>
                     <p className="mb-1 mt-0.5 text-[11.5px] font-normal leading-[1.3] text-weldoo-muted">
-                      {formatCommentDate(comment.comment.created_at)}
+                      {comment.author?.headline ?? "Weldoo member"}
                     </p>
                   </div>
-                  {comment.canDelete ? (
-                    <Button
-                      className="h-7 shrink-0 rounded-full px-2 text-[11.5px]"
-                      disabled={deletePending}
-                      onClick={() => setDeleteCommentId(comment.comment.id)}
-                      size="sm"
-                      variant="ghost"
-                    >
-                      Delete
-                    </Button>
-                  ) : null}
                 </div>
                 <p className="whitespace-pre-line text-[13.5px] leading-[1.55] text-weldoo-ink">
                   {comment.comment.body}
@@ -260,32 +197,6 @@ export function FeedComments({
         </div>
       ) : null}
 
-      <Modal
-        description="This action is irreversible. The comment will be permanently removed."
-        footer={
-          <>
-            <Button
-              disabled={deletePending}
-              onClick={() => setDeleteCommentId(null)}
-              variant="ghost"
-            >
-              Cancel
-            </Button>
-            <Button disabled={deletePending} onClick={handleDeleteComment} variant="danger">
-              {deletePending ? "Deleting" : "Delete permanently"}
-            </Button>
-          </>
-        }
-        onOpenChange={(open) => {
-          if (!open) setDeleteCommentId(null);
-        }}
-        open={Boolean(deleteCommentId)}
-        title="Delete comment?"
-      >
-        <p className="text-sm leading-6 text-weldoo-muted">
-          Are you sure you want to delete this comment? This cannot be undone.
-        </p>
-      </Modal>
     </section>
   );
 }

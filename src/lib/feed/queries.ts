@@ -115,6 +115,7 @@ function groupCommentsByPostId(
         ? {
             avatar_url: profiles[comment.author_profile_id].avatar_url,
             display_name: profiles[comment.author_profile_id].display_name,
+            headline: profiles[comment.author_profile_id].headline,
             id: profiles[comment.author_profile_id].id,
           }
         : null,
