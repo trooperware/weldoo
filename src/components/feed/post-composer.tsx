@@ -315,7 +315,19 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
                     onClick={() => photoInputRef.current?.click()}
                     type="button"
                   >
-                    <PhotoIcon />
+                    <svg aria-hidden="true" className="h-12 w-12 text-weldoo-muted" fill="none" viewBox="0 0 24 24">
+                      <rect
+                        height="18"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        width="18"
+                        x="3"
+                        y="3"
+                      />
+                      <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M21 15l-5-5L5 21" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
                     <span className="mt-3 text-[13.5px] font-semibold text-weldoo-ink">
                       Select photos
                     </span>
