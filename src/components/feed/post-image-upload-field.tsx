@@ -128,26 +128,6 @@ export function PostImageUploadField({
         </svg>
         Photo
       </label>
-      <button
-        className={actionClassName}
-        disabled
-        type="button"
-      >
-        <svg aria-hidden="true" className={iconClassName} fill="none" viewBox="0 0 24 24">
-          <path d="M23 7L16 12L23 17V7ZM1 5H16V19H1V5Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-        </svg>
-        Video
-      </button>
-      <button
-        className={actionClassName}
-        disabled
-        type="button"
-      >
-        <svg aria-hidden="true" className={iconClassName} fill="none" viewBox="0 0 24 24">
-          <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM14 2V8H20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-        </svg>
-        Article
-      </button>
       {url ? (
         <>
           <span className="text-xs font-semibold text-weldoo-indigo">Image ready</span>

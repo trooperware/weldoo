@@ -2,8 +2,9 @@ import Link from "next/link";
 
 import { FeedComments } from "@/components/feed/feed-comments";
 import { FeedPostActions } from "@/components/feed/feed-post-actions";
-import { PostOwnerControls } from "@/components/feed/post-owner-controls";
-import { ReportContentButton } from "@/components/feed/report-content-button";
+import { FeedPostCounts } from "@/components/feed/feed-post-counts";
+import { PostImageCarousel } from "@/components/feed/post-image-carousel";
+import { PostText } from "@/components/feed/post-text";
 import { Avatar, Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
 
@@ -12,7 +13,7 @@ type CommentRow = Tables<"comments">;
 type ProfileRow = Tables<"profiles">;
 
 export type FeedComment = {
-  author: Pick<ProfileRow, "avatar_url" | "display_name" | "id"> | null;
+  author: Pick<ProfileRow, "avatar_url" | "display_name" | "headline" | "id"> | null;
   canDelete: boolean;
   comment: CommentRow;
 };
@@ -77,7 +78,6 @@ export function FeedPostCard({
   const {
     author,
     canInteract,
-    canManage,
     commentCount,
     comments,
     isLiked,
@@ -87,6 +87,12 @@ export function FeedPostCard({
   } = item;
   const authorHref = getProfileHref(author);
   const initials = author?.display_name.slice(0, 1).toUpperCase() ?? "W";
+  const imageUrls =
+    Array.isArray(post.image_urls) && post.image_urls.length > 0
+      ? post.image_urls
+      : post.image_url
+        ? [post.image_url]
+        : [];
 
   return (
     <article className="overflow-hidden rounded-weldoo-md border border-weldoo-border-light bg-white transition hover:border-[#d0d0e8] hover:shadow-[0_4px_16px_rgba(61,61,180,0.08)]">
@@ -123,9 +129,7 @@ export function FeedPostCard({
       </header>
 
       <div className="px-[18px] py-3">
-        <p className="whitespace-pre-line text-[15px] font-normal leading-[1.6] text-weldoo-ink">
-          {post.body}
-        </p>
+        <PostText body={post.body} />
 
         {post.tags.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -138,27 +142,13 @@ export function FeedPostCard({
         ) : null}
       </div>
 
-      {post.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img alt="" className="mt-1.5 aspect-video w-full object-cover" src={post.image_url} />
-      ) : null}
+      <PostImageCarousel imageUrls={imageUrls} />
 
-      <footer className="flex items-center justify-between gap-3 px-[18px] py-2 text-xs tracking-[-0.01em] text-weldoo-muted">
-        <div className="flex items-center gap-1">
-          {likeCount > 0 ? (
-            <div className="flex">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white bg-[linear-gradient(135deg,#3d3db4,#7b7fe8)] text-[8px]">
-                👍
-              </span>
-              <span className="-ml-1 flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white bg-[linear-gradient(135deg,#e05c7e,#f59b42)] text-[8px]">
-                ❤️
-              </span>
-            </div>
-          ) : null}
-          <span>{likeCount}</span>
-        </div>
-        <span className="font-semibold">{commentCount} comments</span>
-      </footer>
+      <FeedPostCounts
+        commentCount={commentCount}
+        initialLikeCount={likeCount}
+        postId={post.id}
+      />
       {canInteract ? (
         <>
         <div className="mx-4 h-px bg-weldoo-border-light" />
@@ -171,22 +161,7 @@ export function FeedPostCard({
             postId={post.id}
           />
         </div>
-        <div className="px-[18px] pb-2">
-          <ReportContentButton postId={post.id} targetLabel="post" targetType="post" />
-        </div>
         </>
-      ) : null}
-      {canManage ? (
-        <div className="px-[18px] pb-3">
-        <PostOwnerControls
-          defaultValues={{
-            body: post.body,
-            imageUrl: post.image_url,
-            tags: post.tags,
-          }}
-          postId={post.id}
-        />
-        </div>
       ) : null}
       <FeedComments
         canComment={canInteract}

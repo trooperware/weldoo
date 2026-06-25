@@ -73,6 +73,7 @@ export async function PATCH(request: Request, context: PostRouteContext) {
     const parsed = postSchema.safeParse({
       body: formData.get("body"),
       imageUrl: formData.get("imageUrl"),
+      imageUrls: formData.get("imageUrls"),
       tags: formData.get("tags"),
     });
 
@@ -93,11 +94,19 @@ export async function PATCH(request: Request, context: PostRouteContext) {
     }
 
     const data = parsed.data;
+    const imageUrls = data.imageUrl && data.imageUrls[0] !== data.imageUrl
+      ? [data.imageUrl]
+      : data.imageUrls.length > 0
+      ? data.imageUrls
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
     const { error: updateError } = await ownerCheck.supabase
       .from("posts")
       .update({
         body: data.body,
-        image_url: data.imageUrl ?? null,
+        image_url: imageUrls[0] ?? null,
+        image_urls: imageUrls,
         tags: data.tags,
       } as never)
       .eq("id", postId)

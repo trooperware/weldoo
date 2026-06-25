@@ -90,6 +90,7 @@ export type Database = {
           author_profile_id: string;
           body: string;
           image_url: string | null;
+          image_urls: string[];
           status: Database["public"]["Enums"]["publication_status"];
           tags: string[];
           created_at: string;

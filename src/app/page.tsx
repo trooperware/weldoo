@@ -162,7 +162,11 @@ export default async function Home() {
 
           <div className="flex flex-col gap-5">
             {appShellAuth ? (
-              <PostComposer avatarUrl={appShellAuth.avatarUrl} initial={initial} />
+              <PostComposer
+                avatarUrl={appShellAuth.avatarUrl}
+                displayName={appShellAuth.displayName}
+                initial={initial}
+              />
             ) : (
               <section className="rounded-weldoo-md border border-weldoo-border-light bg-white p-4 shadow-weldoo-sm">
                 <h2 className="text-base font-bold text-weldoo-ink">Join the feed</h2>
