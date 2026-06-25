@@ -179,47 +179,49 @@ export function FeedComments({
           onSubmit={handleSubmit}
         >
           <Avatar
-            className="h-[34px] w-[34px] text-xs shadow-none"
+            className="mt-[3px] h-9 w-9 text-xs shadow-none"
             initials={viewerInitial}
             src={viewerAvatarUrl}
           />
-          <div className="group relative min-w-0 flex-1">
-            <textarea
-              aria-label="Add comment"
-              aria-invalid={Boolean(state.errors?.body)}
-              className="box-border min-h-[42px] max-h-[140px] w-full resize-none overflow-y-auto rounded-full border-[1.5px] border-weldoo-border-light bg-weldoo-bg px-[18px] py-2.5 pr-12 font-sans text-[13.5px] leading-[1.45] text-weldoo-ink outline-none transition placeholder:text-[#b8b8cc] focus:rounded-[14px] focus:border-weldoo-indigo focus:bg-white focus:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]"
-              id={`comment-${postId}`}
-              maxLength={2000}
-              name="body"
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  event.currentTarget.form?.requestSubmit();
-                }
-              }}
-              placeholder="Add a comment…"
-              rows={1}
-            />
-            <button
-              aria-label={submitPending ? "Posting comment" : "Post comment"}
-              className="absolute right-2 top-[21px] flex h-[30px] w-[30px] -translate-y-1/2 scale-[0.85] cursor-pointer items-center justify-center rounded-full border-0 bg-weldoo-indigo text-white opacity-0 transition group-focus-within:scale-100 group-focus-within:opacity-100 disabled:cursor-wait disabled:opacity-60"
-              disabled={submitPending}
-              type="submit"
-            >
-              <svg
-                aria-hidden="true"
-                className="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
+          <div className="min-w-0 flex-1">
+            <div className="group relative">
+              <textarea
+                aria-label="Add comment"
+                aria-invalid={Boolean(state.errors?.body)}
+                className="box-border min-h-[42px] max-h-[140px] w-full resize-none overflow-y-auto rounded-full border-[1.5px] border-weldoo-border-light bg-weldoo-bg px-[18px] py-2.5 pr-12 font-sans text-[13.5px] leading-[1.45] text-weldoo-ink outline-none transition placeholder:text-[#b8b8cc] focus:rounded-[14px] focus:border-weldoo-indigo focus:bg-white focus:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]"
+                id={`comment-${postId}`}
+                maxLength={2000}
+                name="body"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
+                placeholder="Add a comment…"
+                rows={1}
+              />
+              <button
+                aria-label={submitPending ? "Posting comment" : "Post comment"}
+                className="absolute bottom-[7px] right-2 flex h-[30px] w-[30px] scale-[0.85] cursor-pointer items-center justify-center rounded-full border-0 bg-weldoo-indigo text-white opacity-0 transition group-focus-within:scale-100 group-focus-within:opacity-100 disabled:cursor-wait disabled:opacity-60"
+                disabled={submitPending}
+                type="submit"
               >
-                <line x1="22" x2="11" y1="2" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
+                <svg
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 stroke-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <line x1="22" x2="11" y1="2" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </div>
             {state.errors?.body ? (
               <p className="mt-1.5 text-xs font-medium text-red-600">{state.errors.body}</p>
             ) : null}
