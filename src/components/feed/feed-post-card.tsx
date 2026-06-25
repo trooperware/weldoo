@@ -5,7 +5,6 @@ import { FeedPostActions } from "@/components/feed/feed-post-actions";
 import { FeedPostCounts } from "@/components/feed/feed-post-counts";
 import { PostImageCarousel } from "@/components/feed/post-image-carousel";
 import { PostText } from "@/components/feed/post-text";
-import { PostOwnerControls } from "@/components/feed/post-owner-controls";
 import { Avatar, Badge } from "@/components/ui";
 import type { Tables } from "@/types/database";
 
@@ -79,7 +78,6 @@ export function FeedPostCard({
   const {
     author,
     canInteract,
-    canManage,
     commentCount,
     comments,
     isLiked,
@@ -164,19 +162,6 @@ export function FeedPostCard({
           />
         </div>
         </>
-      ) : null}
-      {canManage ? (
-        <div className="px-[18px] pb-3">
-        <PostOwnerControls
-          defaultValues={{
-            body: post.body,
-            imageUrl: post.image_url,
-            imageUrls,
-            tags: post.tags,
-          }}
-          postId={post.id}
-        />
-        </div>
       ) : null}
       <FeedComments
         canComment={canInteract}
