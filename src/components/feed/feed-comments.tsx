@@ -21,6 +21,10 @@ type CommentState = {
   status?: "error" | "success";
 };
 
+function getOpenAfterSubmitKey(postId: string) {
+  return `weldoo:open-comments-after-submit:${postId}`;
+}
+
 export function FeedComments({
   canComment,
   comments,
@@ -32,6 +36,21 @@ export function FeedComments({
   const [open, setOpen] = useState(false);
   const [submitPending, setSubmitPending] = useState(false);
   const [state, setState] = useState<CommentState>({});
+
+  useEffect(() => {
+    const openAfterSubmitKey = getOpenAfterSubmitKey(postId);
+
+    if (window.sessionStorage.getItem(openAfterSubmitKey) !== "true") return;
+
+    window.sessionStorage.removeItem(openAfterSubmitKey);
+    const frameId = window.requestAnimationFrame(() => {
+      setOpen(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [postId]);
 
   useEffect(() => {
     function handleToggleComments(event: Event) {
@@ -85,6 +104,7 @@ export function FeedComments({
       }
 
       form.reset();
+      window.sessionStorage.setItem(getOpenAfterSubmitKey(postId), "true");
       setOpen(true);
       router.refresh();
     } catch (error) {
