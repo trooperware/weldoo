@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
 import { JobApplyButton } from "@/components/jobs/job-apply-button";
+import { JobSearchFilter } from "@/components/jobs/job-search-filter";
 import { JobSaveButton } from "@/components/jobs/job-save-button";
 import { EmptyState } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
@@ -29,14 +30,15 @@ export const metadata: Metadata = {
 
 type JobsPageProps = {
   searchParams: Promise<{
+    area?: string | string[];
     company?: string;
-    contractType?: string;
+    contractType?: string | string[];
     experience?: string;
-    location?: string;
-    process?: string;
+    location?: string | string[];
+    process?: string | string[];
     q?: string;
     travel?: string;
-    workMode?: string;
+    workMode?: string | string[];
     job?: string;
   }>;
 };
@@ -87,6 +89,57 @@ function getJobSelectionHref(filters: JobFilters, jobId: string) {
   const baseHref = getJobsHref(filters);
   const separator = baseHref.includes("?") ? "&" : "?";
   return `${baseHref}${separator}job=${jobId}`;
+}
+
+type MultiFilterKey = "areas" | "contractTypes" | "locations" | "workModes";
+
+function toggleFilterValueHref(
+  filters: JobFilters,
+  key: MultiFilterKey,
+  value: string,
+) {
+  const current = (filters[key] ?? []) as string[];
+  const next = current.includes(value)
+    ? current.filter((item) => item !== value)
+    : [...current, value];
+
+  return getJobsHref({
+    ...filters,
+    [key]: next.length ? next : undefined,
+  });
+}
+
+function removeFilterValueHref(
+  filters: JobFilters,
+  key: MultiFilterKey,
+  value: string,
+) {
+  const current = (filters[key] ?? []) as string[];
+
+  return getJobsHref({
+    ...filters,
+    [key]: current.filter((item) => item !== value),
+  });
+}
+
+function getDynamicLocationOptions(
+  jobs: JobListItem[],
+  selectedLocations: string[] = [],
+) {
+  const locationMap = new Map<string, string>();
+
+  [...selectedLocations, ...jobs.flatMap((job) => [job.location, job.company?.location])]
+    .filter((location): location is string => Boolean(location?.trim()))
+    .forEach((location) => {
+      const normalized = location.trim();
+      const key = normalized.toLowerCase();
+
+      if (!locationMap.has(key)) {
+        locationMap.set(key, normalized);
+      }
+    });
+
+  return [...locationMap.values()].sort((a, b) => a.localeCompare(b));
 }
 
 function ShareIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -186,30 +239,86 @@ function DetailPill({
   );
 }
 
-function FilterLink({
-  active,
-  children,
-  href,
-  icon,
-}: {
+type FilterDropdownOption = {
   active: boolean;
-  children: ReactNode;
   href: string;
-  icon?: ReactNode;
+  label: string;
+};
+
+function FilterDropdown({
+  activeCount = 0,
+  align = "left",
+  clearHref,
+  label,
+  options,
+}: {
+  activeCount?: number;
+  align?: "left" | "right";
+  clearHref?: string;
+  label: string;
+  options: FilterDropdownOption[];
 }) {
+  const active = activeCount > 0;
+
   return (
-    <Link
-      className={[
-        "inline-flex h-8 items-center gap-1.5 rounded-full border-[1.5px] px-3 text-[12.5px] font-medium tracking-[-0.01em] shadow-weldoo-sm transition",
-        active
-          ? "border-weldoo-indigo bg-weldoo-indigo/[0.08] font-semibold text-weldoo-indigo"
-          : "border-weldoo-border-light bg-white text-weldoo-ink hover:border-[#c8c8e4] hover:text-weldoo-indigo",
-      ].join(" ")}
-      href={href}
-    >
-      {icon}
-      {children}
-    </Link>
+    <details className="group relative">
+      <summary
+        className={[
+          "inline-flex h-8 cursor-pointer list-none items-center gap-1.5 rounded-full border-[1.5px] bg-white px-3 text-[12.5px] font-medium tracking-[-0.01em] shadow-weldoo-sm transition marker:content-none",
+          active
+            ? "border-weldoo-indigo bg-weldoo-indigo/[0.08] font-semibold text-weldoo-indigo"
+            : "border-weldoo-border-light text-weldoo-ink hover:border-[#c8c8e4] hover:text-weldoo-indigo",
+        ].join(" ")}
+      >
+        {label}
+        {activeCount ? (
+          <span className="ml-0.5 inline-flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-weldoo-indigo px-1 text-[10px] font-bold leading-none text-white">
+            {activeCount}
+          </span>
+        ) : null}
+        <ChevronDownIcon />
+      </summary>
+      <div
+        className={[
+          "absolute top-10 z-30 min-w-[180px] rounded-weldoo-md border-[1.5px] border-weldoo-border-light bg-white py-2 shadow-weldoo-lg",
+          align === "right" ? "right-0" : "left-0",
+        ].join(" ")}
+      >
+        {options.map((option) => (
+          <Link
+            className={[
+              "flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-weldoo-ink transition hover:bg-weldoo-bg-strong",
+              option.active ? "font-semibold text-weldoo-indigo" : "font-normal",
+            ].join(" ")}
+            href={option.href}
+            key={option.label}
+          >
+            <span
+              className={[
+                "flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border-[1.5px]",
+                option.active
+                  ? "border-weldoo-indigo bg-weldoo-indigo text-white"
+                  : "border-weldoo-border-light text-transparent",
+              ].join(" ")}
+            >
+              <CheckIcon />
+            </span>
+            {option.label}
+          </Link>
+        ))}
+        {clearHref ? (
+          <>
+            <div className="my-1.5 h-px bg-weldoo-border-light" />
+            <Link
+              className="block px-4 py-2 text-xs font-medium text-weldoo-muted transition hover:text-weldoo-indigo"
+              href={clearHref}
+            >
+              Clear filter
+            </Link>
+          </>
+        ) : null}
+      </div>
+    </details>
   );
 }
 
@@ -229,30 +338,57 @@ function JobCompactBadge({
 }
 
 function ActiveFilterPills({ filters }: { filters: JobFilters }) {
-  const pills = [
-    filters.query ? ["query", `Search: ${filters.query}`] : null,
-    filters.location ? ["location", `Location: ${filters.location}`] : null,
-    filters.process ? ["process", `Process: ${filters.process}`] : null,
-    filters.contractType
-      ? ["contractType", contractTypeLabels[filters.contractType] ?? filters.contractType]
-      : null,
-    filters.workMode ? ["workMode", workModeLabels[filters.workMode] ?? filters.workMode] : null,
-    filters.travelRequired === "true" ? ["travelRequired", "Travel required"] : null,
-    filters.experienceLevel ? ["experienceLevel", `Experience: ${filters.experienceLevel}`] : null,
-    filters.company ? ["company", `Company: ${filters.company}`] : null,
-  ].filter(Boolean) as Array<[keyof JobFilters, string]>;
+  const pills: Array<{ href: string; label: string }> = [];
+
+  pills.push(
+    ...(filters.areas ?? []).map((area) => ({
+      href: removeFilterValueHref(filters, "areas", area),
+      label: area,
+    })),
+    ...(filters.locations ?? []).map((location) => ({
+      href: removeFilterValueHref(filters, "locations", location),
+      label: location,
+    })),
+    ...(filters.contractTypes ?? []).map((contractType) => ({
+      href: removeFilterValueHref(filters, "contractTypes", contractType),
+      label: contractTypeLabels[contractType] ?? contractType,
+    })),
+    ...(filters.workModes ?? []).map((workMode) => ({
+      href: removeFilterValueHref(filters, "workModes", workMode),
+      label: workModeLabels[workMode] ?? workMode,
+    })),
+  );
+
+  if (filters.query) {
+    pills.push({ href: clearFilterHref(filters, "query"), label: `Search: ${filters.query}` });
+  }
+
+  if (filters.travelRequired === "true") {
+    pills.push({ href: clearFilterHref(filters, "travelRequired"), label: "Travel required" });
+  }
+
+  if (filters.experienceLevel) {
+    pills.push({
+      href: clearFilterHref(filters, "experienceLevel"),
+      label: `Experience: ${filters.experienceLevel}`,
+    });
+  }
+
+  if (filters.company) {
+    pills.push({ href: clearFilterHref(filters, "company"), label: `Company: ${filters.company}` });
+  }
 
   if (!pills.length) return null;
 
   return (
     <div className="mb-3 flex flex-wrap gap-1.5">
-      {pills.map(([key, label]) => (
+      {pills.map((pill) => (
         <Link
           className="inline-flex h-[26px] items-center gap-1.5 rounded-full border border-weldoo-indigo/20 bg-weldoo-indigo/[0.08] px-3 text-xs font-semibold text-weldoo-indigo"
-          href={clearFilterHref(filters, key)}
-          key={key}
+          href={pill.href}
+          key={`${pill.label}-${pill.href}`}
         >
-          {label}
+          {pill.label}
           <span className="text-sm leading-none opacity-70">x</span>
         </Link>
       ))}
@@ -314,10 +450,10 @@ function JobDetailPanel({
   const companyLocation = job.company?.location ?? job.location;
 
   return (
-    <div className="px-5 py-6 lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto lg:px-8 lg:py-7">
+    <div className="px-5 py-6 lg:sticky lg:top-16 lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto lg:px-8 lg:py-7">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-weldoo-border-light bg-white text-lg font-extrabold text-weldoo-indigo">
             {job.company?.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img alt="" className="h-full w-full object-contain" src={job.company.logo_url} />
@@ -335,7 +471,7 @@ function JobDetailPanel({
         </div>
         <div className="flex shrink-0 gap-1.5">
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted opacity-60"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
             disabled
             title="Share"
             type="button"
@@ -490,13 +626,32 @@ function JobCard({
     ...job.required_certifications.slice(0, 1),
   ];
   const salary = formatSalary(job);
+  const searchText = [
+    job.title,
+    job.description,
+    job.location,
+    job.company?.name,
+    job.company?.location,
+    job.company?.sector,
+    job.experience_level,
+    workModeLabels[job.work_mode ?? ""],
+    contractTypeLabels[job.contract_type ?? ""],
+    ...job.welding_processes,
+    ...job.materials,
+    ...job.required_certifications,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 
   return (
     <Link
       className={[
-        "relative flex items-start gap-3 border-b border-weldoo-border-light px-[18px] py-3.5 transition hover:bg-weldoo-bg-strong",
+        "group relative flex items-start gap-3 border-b border-weldoo-border-light px-[18px] py-3.5 transition hover:bg-weldoo-bg-strong",
         active ? "bg-weldoo-indigo/[0.06] before:absolute before:bottom-0 before:left-0 before:top-0 before:w-[3px] before:rounded-r-sm before:bg-weldoo-indigo" : "",
       ].join(" ")}
+      data-job-card
+      data-search-text={searchText}
       href={getJobSelectionHref(filters, job.id)}
     >
       <JobLogo job={job} />
@@ -571,6 +726,29 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     selectedJob && appShellAuth?.profileId
       ? await getSavedJobForCurrentUser(supabase, selectedJob.id, appShellAuth.profileId)
       : null;
+  const workModeOptions: FilterDropdownOption[] = [
+    { active: Boolean(filters.workModes?.includes("remote")), href: toggleFilterValueHref(filters, "workModes", "remote"), label: "Remote" },
+    { active: Boolean(filters.workModes?.includes("hybrid")), href: toggleFilterValueHref(filters, "workModes", "hybrid"), label: "Hybrid" },
+    { active: Boolean(filters.workModes?.includes("on_site")), href: toggleFilterValueHref(filters, "workModes", "on_site"), label: "On-site" },
+  ];
+  const contractOptions: FilterDropdownOption[] = [
+    { active: Boolean(filters.contractTypes?.includes("full_time")), href: toggleFilterValueHref(filters, "contractTypes", "full_time"), label: "Full-time" },
+    { active: Boolean(filters.contractTypes?.includes("part_time")), href: toggleFilterValueHref(filters, "contractTypes", "part_time"), label: "Part-time" },
+    { active: Boolean(filters.contractTypes?.includes("contract")), href: toggleFilterValueHref(filters, "contractTypes", "contract"), label: "Contract" },
+  ];
+  const locationOptions: FilterDropdownOption[] = getDynamicLocationOptions(
+    listing.items,
+    filters.locations,
+  ).map((location) => ({
+    active: Boolean(filters.locations?.some((item) => item.toLowerCase() === location.toLowerCase())),
+    href: toggleFilterValueHref(filters, "locations", location),
+    label: location,
+  }));
+  const areaOptions: FilterDropdownOption[] = ["Design", "Engineering", "Marketing", "Data", "Product"].map((area) => ({
+    active: Boolean(filters.areas?.some((item) => item.toLowerCase() === area.toLowerCase())),
+    href: toggleFilterValueHref(filters, "areas", area),
+    label: area,
+  }));
 
   return (
     <AppShell auth={appShellAuth}>
@@ -578,95 +756,48 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-[18px] font-extrabold tracking-[-0.3px] text-weldoo-ink">
             Jobs in Spain
-            <span className="ml-2 text-sm font-medium text-weldoo-muted">
+            <span className="ml-2 text-sm font-medium text-weldoo-muted" data-jobs-results-count>
               {listing.totalCount} results
             </span>
           </h1>
 
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-            <form action="/jobs" className="flex h-10 w-full items-center gap-2 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 shadow-weldoo-sm transition focus-within:border-weldoo-indigo focus-within:shadow-[0_0_0_3px_rgba(61,61,180,0.09)] sm:w-[220px]">
-              {filters.location ? <input name="location" type="hidden" value={filters.location} /> : null}
-              {filters.process ? <input name="process" type="hidden" value={filters.process} /> : null}
-              {filters.contractType ? <input name="contractType" type="hidden" value={filters.contractType} /> : null}
-              {filters.workMode ? <input name="workMode" type="hidden" value={filters.workMode} /> : null}
-              {filters.travelRequired ? <input name="travel" type="hidden" value={filters.travelRequired} /> : null}
-              {filters.experienceLevel ? <input name="experience" type="hidden" value={filters.experienceLevel} /> : null}
-              {filters.company ? <input name="company" type="hidden" value={filters.company} /> : null}
-              <svg aria-hidden="true" className="h-[15px] w-[15px] shrink-0 text-weldoo-muted" fill="none" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                <line x1="21" x2="16.65" y1="21" y2="16.65" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-              <input
-                className="min-w-0 flex-1 bg-transparent text-[13px] text-weldoo-ink outline-none placeholder:text-[#b0b0cc]"
-                defaultValue={filters.query ?? ""}
-                name="q"
-                placeholder="Search jobs..."
-                type="search"
-              />
-            </form>
+            <JobSearchFilter defaultValue={filters.query ?? ""} />
 
-            <FilterLink
-              active={filters.workMode === "remote"}
-              href={getJobsHref({ ...filters, workMode: filters.workMode === "remote" ? undefined : "remote" })}
-              icon={<MonitorIcon />}
-            >
-              Remote
-            </FilterLink>
-            <FilterLink
-              active={filters.workMode === "hybrid"}
-              href={getJobsHref({ ...filters, workMode: filters.workMode === "hybrid" ? undefined : "hybrid" })}
-              icon={<MonitorIcon />}
-            >
-              Hybrid
-            </FilterLink>
-            <FilterLink
-              active={filters.workMode === "on_site"}
-              href={getJobsHref({ ...filters, workMode: filters.workMode === "on_site" ? undefined : "on_site" })}
-              icon={<BriefcaseIcon />}
-            >
-              On-site
-            </FilterLink>
-            <details className="relative">
-              <summary className="inline-flex h-8 cursor-pointer list-none items-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-3 text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-ink shadow-weldoo-sm transition hover:border-[#c8c8e4] hover:text-weldoo-indigo marker:content-none">
-                More filters
-                <ChevronDownIcon />
-              </summary>
-              <div className="absolute right-0 top-10 z-20 w-[min(760px,calc(100vw-32px))] rounded-weldoo-md border border-weldoo-border-light bg-white p-4 shadow-weldoo-lg">
-                <form action="/jobs" className="grid gap-3 md:grid-cols-4">
-                  {filters.query ? <input name="q" type="hidden" value={filters.query} /> : null}
-                  {filters.workMode ? <input name="workMode" type="hidden" value={filters.workMode} /> : null}
-                  <input className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.location ?? ""} name="location" placeholder="Location" />
-                  <input className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.process ?? ""} name="process" placeholder="Welding process" />
-                  <input className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.company ?? ""} name="company" placeholder="Company" />
-                  <select className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.contractType ?? ""} name="contractType">
-                    <option value="">Any contract</option>
-                    <option value="full_time">Full-time</option>
-                    <option value="part_time">Part-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="temporary">Temporary</option>
-                    <option value="freelance">Freelance</option>
-                  </select>
-                  <select className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.travelRequired ?? ""} name="travel">
-                    <option value="">Any travel</option>
-                    <option value="true">Travel required</option>
-                    <option value="false">No travel required</option>
-                  </select>
-                  <input className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none" defaultValue={filters.experienceLevel ?? ""} name="experience" placeholder="Experience level" />
-                  <button className="h-10 rounded-weldoo-sm bg-weldoo-indigo px-4 text-[13px] font-semibold text-white" type="submit">
-                    Apply filters
-                  </button>
-                </form>
-              </div>
-            </details>
+            <FilterDropdown
+              activeCount={filters.workModes?.length ?? 0}
+              clearHref={filters.workModes?.length ? clearFilterHref(filters, "workModes") : undefined}
+              label="Work mode"
+              options={workModeOptions}
+            />
+            <FilterDropdown
+              activeCount={filters.contractTypes?.length ?? 0}
+              clearHref={filters.contractTypes?.length ? clearFilterHref(filters, "contractTypes") : undefined}
+              label="Job type"
+              options={contractOptions}
+            />
+            <FilterDropdown
+              activeCount={filters.locations?.length ?? 0}
+              clearHref={filters.locations?.length ? clearFilterHref(filters, "locations") : undefined}
+              label="Location"
+              options={locationOptions}
+            />
+            <FilterDropdown
+              activeCount={filters.areas?.length ?? 0}
+              align="right"
+              clearHref={filters.areas?.length ? clearFilterHref(filters, "areas") : undefined}
+              label="Area"
+              options={areaOptions}
+            />
           </div>
         </div>
 
         <ActiveFilterPills filters={filters} />
 
         <section className="grid overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm lg:grid-cols-[40%_60%]">
-          <div className="border-b border-weldoo-border-light lg:border-b-0 lg:border-r">
+          <div className="border-b border-weldoo-border-light lg:sticky lg:top-16 lg:max-h-[calc(100vh-64px)] lg:overflow-hidden lg:border-b-0 lg:border-r">
             {listing.items.length ? (
-              <div>
+              <div className="lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto">
                 {listing.items.map((job) => (
                   <JobCard
                     active={job.id === selectedJob?.id}
