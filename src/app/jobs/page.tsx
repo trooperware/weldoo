@@ -453,10 +453,10 @@ function JobDetailPanel({
     <div className="px-5 py-6 lg:sticky lg:top-16 lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto lg:px-8 lg:py-7">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-weldoo-border-light bg-white text-lg font-extrabold text-weldoo-indigo">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
             {job.company?.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img alt="" className="h-full w-full object-contain" src={job.company.logo_url} />
+              <img alt="" className="h-11 w-11 rounded-lg object-contain" src={job.company.logo_url} />
             ) : (
               companyName.slice(0, 1).toUpperCase()
             )}
@@ -472,7 +472,6 @@ function JobDetailPanel({
         <div className="flex shrink-0 gap-1.5">
           <button
             className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
-            disabled
             title="Share"
             type="button"
           >
