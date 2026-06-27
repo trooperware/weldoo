@@ -135,6 +135,20 @@ function ProfileMenu({
         >
           My profile
         </ProfileMenuItem>
+        {auth.profileType === "company" ? (
+          <ProfileMenuItem
+            href="/company/jobs"
+            icon={
+              <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                <rect height="14" rx="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" width="20" x="2" y="7" />
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                <path d="M8 13h8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+              </svg>
+            }
+          >
+            Company dashboard
+          </ProfileMenuItem>
+        ) : null}
         <ProfileMenuItem
           href="/saved/jobs"
           icon={
@@ -275,6 +289,7 @@ export function AppShell({ auth, children }: AppShellProps) {
                       avatarUrl={auth.avatarUrl}
                       displayName={displayName}
                       profileHref={auth.publicProfileHref ?? profileHref}
+                      profileType={auth.profileType}
                       roleLabel={roleLabel}
                       signOutAction={signOutAction}
                     />

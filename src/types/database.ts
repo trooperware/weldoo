@@ -159,6 +159,9 @@ export type Database = {
       };
       jobs: {
         Row: Row<{
+          application_deadline: string | null;
+          application_mode: string;
+          area: string | null;
           id: string;
           company_id: string;
           created_by_profile_id: string;
@@ -176,7 +179,11 @@ export type Database = {
           materials: string[];
           required_certifications: string[];
           experience_level: string | null;
+          external_apply_url: string | null;
+          salary_visible: boolean;
+          skills: string[];
           travel_required: boolean;
+          tools: string[];
           benefits: string[];
           status: Database["public"]["Enums"]["publication_status"];
           published_at: string | null;

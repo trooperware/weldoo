@@ -65,7 +65,7 @@ export default async function CompanyJobsPage() {
               Manage job postings
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-weldoo-muted">
-              Create structured welding-sector job offers, publish them to the public jobs board, and close them when hiring is done.
+              Create structured job offers, publish them to the public jobs board, and close them when hiring is done.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

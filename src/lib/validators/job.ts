@@ -5,6 +5,8 @@ import type { Enums } from "@/types/database";
 const contractTypes = ["full_time", "part_time", "contract", "temporary", "freelance"] as const;
 const workModes = ["on_site", "hybrid", "remote"] as const;
 const statuses = ["draft", "published"] as const;
+const applicationModes = ["weldoo", "external", "both"] as const;
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 function emptyToUndefined(value: unknown) {
   if (typeof value !== "string") return value;
@@ -30,6 +32,15 @@ function optionalInteger(value: unknown) {
 export const jobFormSchema = z
   .object({
     benefits: z.preprocess(stringList, z.array(z.string().max(80)).max(24)),
+    applicationDeadline: z.preprocess(
+      emptyToUndefined,
+      z.string().regex(datePattern, "Use a valid date.").optional(),
+    ),
+    applicationMode: z.enum(applicationModes).default("weldoo"),
+    area: z.preprocess(
+      emptyToUndefined,
+      z.string().max(120, "Area is too long.").optional(),
+    ),
     contractType: z.preprocess(
       emptyToUndefined,
       z.enum(contractTypes).optional(),
@@ -42,6 +53,10 @@ export const jobFormSchema = z
     experienceLevel: z.preprocess(
       emptyToUndefined,
       z.string().max(120, "Experience level is too long.").optional(),
+    ),
+    externalApplyUrl: z.preprocess(
+      emptyToUndefined,
+      z.string().url("Use a valid URL.").max(500, "URL is too long.").optional(),
     ),
     jobId: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
     location: z.preprocess(
@@ -77,6 +92,11 @@ export const jobFormSchema = z
       optionalInteger,
       z.number().int().min(0, "Salary must be positive.").optional(),
     ),
+    salaryVisible: z.preprocess(
+      (value) => value === "on" || value === "true",
+      z.boolean(),
+    ),
+    skills: z.preprocess(stringList, z.array(z.string().max(80)).max(24)),
     status: z.enum(statuses).default("draft"),
     title: z
       .string()
@@ -87,6 +107,7 @@ export const jobFormSchema = z
       (value) => value === "on" || value === "true",
       z.boolean(),
     ),
+    tools: z.preprocess(stringList, z.array(z.string().max(80)).max(24)),
     weldingProcesses: z.preprocess(
       stringList,
       z.array(z.string().max(80)).max(24),
@@ -103,6 +124,17 @@ export const jobFormSchema = z
         code: z.ZodIssueCode.custom,
         message: "Minimum salary cannot be greater than maximum salary.",
         path: ["salaryMin"],
+      });
+    }
+
+    if (
+      (data.applicationMode === "external" || data.applicationMode === "both") &&
+      !data.externalApplyUrl
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "External apply URL is required for this application mode.",
+        path: ["externalApplyUrl"],
       });
     }
   });
