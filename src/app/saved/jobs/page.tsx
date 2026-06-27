@@ -32,6 +32,14 @@ function formatDate(value: string | null, fallback: string) {
   }).format(new Date(value ?? fallback));
 }
 
+function getJobTags(job: Awaited<ReturnType<typeof getSavedJobsForCurrentUser>>[number]["job"]) {
+  const structuredTags = [...job.skills, ...job.tools, ...job.required_certifications];
+  const fallbackTags = [...job.welding_processes, ...job.materials, ...job.required_certifications];
+  const tags = structuredTags.length ? structuredTags : fallbackTags;
+
+  return [...new Set(tags.filter(Boolean))];
+}
+
 export default async function SavedJobsPage() {
   const { profile } = await requireCompletedOnboarding();
   const [appShellAuth, supabase] = await Promise.all([
@@ -97,9 +105,9 @@ export default async function SavedJobsPage() {
                         {job.contract_type ? ` · ${contractTypeLabels[job.contract_type]}` : ""}
                         {" · "}Posted {formatDate(job.published_at, job.created_at)}
                       </p>
-                      {job.welding_processes.length ? (
+                      {getJobTags(job).length ? (
                         <div className="mt-2 flex flex-wrap gap-1.5">
-                          {job.welding_processes.slice(0, 4).map((tag) => (
+                          {getJobTags(job).slice(0, 4).map((tag) => (
                             <span
                               className="rounded-full bg-weldoo-indigo/10 px-2.5 py-1 text-[11px] font-semibold text-weldoo-indigo"
                               key={tag}

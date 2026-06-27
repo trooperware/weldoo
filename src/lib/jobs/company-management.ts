@@ -4,12 +4,16 @@ import type { Database, Tables } from "@/types/database";
 
 export type CompanyJob = Pick<
   Tables<"jobs">,
+  | "application_deadline"
+  | "application_mode"
+  | "area"
   | "benefits"
   | "closed_at"
   | "contract_type"
   | "created_at"
   | "description"
   | "experience_level"
+  | "external_apply_url"
   | "id"
   | "location"
   | "materials"
@@ -20,8 +24,11 @@ export type CompanyJob = Pick<
   | "salary_currency"
   | "salary_max"
   | "salary_min"
+  | "salary_visible"
+  | "skills"
   | "status"
   | "title"
+  | "tools"
   | "travel_required"
   | "welding_processes"
   | "work_mode"
@@ -51,7 +58,7 @@ export async function getCompanyJobs(
   const { data, error } = await supabase
     .from("jobs")
     .select(
-      "id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, status, published_at, closed_at, created_at",
+      "id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, salary_visible, area, skills, tools, external_apply_url, application_mode, application_deadline, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, status, published_at, closed_at, created_at",
     )
     .eq("company_id", companyId)
     .order("created_at", { ascending: false });
