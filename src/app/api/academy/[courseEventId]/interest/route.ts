@@ -69,3 +69,37 @@ export async function POST(request: Request, context: CourseInterestRouteContext
     );
   }
 }
+
+export async function DELETE(_request: Request, context: CourseInterestRouteContext) {
+  try {
+    const { courseEventId, error, supabase, user } = await getUserAndCourseEvent(context);
+
+    if (error) return error;
+
+    const { error: deleteError } = await supabase
+      .from("course_event_interests")
+      .delete()
+      .eq("course_event_id", courseEventId)
+      .eq("profile_id", user.id);
+
+    if (deleteError) {
+      return NextResponse.json(
+        {
+          message: `Could not cancel registration: ${deleteError.message}`,
+          status: "error",
+        },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({ message: "Registration cancelled.", status: "success" });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message: error instanceof Error ? error.message : "Could not cancel registration.",
+        status: "error",
+      },
+      { status: 500 },
+    );
+  }
+}
