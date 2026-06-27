@@ -113,6 +113,24 @@ function ShareIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function MoreIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="currentColor" viewBox="0 0 24 24">
+      <circle cx="5" cy="12" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="19" cy="12" r="1.5" />
+    </svg>
+  );
+}
+
+function BackIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <polyline points="15 18 9 12 15 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 function CheckIcon({ className = "h-3 w-3" }: { className?: string }) {
   return (
     <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -182,9 +200,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     <AppShell auth={appShellAuth}>
       <main className="mx-auto max-w-[900px] px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-7 sm:px-6 lg:px-8 lg:pb-20">
         <Link
-          className="mb-4 inline-flex h-8 items-center rounded-full border-[1.5px] border-weldoo-border-light bg-white px-3 text-[12.5px] font-semibold text-weldoo-indigo shadow-weldoo-sm transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04]"
+          className="mb-4 inline-flex h-8 items-center gap-1.5 text-[13px] font-semibold text-weldoo-muted transition hover:text-weldoo-indigo"
           href={`/jobs?job=${job.id}`}
         >
+          <BackIcon />
           Back to jobs
         </Link>
         <article className="rounded-[16px] border border-weldoo-border-light bg-white px-5 py-6 shadow-weldoo-sm sm:px-8 sm:py-7">
@@ -193,7 +212,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
                 {job.company?.logo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img alt="" className="h-full w-full object-contain" src={job.company.logo_url} />
+                  <img alt="" className="h-11 w-11 rounded-lg object-contain" src={job.company.logo_url} />
                 ) : (
                   companyName.slice(0, 1).toUpperCase()
                 )}
@@ -206,18 +225,27 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 </div>
               </div>
             </div>
-            <button
-              aria-label="Share job"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted opacity-60"
-              disabled
-              title="Share"
-              type="button"
-            >
-              <ShareIcon />
-            </button>
+            <div className="flex shrink-0 gap-1.5">
+              <button
+                aria-label="Share job"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                title="Share"
+                type="button"
+              >
+                <ShareIcon />
+              </button>
+              <button
+                aria-label="More job actions"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-weldoo-border-light bg-transparent text-weldoo-muted transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                title="More"
+                type="button"
+              >
+                <MoreIcon />
+              </button>
+            </div>
           </div>
 
-          <h1 className="mb-2 text-2xl font-extrabold leading-[1.2] tracking-[-0.4px] text-weldoo-ink sm:text-[28px]">
+          <h1 className="mb-2 text-2xl font-extrabold leading-[1.2] tracking-[-0.4px] text-weldoo-ink">
             {job.title}
           </h1>
           <p className="mb-4 text-[13px] leading-[1.7] text-weldoo-muted">
