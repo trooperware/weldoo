@@ -91,8 +91,12 @@ export type SavedJobItem = Pick<Tables<"saved_items">, "created_at" | "id"> & {
     | "created_at"
     | "id"
     | "location"
+    | "materials"
     | "published_at"
+    | "required_certifications"
+    | "skills"
     | "title"
+    | "tools"
     | "welding_processes"
     | "work_mode"
   > & {
@@ -107,7 +111,7 @@ export async function getSavedJobsForCurrentUser(
   const { data, error } = await supabase
     .from("saved_items")
     .select(
-      "id, created_at, jobs!inner(id, title, location, work_mode, contract_type, welding_processes, published_at, created_at, companies(id, name, location, logo_url))",
+      "id, created_at, jobs!inner(id, title, location, work_mode, contract_type, skills, tools, welding_processes, materials, required_certifications, published_at, created_at, companies(id, name, location, logo_url))",
     )
     .eq("profile_id", profileId)
     .eq("item_type", "job")
@@ -124,8 +128,12 @@ export async function getSavedJobsForCurrentUser(
       | "created_at"
       | "id"
       | "location"
+      | "materials"
       | "published_at"
+      | "required_certifications"
+      | "skills"
       | "title"
+      | "tools"
       | "welding_processes"
       | "work_mode"
     > & {
@@ -140,8 +148,12 @@ export async function getSavedJobsForCurrentUser(
       created_at: row.jobs.created_at,
       id: row.jobs.id,
       location: row.jobs.location,
+      materials: row.jobs.materials,
       published_at: row.jobs.published_at,
+      required_certifications: row.jobs.required_certifications,
+      skills: row.jobs.skills,
       title: row.jobs.title,
+      tools: row.jobs.tools,
       welding_processes: row.jobs.welding_processes,
       work_mode: row.jobs.work_mode,
     },

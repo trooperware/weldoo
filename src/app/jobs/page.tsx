@@ -24,7 +24,7 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  description: "Browse welding and industrial job opportunities on Weldoo.",
+  description: "Browse industrial, technical, product, and welding job opportunities on Weldoo.",
   title: "Jobs | Weldoo",
 };
 
@@ -58,6 +58,7 @@ const workModeLabels: Record<string, string> = {
 };
 
 function formatSalary(job: JobListItem) {
+  if (job.salary_visible === false) return null;
   if (!job.salary_min && !job.salary_max) return null;
   const formatter = new Intl.NumberFormat("en", {
     currency: job.salary_currency || "EUR",
@@ -88,6 +89,14 @@ function formatPostedDate(value: string | null, fallback: string) {
   if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
   if (diffWeeks < 5) return `${diffWeeks} ${diffWeeks === 1 ? "week" : "weeks"} ago`;
   return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
+}
+
+function getJobTags(job: JobListItem) {
+  const structuredTags = [...job.skills, ...job.tools, ...job.required_certifications];
+  const fallbackTags = [...job.welding_processes, ...job.materials, ...job.required_certifications];
+  const tags = structuredTags.length ? structuredTags : fallbackTags;
+
+  return tags.filter((tag, index, allTags) => tag !== job.area && tag !== job.experience_level && allTags.indexOf(tag) === index);
 }
 
 function clearFilterHref(filters: JobFilters, key: keyof JobFilters) {
@@ -513,16 +522,27 @@ function JobDetailPanel({
         ) : null}
       </div>
 
-      <div className="mb-5 flex items-center gap-2">
-        <JobApplyButton
-          existingApplication={
-            application
-              ? { createdAt: application.created_at, status: application.status }
-              : null
-          }
-          jobId={job.id}
-          profileType={profileType}
-        />
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        {job.application_mode !== "external" ? (
+          <JobApplyButton
+            existingApplication={
+              application
+                ? { createdAt: application.created_at, status: application.status }
+                : null
+            }
+            jobId={job.id}
+            profileType={profileType}
+          />
+        ) : null}
+        {(job.application_mode === "external" || job.application_mode === "both") && job.external_apply_url ? (
+          <Link
+            className="inline-flex h-10 items-center justify-center rounded-full bg-weldoo-indigo px-5 text-[12px] font-bold text-white shadow-weldoo-md transition hover:bg-weldoo-indigo-dark"
+            href={job.external_apply_url}
+            target="_blank"
+          >
+            Apply externally
+          </Link>
+        ) : null}
         <JobSaveButton
           initialSaved={isSaved}
           jobId={job.id}
@@ -591,10 +611,10 @@ function JobDetailPanel({
 
       <div className="mt-5 rounded-weldoo-md border border-weldoo-indigo/15 bg-weldoo-indigo/[0.04] px-4 py-4">
         <h3 className="mb-2 text-[13.5px] font-bold text-weldoo-ink">
-          Welding match fields
+          Skills and match fields
         </h3>
         <div className="flex flex-wrap gap-1.5">
-          {[...job.welding_processes, ...job.materials, ...job.required_certifications].map((tag) => (
+          {getJobTags(job).map((tag) => (
             <span className="inline-flex h-[30px] items-center rounded-full border border-weldoo-indigo/20 bg-weldoo-indigo/[0.07] px-3 text-[12.5px] font-medium text-weldoo-indigo" key={tag}>
               {tag}
             </span>
@@ -614,11 +634,7 @@ function JobCard({
   filters: JobFilters;
   job: JobListItem;
 }) {
-  const tags = [
-    ...job.welding_processes,
-    ...job.materials,
-    ...job.required_certifications,
-  ].filter((tag, index, allTags) => tag !== job.experience_level && allTags.indexOf(tag) === index).slice(0, 3);
+  const tags = getJobTags(job).slice(0, 3);
   const searchText = [
     job.title,
     job.description,
@@ -626,9 +642,12 @@ function JobCard({
     job.company?.name,
     job.company?.location,
     job.company?.sector,
+    job.area,
     job.experience_level,
     workModeLabels[job.work_mode ?? ""],
     contractTypeLabels[job.contract_type ?? ""],
+    ...job.skills,
+    ...job.tools,
     ...job.welding_processes,
     ...job.materials,
     ...job.required_certifications,
@@ -789,7 +808,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                 <EmptyState
                   description={
                     hasActiveJobFilters(filters)
-                      ? "Try clearing filters or searching for a broader welding process, company, or location."
+                      ? "Try clearing filters or searching for a broader skill, company, area, or location."
                       : "Published jobs will appear here once companies start posting opportunities."
                   }
                   title="No jobs found"

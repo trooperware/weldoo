@@ -63,7 +63,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const { data: job, error: jobError } = await supabase
       .from("jobs")
-      .select("id")
+      .select("id, application_mode")
       .eq("id", jobId)
       .eq("status", "published")
       .maybeSingle();
@@ -79,6 +79,13 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json(
         { message: "This job is not available for applications.", status: "error" },
         { status: 404 },
+      );
+    }
+
+    if ((job as { application_mode?: string }).application_mode === "external") {
+      return NextResponse.json(
+        { message: "This job uses an external application flow.", status: "error" },
+        { status: 400 },
       );
     }
 
