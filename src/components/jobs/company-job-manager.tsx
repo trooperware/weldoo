@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 
 import { Button, FormError, Input, Modal, Select, Textarea } from "@/components/ui";
 import type { CompanyForJobs, CompanyJob } from "@/lib/jobs/company-management";
@@ -30,10 +30,14 @@ type ConfirmationState = {
 } | null;
 
 const emptyJob = {
+  application_deadline: null,
+  application_mode: "weldoo",
+  area: null,
   benefits: [],
   contract_type: null,
   description: "",
   experience_level: null,
+  external_apply_url: null,
   id: "",
   location: null,
   materials: [],
@@ -43,8 +47,11 @@ const emptyJob = {
   salary_currency: "EUR",
   salary_max: null,
   salary_min: null,
+  salary_visible: true,
+  skills: [],
   status: "draft",
   title: "",
+  tools: [],
   travel_required: false,
   welding_processes: [],
   work_mode: null,
@@ -71,6 +78,7 @@ function formatDate(value?: string | null) {
 
 export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
   const router = useRouter();
+  const formPanelRef = useRef<HTMLElement | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<ConfirmationState>(null);
   const [pending, setPending] = useState(false);
@@ -81,6 +89,14 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
     [jobs, selectedJobId],
   );
   const isEditing = Boolean(selectedJobId);
+
+  function startNewJob() {
+    setSelectedJobId(null);
+    setState({});
+    requestAnimationFrame(() => {
+      formPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -216,6 +232,20 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
         </div>
       </Modal>
 
+      <div className="mb-4 flex justify-end">
+        <Button
+          className="h-10 rounded-full px-4 text-[12px]"
+          onClick={startNewJob}
+          size="sm"
+          type="button"
+        >
+          <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+          </svg>
+          Create job
+        </Button>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
         <aside className="rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
         <div className="border-b border-weldoo-border-light px-5 py-4">
@@ -230,12 +260,9 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
               "flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition hover:bg-weldoo-bg",
               !selectedJobId ? "bg-weldoo-indigo/[0.06]" : "",
             ].join(" ")}
-            onClick={() => {
-              setSelectedJobId(null);
-              setState({});
-            }}
-            type="button"
-          >
+              onClick={startNewJob}
+              type="button"
+            >
             <span>
               <span className="block text-[13.5px] font-bold text-weldoo-ink">
                 New job
@@ -285,7 +312,10 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
         </div>
         </aside>
 
-        <section className="rounded-[16px] border border-weldoo-border-light bg-white p-5 shadow-weldoo-sm sm:p-6">
+        <section
+          className="rounded-[16px] border border-weldoo-border-light bg-white p-5 shadow-weldoo-sm scroll-mt-24 sm:p-6"
+          ref={formPanelRef}
+        >
         <div className="mb-5 flex flex-col gap-3 border-b border-weldoo-border-light pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-weldoo-indigo">
@@ -332,7 +362,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             id="title"
             label="Job title"
             name="title"
-            placeholder="TIG Welder - Stainless Steel Assemblies"
+            placeholder="Senior Product Designer"
           />
 
           <section className="grid gap-4 sm:grid-cols-2">
@@ -344,13 +374,29 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
               name="location"
               placeholder="Barcelona, Spain"
             />
+            <Select
+              defaultValue={selectedJob.area ?? ""}
+              error={state.errors?.area}
+              id="area"
+              label="Area"
+              name="area"
+            >
+              <option value="">Select area</option>
+              <option value="Design">Design</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Data">Data</option>
+              <option value="Product">Product</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Operations">Operations</option>
+              <option value="Welding / Manufacturing">Welding / Manufacturing</option>
+            </Select>
             <Input
               defaultValue={selectedJob.experience_level ?? ""}
               error={state.errors?.experienceLevel}
               id="experienceLevel"
-              label="Experience level"
+              label="Seniority / experience"
               name="experienceLevel"
-              placeholder="3+ years"
+              placeholder="Senior, Lead, 5+ years"
             />
             <Select
               defaultValue={selectedJob.work_mode ?? ""}
@@ -412,13 +458,24 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             />
           </section>
 
+          <label className="flex items-center gap-2 text-[13px] font-semibold text-weldoo-ink">
+            <input
+              className="h-4 w-4 rounded border-weldoo-border-light accent-weldoo-indigo"
+              defaultChecked={selectedJob.salary_visible ?? true}
+              name="salaryVisible"
+              type="checkbox"
+              value="true"
+            />
+            Show salary publicly
+          </label>
+
           <Textarea
             defaultValue={selectedJob.description ?? ""}
             error={state.errors?.description}
             id="description"
             label="Description"
             name="description"
-            placeholder="Describe the role, workshop context, project type, and what the welder will do."
+            placeholder="Describe the role, product or industrial context, and why the opportunity matters."
             rows={5}
           />
           <section className="grid gap-4 sm:grid-cols-2">
@@ -428,7 +485,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
               id="responsibilities"
               label="Responsibilities"
               name="responsibilities"
-              placeholder="Prepare joints, perform TIG welding, document completed work..."
+              placeholder="Lead discovery, design flows, collaborate with engineering, document decisions..."
               rows={4}
             />
             <Textarea
@@ -437,28 +494,28 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
               id="requirements"
               label="Requirements"
               name="requirements"
-              placeholder="EN ISO certification, drawing reading, stainless steel experience..."
+              placeholder="5+ years of experience, strong portfolio, technical collaboration..."
               rows={4}
             />
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2">
             <Textarea
-              defaultValue={listToText(selectedJob.welding_processes)}
-              error={state.errors?.weldingProcesses}
-              id="weldingProcesses"
-              label="Welding processes"
-              name="weldingProcesses"
-              placeholder="TIG, MIG/MAG, SMAW"
+              defaultValue={listToText(selectedJob.skills.length ? selectedJob.skills : selectedJob.welding_processes)}
+              error={state.errors?.skills}
+              id="skills"
+              label="Primary skills"
+              name="skills"
+              placeholder="Design Systems, Figma, UX Research"
               rows={3}
             />
             <Textarea
-              defaultValue={listToText(selectedJob.materials)}
-              error={state.errors?.materials}
-              id="materials"
-              label="Materials"
-              name="materials"
-              placeholder="Stainless steel, carbon steel, aluminium"
+              defaultValue={listToText(selectedJob.tools.length ? selectedJob.tools : selectedJob.materials)}
+              error={state.errors?.tools}
+              id="tools"
+              label="Tools / secondary skills"
+              name="tools"
+              placeholder="React, TypeScript, IoT"
               rows={3}
             />
             <Textarea
@@ -467,7 +524,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
               id="requiredCertifications"
               label="Required certifications"
               name="requiredCertifications"
-              placeholder="EN ISO 9606-1, CSWIP"
+              placeholder="Optional certifications or credentials"
               rows={3}
             />
             <Textarea
@@ -476,7 +533,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
               id="benefits"
               label="Benefits"
               name="benefits"
-              placeholder="Private insurance, overtime paid, training budget"
+              placeholder="Health insurance, learning budget, flexible hours"
               rows={3}
             />
           </section>
@@ -490,6 +547,37 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
             />
             Travel required
           </label>
+
+          <section className="grid gap-4 border-t border-weldoo-border-light pt-5 sm:grid-cols-2">
+            <Select
+              defaultValue={selectedJob.application_mode ?? "weldoo"}
+              error={state.errors?.applicationMode}
+              id="applicationMode"
+              label="Application mode"
+              name="applicationMode"
+            >
+              <option value="weldoo">Weldoo applications</option>
+              <option value="external">External apply URL</option>
+              <option value="both">Weldoo and external</option>
+            </Select>
+            <Input
+              defaultValue={selectedJob.external_apply_url ?? ""}
+              error={state.errors?.externalApplyUrl}
+              id="externalApplyUrl"
+              label="External apply URL"
+              name="externalApplyUrl"
+              placeholder="https://company.com/careers/job"
+              type="url"
+            />
+            <Input
+              defaultValue={selectedJob.application_deadline ?? ""}
+              error={state.errors?.applicationDeadline}
+              id="applicationDeadline"
+              label="Application deadline"
+              name="applicationDeadline"
+              type="date"
+            />
+          </section>
 
           <div className="flex flex-wrap items-center gap-2 border-t border-weldoo-border-light pt-5">
             <Button disabled={pending} name="status" size="sm" type="submit" value="draft" variant="ghost">

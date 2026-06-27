@@ -35,6 +35,7 @@ const workModeLabels: Record<string, string> = {
 };
 
 function formatSalary(job: JobListItem) {
+  if (job.salary_visible === false) return null;
   if (!job.salary_min && !job.salary_max) return null;
   const formatter = new Intl.NumberFormat("en", {
     currency: job.salary_currency || "EUR",
@@ -48,6 +49,14 @@ function formatSalary(job: JobListItem) {
 
   if (job.salary_min) return `From ${formatter.format(job.salary_min)}`;
   return `Up to ${formatter.format(job.salary_max ?? 0)}`;
+}
+
+function getJobTags(job: JobListItem) {
+  const structuredTags = [...job.skills, ...job.tools, ...job.required_certifications];
+  const fallbackTags = [...job.welding_processes, ...job.materials, ...job.required_certifications];
+  const tags = structuredTags.length ? structuredTags : fallbackTags;
+
+  return tags.filter((tag, index, allTags) => tag !== job.area && tag !== job.experience_level && allTags.indexOf(tag) === index);
 }
 
 function formatPostedDate(value: string | null, fallback: string) {
@@ -188,6 +197,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const salary = formatSalary(job);
   const companyName = job.company?.name ?? "Weldoo company";
   const companyLocation = job.company?.location ?? job.location;
+  const jobTags = getJobTags(job);
   const application =
     appShellAuth?.profileType === "professional" && appShellAuth.profileId
       ? await getApplicationForCurrentUser(supabase, job.id, appShellAuth.profileId)
@@ -278,15 +288,26 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </div>
 
           <div className="mb-6 flex flex-wrap items-start gap-2">
-            <JobApplyButton
-              existingApplication={
-                application
-                  ? { createdAt: application.created_at, status: application.status }
-                  : null
-              }
-              jobId={job.id}
-              profileType={appShellAuth?.profileType}
-            />
+            {job.application_mode !== "external" ? (
+              <JobApplyButton
+                existingApplication={
+                  application
+                    ? { createdAt: application.created_at, status: application.status }
+                    : null
+                }
+                jobId={job.id}
+                profileType={appShellAuth?.profileType}
+              />
+            ) : null}
+            {(job.application_mode === "external" || job.application_mode === "both") && job.external_apply_url ? (
+              <Link
+                className="inline-flex h-10 items-center justify-center rounded-full bg-weldoo-indigo px-5 text-[12px] font-bold text-white shadow-weldoo-md transition hover:bg-weldoo-indigo-dark"
+                href={job.external_apply_url}
+                target="_blank"
+              >
+                Apply externally
+              </Link>
+            ) : null}
             <JobSaveButton
               initialSaved={Boolean(savedJob)}
               jobId={job.id}
@@ -334,11 +355,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             ) : null}
             <section className="mt-6 rounded-weldoo-md border border-weldoo-indigo/15 bg-weldoo-indigo/[0.04] px-4 py-4">
               <h2 className="mb-2 text-[13.5px] font-bold text-weldoo-ink">
-                Welding match fields
+                Skills and match fields
               </h2>
-              {[...job.welding_processes, ...job.materials, ...job.required_certifications].length ? (
+              {jobTags.length ? (
                 <div className="flex flex-wrap gap-1.5">
-                  {[...job.welding_processes, ...job.materials, ...job.required_certifications].map((tag) => (
+                  {jobTags.map((tag) => (
                     <span className="inline-flex h-[30px] items-center rounded-full border border-weldoo-indigo/20 bg-weldoo-indigo/[0.07] px-3 text-[12.5px] font-medium text-weldoo-indigo" key={tag}>
                       {tag}
                     </span>
@@ -346,7 +367,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 </div>
               ) : (
                 <p className="text-[13px] leading-[1.65] text-weldoo-muted">
-                  This job does not include welding match tags yet.
+                  This job does not include skills or match tags yet.
                 </p>
               )}
             </section>

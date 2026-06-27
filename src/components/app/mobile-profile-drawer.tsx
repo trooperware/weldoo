@@ -11,6 +11,7 @@ type MobileProfileDrawerProps = {
   avatarUrl?: string | null;
   displayName: string;
   profileHref: string;
+  profileType?: string | null;
   roleLabel: string;
   signOutAction: () => Promise<void>;
 };
@@ -142,6 +143,7 @@ export function MobileProfileDrawer({
   avatarUrl,
   displayName,
   profileHref,
+  profileType,
   roleLabel,
   signOutAction,
 }: MobileProfileDrawerProps) {
@@ -149,6 +151,10 @@ export function MobileProfileDrawer({
   const [visible, setVisible] = useState(false);
   const closeTimeoutRef = useRef<number | null>(null);
   const titleId = useId();
+  const companyLinks: DrawerLink[] =
+    profileType === "company"
+      ? [{ href: "/company/jobs", icon: <DrawerIcon name="briefcase" />, label: "Company dashboard" }]
+      : [];
   const links: DrawerLink[] = [
     { href: profileHref, icon: <DrawerIcon name="profile" />, label: "My profile" },
     { href: "/", icon: <DrawerIcon name="home" />, label: "Feed" },
@@ -156,6 +162,7 @@ export function MobileProfileDrawer({
     { href: "/events", icon: <DrawerIcon name="calendar" />, label: "Events" },
     { href: "/jobs", icon: <DrawerIcon name="briefcase" />, label: "Jobs" },
     { href: "/academy", icon: <DrawerIcon name="academy" />, label: "Academy" },
+    ...companyLinks,
     { href: "/saved/jobs", icon: <DrawerIcon name="briefcase" />, label: "Saved jobs" },
     { href: "/settings", icon: <DrawerIcon name="settings" />, label: "Settings" },
   ];

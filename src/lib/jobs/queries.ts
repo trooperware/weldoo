@@ -20,12 +20,16 @@ type CompanySummary = Pick<
 
 export type JobListItem = Pick<
   Tables<"jobs">,
+  | "application_deadline"
+  | "application_mode"
+  | "area"
   | "benefits"
   | "company_id"
   | "contract_type"
   | "created_at"
   | "description"
   | "experience_level"
+  | "external_apply_url"
   | "id"
   | "location"
   | "materials"
@@ -36,6 +40,9 @@ export type JobListItem = Pick<
   | "salary_currency"
   | "salary_max"
   | "salary_min"
+  | "salary_visible"
+  | "skills"
+  | "tools"
   | "title"
   | "travel_required"
   | "welding_processes"
@@ -153,7 +160,7 @@ export async function getJobsListing(
   let jobsQuery = supabase
     .from("jobs")
     .select(
-      "id, company_id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
+      "id, company_id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, salary_visible, area, skills, tools, external_apply_url, application_mode, application_deadline, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
       { count: "exact" },
     )
     .eq("status", "published")
@@ -195,9 +202,12 @@ export async function getJobsListing(
         !query ||
         includesText(job.title, query) ||
         includesText(job.description, query) ||
+        includesText(job.area, query) ||
         includesText(job.location, query) ||
         includesText(job.experience_level, query) ||
         includesText(job.company?.name, query) ||
+        arrayIncludesText(job.skills, query) ||
+        arrayIncludesText(job.tools, query) ||
         arrayIncludesText(job.welding_processes, query) ||
         arrayIncludesText(job.materials, query) ||
         arrayIncludesText(job.required_certifications, query);
@@ -217,8 +227,11 @@ export async function getJobsListing(
             (area) =>
               includesText(job.title, area) ||
               includesText(job.description, area) ||
+              includesText(job.area, area) ||
               includesText(job.experience_level, area) ||
               includesText(job.company?.sector, area) ||
+              arrayIncludesText(job.skills, area) ||
+              arrayIncludesText(job.tools, area) ||
               arrayIncludesText(job.welding_processes, area) ||
               arrayIncludesText(job.materials, area) ||
               arrayIncludesText(job.required_certifications, area),
@@ -239,7 +252,7 @@ export async function getPublishedJobById(
   const { data, error } = await supabase
     .from("jobs")
     .select(
-      "id, company_id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
+      "id, company_id, title, description, responsibilities, requirements, location, work_mode, contract_type, salary_min, salary_max, salary_currency, salary_visible, area, skills, tools, external_apply_url, application_mode, application_deadline, welding_processes, materials, required_certifications, experience_level, travel_required, benefits, published_at, created_at, companies(id, name, sector, location, logo_url)",
     )
     .eq("id", jobId)
     .eq("status", "published")
