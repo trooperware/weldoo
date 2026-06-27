@@ -227,7 +227,7 @@ function EventCard({ index, item }: { index: number; item: AcademyItem }) {
 
         <Link
           className="mt-auto inline-flex h-9 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border bg-white px-4 text-[12.5px] font-semibold tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"
-          href={`/academy/${item.id}`}
+          href={`/events/${item.id}`}
         >
           <ExternalLinkIcon />
           View details
