@@ -75,10 +75,19 @@ function formatSalary(job: JobListItem) {
 
 function formatPostedDate(value: string | null, fallback: string) {
   const date = new Date(value ?? fallback);
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-  }).format(date);
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+  if (diffWeeks < 5) return `${diffWeeks} ${diffWeeks === 1 ? "week" : "weeks"} ago`;
+  return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
 }
 
 function clearFilterHref(filters: JobFilters, key: keyof JobFilters) {
@@ -322,21 +331,6 @@ function FilterDropdown({
   );
 }
 
-function JobCompactBadge({
-  children,
-  icon,
-}: {
-  children: string;
-  icon: ReactNode;
-}) {
-  return (
-    <span className="inline-flex h-[22px] items-center gap-1 rounded-full bg-weldoo-bg-strong px-2 text-[11px] font-medium text-weldoo-ink">
-      {icon}
-      {children}
-    </span>
-  );
-}
-
 function ActiveFilterPills({ filters }: { filters: JobFilters }) {
   const pills: Array<{ href: string; label: string }> = [];
 
@@ -407,7 +401,7 @@ function JobLogo({ job }: { job: JobListItem }) {
   const initial = company?.name?.slice(0, 1).toUpperCase() ?? "W";
 
   return (
-    <div className="flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
+    <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-weldoo-border-light bg-white text-lg font-extrabold text-weldoo-indigo">
       {company?.logo_url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img alt="" className="h-full w-full object-contain" src={company.logo_url} />
@@ -621,10 +615,10 @@ function JobCard({
   job: JobListItem;
 }) {
   const tags = [
-    ...job.welding_processes.slice(0, 2),
-    ...job.required_certifications.slice(0, 1),
-  ];
-  const salary = formatSalary(job);
+    ...job.welding_processes,
+    ...job.materials,
+    ...job.required_certifications,
+  ].filter((tag, index, allTags) => tag !== job.experience_level && allTags.indexOf(tag) === index).slice(0, 3);
   const searchText = [
     job.title,
     job.description,
@@ -646,7 +640,7 @@ function JobCard({
   return (
     <Link
       className={[
-        "group relative flex items-start gap-3 border-b border-weldoo-border-light px-[18px] py-3.5 transition hover:bg-weldoo-bg-strong",
+        "group relative flex items-start gap-2.5 border-b border-weldoo-border-light px-3.5 py-3.5 transition hover:bg-weldoo-bg-strong",
         active ? "bg-weldoo-indigo/[0.06] before:absolute before:bottom-0 before:left-0 before:top-0 before:w-[3px] before:rounded-r-sm before:bg-weldoo-indigo" : "",
       ].join(" ")}
       data-job-card
@@ -665,30 +659,14 @@ function JobCard({
           <LocationIcon className="h-3 w-3 shrink-0" />
           <span>
             {job.location ?? job.company?.location ?? "Location not set"}
+            {job.work_mode ? ` · ${workModeLabels[job.work_mode]}` : ""}
           </span>
         </p>
-        <div className="mb-1.5 flex flex-wrap gap-1">
-          {job.work_mode ? (
-            <JobCompactBadge icon={<MonitorIcon />}>
-              {workModeLabels[job.work_mode]}
-            </JobCompactBadge>
-          ) : null}
-          {job.contract_type ? (
-            <JobCompactBadge icon={<ClockIcon />}>
-              {contractTypeLabels[job.contract_type]}
-            </JobCompactBadge>
-          ) : null}
-          {job.travel_required ? (
-            <JobCompactBadge icon={<BriefcaseIcon />}>
-              Travel
-            </JobCompactBadge>
-          ) : null}
-        </div>
         {tags.length ? (
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (
               <span
-                className="rounded-full bg-weldoo-bg-strong px-2 py-0.5 text-[11px] font-medium text-weldoo-ink"
+                className="whitespace-nowrap rounded-full bg-weldoo-bg-strong px-1.5 py-0.5 text-[10.5px] font-medium text-weldoo-ink"
                 key={tag}
               >
                 {tag}
@@ -697,8 +675,8 @@ function JobCard({
           </div>
         ) : null}
         <p className="mt-1.5 text-[11px] text-weldoo-muted">
-          Posted {formatPostedDate(job.published_at, job.created_at)}
-          {salary ? ` · ${salary}` : ""}
+          {formatPostedDate(job.published_at, job.created_at)}
+          {job.contract_type ? ` · ${contractTypeLabels[job.contract_type]}` : ""}
         </p>
       </div>
     </Link>
@@ -793,7 +771,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
         <ActiveFilterPills filters={filters} />
 
-        <section className="grid overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm lg:grid-cols-[40%_60%]">
+        <section className="grid overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm lg:grid-cols-[43%_57%]">
           <div className="border-b border-weldoo-border-light lg:sticky lg:top-16 lg:max-h-[calc(100vh-64px)] lg:overflow-hidden lg:border-b-0 lg:border-r">
             {listing.items.length ? (
               <div className="lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto">

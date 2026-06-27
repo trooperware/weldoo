@@ -11,7 +11,8 @@
     "jira:sprint": "node scripts/sync-jira.mjs --sprint",
     "jira:issue": "node scripts/sync-jira.mjs --issue",
     "jira:dry-run": "node scripts/sync-jira.mjs",
-    "jira:push": "node scripts/sync-jira.mjs --push"
+    "jira:push": "node scripts/sync-jira.mjs --push",
+    "seed:prototype": "node scripts/seed-prototype-data.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
