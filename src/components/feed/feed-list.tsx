@@ -14,6 +14,8 @@ type FeedPageResponse = {
 type FeedListProps = {
   initialFeed: FeedPageResponse;
   viewerAvatarUrl?: string | null;
+  viewerDisplayName?: string | null;
+  viewerHeadline?: string | null;
   viewerInitial: string;
 };
 
@@ -45,6 +47,8 @@ function FeedLoadingSpinner() {
 export function FeedList({
   initialFeed,
   viewerAvatarUrl,
+  viewerDisplayName,
+  viewerHeadline,
   viewerInitial,
 }: FeedListProps) {
   const [items, setItems] = useState(initialFeed.items);
@@ -122,6 +126,8 @@ export function FeedList({
           item={item}
           key={item.post.id}
           viewerAvatarUrl={viewerAvatarUrl}
+          viewerDisplayName={viewerDisplayName}
+          viewerHeadline={viewerHeadline}
           viewerInitial={viewerInitial}
         />
       ))}

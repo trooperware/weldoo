@@ -3,14 +3,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Enums, Tables } from "@/types/database";
 
 export type JobFilters = {
+  areas?: string[];
   company?: string;
-  contractType?: Enums<"contract_type">;
+  contractTypes?: Array<Enums<"contract_type">>;
   experienceLevel?: string;
-  location?: string;
-  process?: string;
+  locations?: string[];
   query?: string;
   travelRequired?: "false" | "true";
-  workMode?: Enums<"work_mode">;
+  workModes?: Array<Enums<"work_mode">>;
 };
 
 type CompanySummary = Pick<
@@ -54,8 +54,13 @@ function normalizeFilter(value?: string) {
   return normalized ? normalized.slice(0, 120) : undefined;
 }
 
-function normalizeLike(value: string) {
-  return `%${value.replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;
+function normalizeFilterValues(value?: string | string[]) {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+
+  return values
+    .flatMap((item) => item.split(","))
+    .map((item) => normalizeFilter(item))
+    .filter(Boolean) as string[];
 }
 
 function includesText(value: string | null | undefined, filter?: string) {
@@ -83,39 +88,43 @@ function isWorkMode(value?: string): value is Enums<"work_mode"> {
 }
 
 export function parseJobFilters(params: {
+  area?: string | string[];
   company?: string;
-  contractType?: string;
+  contractType?: string | string[];
   experience?: string;
-  location?: string;
-  process?: string;
+  location?: string | string[];
+  process?: string | string[];
   q?: string;
   travel?: string;
-  workMode?: string;
+  workMode?: string | string[];
 }): JobFilters {
-  const contractType = normalizeFilter(params.contractType);
-  const workMode = normalizeFilter(params.workMode);
+  const contractTypes = normalizeFilterValues(params.contractType).filter(isContractType);
+  const areas = [...normalizeFilterValues(params.area), ...normalizeFilterValues(params.process)];
+  const workModes = normalizeFilterValues(params.workMode).filter(isWorkMode);
   const travel = normalizeFilter(params.travel);
 
   return {
+    areas: areas.length ? [...new Set(areas)] : undefined,
     company: normalizeFilter(params.company),
-    contractType: isContractType(contractType) ? contractType : undefined,
+    contractTypes: contractTypes.length ? [...new Set(contractTypes)] : undefined,
     experienceLevel: normalizeFilter(params.experience),
-    location: normalizeFilter(params.location),
-    process: normalizeFilter(params.process),
+    locations: normalizeFilterValues(params.location).length
+      ? [...new Set(normalizeFilterValues(params.location))]
+      : undefined,
     query: normalizeFilter(params.q),
     travelRequired: travel === "true" || travel === "false" ? travel : undefined,
-    workMode: isWorkMode(workMode) ? workMode : undefined,
+    workModes: workModes.length ? [...new Set(workModes)] : undefined,
   };
 }
 
 export function getJobsHref(filters: JobFilters) {
   const params = new URLSearchParams();
 
+  filters.areas?.forEach((area) => params.append("area", area));
   if (filters.query) params.set("q", filters.query);
-  if (filters.location) params.set("location", filters.location);
-  if (filters.process) params.set("process", filters.process);
-  if (filters.contractType) params.set("contractType", filters.contractType);
-  if (filters.workMode) params.set("workMode", filters.workMode);
+  filters.locations?.forEach((location) => params.append("location", location));
+  filters.contractTypes?.forEach((contractType) => params.append("contractType", contractType));
+  filters.workModes?.forEach((workMode) => params.append("workMode", workMode));
   if (filters.travelRequired) params.set("travel", filters.travelRequired);
   if (filters.experienceLevel) params.set("experience", filters.experienceLevel);
   if (filters.company) params.set("company", filters.company);
@@ -126,11 +135,11 @@ export function getJobsHref(filters: JobFilters) {
 
 export function hasActiveJobFilters(filters: JobFilters) {
   return Boolean(
-    filters.query ||
-      filters.location ||
-      filters.process ||
-      filters.contractType ||
-      filters.workMode ||
+    filters.areas?.length ||
+      filters.query ||
+      filters.locations?.length ||
+      filters.contractTypes?.length ||
+      filters.workModes?.length ||
       filters.travelRequired ||
       filters.experienceLevel ||
       filters.company,
@@ -152,16 +161,12 @@ export async function getJobsListing(
     .order("created_at", { ascending: false })
     .limit(100);
 
-  if (filters.location) {
-    jobsQuery = jobsQuery.ilike("location", normalizeLike(filters.location));
+  if (filters.contractTypes?.length) {
+    jobsQuery = jobsQuery.in("contract_type", filters.contractTypes);
   }
 
-  if (filters.contractType) {
-    jobsQuery = jobsQuery.eq("contract_type", filters.contractType);
-  }
-
-  if (filters.workMode) {
-    jobsQuery = jobsQuery.eq("work_mode", filters.workMode);
+  if (filters.workModes?.length) {
+    jobsQuery = jobsQuery.in("work_mode", filters.workModes);
   }
 
   if (filters.travelRequired) {
@@ -201,11 +206,23 @@ export async function getJobsListing(
         queryMatches &&
         includesText(job.company?.name, filters.company) &&
         includesText(job.experience_level, filters.experienceLevel) &&
-        (
-          arrayIncludesText(job.welding_processes, filters.process) ||
-          arrayIncludesText(job.materials, filters.process) ||
-          arrayIncludesText(job.required_certifications, filters.process)
-        )
+        (!filters.locations?.length ||
+          filters.locations.some(
+            (location) =>
+              includesText(job.location, location) ||
+              includesText(job.company?.location, location),
+          )) &&
+        (!filters.areas?.length ||
+          filters.areas.some(
+            (area) =>
+              includesText(job.title, area) ||
+              includesText(job.description, area) ||
+              includesText(job.experience_level, area) ||
+              includesText(job.company?.sector, area) ||
+              arrayIncludesText(job.welding_processes, area) ||
+              arrayIncludesText(job.materials, area) ||
+              arrayIncludesText(job.required_certifications, area),
+          ))
       );
     });
 
