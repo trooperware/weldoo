@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 type ModalProps = {
   children: ReactNode;
   description?: string;
-  footer?: ReactNode;
+  footer?: ReactNode | null;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   title: string;
@@ -64,16 +64,18 @@ export function Modal({
           </div>
         </div>
         <div className="p-5">{children}</div>
-        <div className="flex justify-end gap-3 border-t border-weldoo-border-light px-5 py-4">
-          {footer ?? (
-            <>
-              <Button onClick={() => onOpenChange(false)} variant="ghost">
-                Cancel
-              </Button>
-              <Button onClick={() => onOpenChange(false)}>Confirm</Button>
-            </>
-          )}
-        </div>
+        {footer !== null ? (
+          <div className="flex justify-end gap-3 border-t border-weldoo-border-light px-5 py-4">
+            {footer ?? (
+              <>
+                <Button onClick={() => onOpenChange(false)} variant="ghost">
+                  Cancel
+                </Button>
+                <Button onClick={() => onOpenChange(false)}>Confirm</Button>
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>,
     document.body,

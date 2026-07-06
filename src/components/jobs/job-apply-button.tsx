@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -35,6 +36,16 @@ const jobActionButtonClass =
 const primaryJobActionButtonClass =
   "bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] hover:brightness-105";
 
+function ApplyIcon() {
+  return (
+    <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      <polyline points="15 3 21 3 21 9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      <line x1="10" x2="21" y1="14" y2="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function JobApplyButton({
   existingApplication,
   jobId,
@@ -43,9 +54,11 @@ export function JobApplyButton({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [state, setState] = useState<ApplyState>({});
+  const appliedAt = existingApplication?.createdAt ?? submittedAt;
 
-  if (existingApplication) {
+  if (appliedAt) {
     return (
       <button
         className={cn(
@@ -55,20 +68,56 @@ export function JobApplyButton({
         disabled
         type="button"
       >
-        Applied {formatDate(existingApplication.createdAt)}
+        Applied {formatDate(appliedAt)}
       </button>
     );
   }
 
   if (profileType !== "professional") {
     return (
-      <button
-        className={cn(jobActionButtonClass, primaryJobActionButtonClass, "opacity-50")}
-        disabled
-        type="button"
-      >
-        Apply now
-      </button>
+      <>
+        <button
+          className={cn(jobActionButtonClass, primaryJobActionButtonClass, "gap-1.5")}
+          onClick={() => setOpen(true)}
+          type="button"
+        >
+          <ApplyIcon />
+          Apply now
+        </button>
+
+        <Modal
+          description={
+            profileType
+              ? "Only professional profiles can apply to jobs on Weldoo."
+              : "Sign in with a professional profile to apply to this job."
+          }
+          footer={null}
+          onOpenChange={setOpen}
+          open={open}
+          title={profileType ? "Professional profile required" : "Sign in to apply"}
+        >
+          <div className="space-y-4">
+            <p className="text-sm leading-6 text-weldoo-muted">
+              {profileType
+                ? "Company and training provider accounts can browse jobs, but applications are limited to professional profiles."
+                : "After signing in, you can confirm your application and share your professional profile with the employer."}
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button onClick={() => setOpen(false)} type="button" variant="ghost">
+                Cancel
+              </Button>
+              {!profileType ? (
+                <Link
+                  className="inline-flex h-10 items-center justify-center rounded-weldoo-sm bg-weldoo-indigo px-4 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
+                  href="/auth/sign-in"
+                >
+                  Sign in
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </Modal>
+      </>
     );
   }
 
@@ -96,6 +145,8 @@ export function JobApplyButton({
         message: payload.message ?? "Application submitted.",
         status: "success",
       });
+      setSubmittedAt(new Date().toISOString());
+      setOpen(false);
       router.refresh();
     } catch (error) {
       setState({
@@ -114,17 +165,13 @@ export function JobApplyButton({
         onClick={() => setOpen(true)}
         type="button"
       >
-        <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-          <polyline points="15 3 21 3 21 9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-          <line x1="10" x2="21" y1="14" y2="3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
+        <ApplyIcon />
         Apply now
       </button>
 
       <Modal
         description="Send a short application message. The company will see it in their applications panel."
-        footer={<></>}
+        footer={null}
         onOpenChange={setOpen}
         open={open}
         title="Apply to this job"
