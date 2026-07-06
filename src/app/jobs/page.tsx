@@ -431,14 +431,14 @@ function JobLogo({ job }: { job: JobListItem }) {
 
 function JobDetailPanel({
   application,
+  auth,
   isSaved,
   job,
-  profileType,
 }: {
   application: { created_at: string; status: string } | null;
+  auth?: Awaited<ReturnType<typeof getAppShellAuth>>;
   isSaved: boolean;
   job: JobListItem | null;
-  profileType?: string | null;
 }) {
   if (!job) {
     return (
@@ -539,7 +539,22 @@ function JobDetailPanel({
                 : null
             }
             jobId={job.id}
-            profileType={profileType}
+            jobSummary={{
+              company: companyName,
+              location: job.location ?? companyLocation,
+              logoUrl: job.company?.logo_url,
+              title: job.title,
+            }}
+            profileSummary={
+              auth
+                ? {
+                    avatarUrl: auth.avatarUrl,
+                    displayName: auth.displayName,
+                    headline: auth.headline,
+                  }
+                : undefined
+            }
+            profileType={auth?.profileType}
           />
         ) : null}
         {(job.application_mode === "external" || job.application_mode === "both") && job.external_apply_url ? (
@@ -554,7 +569,7 @@ function JobDetailPanel({
         <JobSaveButton
           initialSaved={isSaved}
           jobId={job.id}
-          signedIn={Boolean(profileType)}
+          signedIn={Boolean(auth?.profileType)}
         />
       </div>
 
@@ -837,9 +852,9 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           <div className="hidden lg:block">
             <JobDetailPanel
               application={selectedApplication}
+              auth={appShellAuth}
               isSaved={Boolean(selectedSavedJob)}
               job={selectedJob}
-              profileType={appShellAuth?.profileType}
             />
           </div>
         </section>
@@ -864,9 +879,9 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               <div className="-mx-4">
                 <JobDetailPanel
                   application={selectedApplication}
+                  auth={appShellAuth}
                   isSaved={Boolean(selectedSavedJob)}
                   job={selectedJob}
-                  profileType={appShellAuth?.profileType}
                 />
               </div>
             </div>

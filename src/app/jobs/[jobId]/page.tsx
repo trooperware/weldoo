@@ -296,6 +296,21 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                     : null
                 }
                 jobId={job.id}
+                jobSummary={{
+                  company: companyName,
+                  location: job.location ?? companyLocation,
+                  logoUrl: job.company?.logo_url,
+                  title: job.title,
+                }}
+                profileSummary={
+                  appShellAuth
+                    ? {
+                        avatarUrl: appShellAuth.avatarUrl,
+                        displayName: appShellAuth.displayName,
+                        headline: appShellAuth.headline,
+                      }
+                    : undefined
+                }
                 profileType={appShellAuth?.profileType}
               />
             ) : null}

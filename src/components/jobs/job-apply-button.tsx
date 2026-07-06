@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
-import { Button, FormError, Input, Modal, Textarea } from "@/components/ui";
+import { Button, FormError, Modal } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { JobApplicationFieldErrors } from "@/lib/validators/job-application";
 
@@ -20,6 +20,17 @@ type JobApplyButtonProps = {
     status: string;
   } | null;
   jobId: string;
+  jobSummary?: {
+    company: string;
+    location?: string | null;
+    logoUrl?: string | null;
+    title: string;
+  };
+  profileSummary?: {
+    avatarUrl?: string | null;
+    displayName: string;
+    headline?: string | null;
+  };
   profileType?: string | null;
 };
 
@@ -49,6 +60,8 @@ function ApplyIcon() {
 export function JobApplyButton({
   existingApplication,
   jobId,
+  jobSummary,
+  profileSummary,
   profileType,
 }: JobApplyButtonProps) {
   const router = useRouter();
@@ -121,14 +134,20 @@ export function JobApplyButton({
     );
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleConfirm() {
     setPending(true);
     setState({});
 
     try {
+      const formData = new FormData();
+      formData.set(
+        "message",
+        "Application confirmed through Weldoo profile sharing.",
+      );
+      formData.set("externalCvUrl", "");
+
       const response = await fetch(`/api/jobs/${jobId}/applications`, {
-        body: new FormData(event.currentTarget),
+        body: formData,
         method: "POST",
       });
       const payload = (await response.json()) as ApplyState;
@@ -170,44 +189,84 @@ export function JobApplyButton({
       </button>
 
       <Modal
-        description="Send a short application message. The company will see it in their applications panel."
         footer={null}
         onOpenChange={setOpen}
         open={open}
-        title="Apply to this job"
+        title="Confirm application"
       >
-        <form className="space-y-4" noValidate onSubmit={handleSubmit}>
+        <div className="space-y-4">
           <FormError>{state.status === "error" ? state.message : null}</FormError>
           {state.status === "success" && state.message ? (
             <div className="rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
               {state.message}
             </div>
           ) : null}
-          <Textarea
-            error={state.errors?.message}
-            id="message"
-            label="Message"
-            name="message"
-            placeholder="Introduce yourself, your welding experience, and why this role fits your profile."
-            rows={5}
-          />
-          <Input
-            error={state.errors?.externalCvUrl}
-            id="externalCvUrl"
-            label="External CV URL"
-            name="externalCvUrl"
-            placeholder="https://..."
-            type="url"
-          />
+          {state.errors?.message || state.errors?.externalCvUrl ? (
+            <FormError>
+              {state.errors.message ?? state.errors.externalCvUrl ?? null}
+            </FormError>
+          ) : null}
+          <div className="flex items-center gap-3.5 rounded-xl bg-[#f7f7fb] px-4 py-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-white text-base font-extrabold text-weldoo-indigo">
+              {jobSummary?.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt=""
+                  className="h-full w-full object-contain"
+                  src={jobSummary.logoUrl}
+                />
+              ) : (
+                (jobSummary?.company ?? "W").slice(0, 1).toUpperCase()
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-[14.5px] font-bold text-weldoo-ink">
+                {jobSummary?.title ?? "Selected job"}
+              </div>
+              <div className="mt-0.5 truncate text-[12.5px] text-weldoo-muted">
+                {jobSummary?.company ?? "Weldoo company"}
+                {jobSummary?.location ? ` · ${jobSummary.location}` : ""}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-weldoo-indigo text-sm font-bold text-white">
+              {profileSummary?.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt=""
+                  className="h-full w-full object-cover"
+                  src={profileSummary.avatarUrl}
+                />
+              ) : (
+                (profileSummary?.displayName ?? "W").slice(0, 1).toUpperCase()
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-[13.5px] font-bold text-weldoo-ink">
+                {profileSummary?.displayName ?? "Weldoo professional"}
+              </div>
+              <div className="mt-0.5 truncate text-xs text-weldoo-muted">
+                {profileSummary?.headline ?? "Professional profile"}
+              </div>
+            </div>
+          </div>
+          <p className="text-[12.5px] leading-6 text-weldoo-muted">
+            Your profile (name, role, and current avatar) will be shared with the employer as your application.
+          </p>
           <div className="flex justify-end gap-2">
             <Button onClick={() => setOpen(false)} type="button" variant="ghost">
               Cancel
             </Button>
-            <Button disabled={pending || state.status === "success"} type="submit">
-              {pending ? "Submitting" : "Submit application"}
+            <Button
+              disabled={pending || state.status === "success"}
+              onClick={handleConfirm}
+              type="button"
+            >
+              {pending ? "Applying..." : "Confirm application"}
             </Button>
           </div>
-        </form>
+        </div>
       </Modal>
     </>
   );
