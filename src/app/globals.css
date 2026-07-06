@@ -99,6 +99,19 @@ a {
   text-decoration: none;
 }
 
+a[href],
+button:not(:disabled),
+summary,
+[role="button"]:not([aria-disabled="true"]),
+[role="link"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 button,
 input,
 textarea,
