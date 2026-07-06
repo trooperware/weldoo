@@ -305,7 +305,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 href={job.external_apply_url}
                 target="_blank"
               >
-                Apply externally
+                Apply now
               </Link>
             ) : null}
             <JobSaveButton
