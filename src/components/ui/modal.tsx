@@ -27,7 +27,7 @@ export function Modal({
   return createPortal(
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-weldoo-ink/35 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[1100] flex items-center justify-center bg-weldoo-ink/35 p-4 backdrop-blur-[2px]"
       role="dialog"
     >
       <div className="w-full max-w-lg rounded-weldoo-md border border-weldoo-border-light bg-white shadow-weldoo-xl">
