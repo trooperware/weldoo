@@ -157,7 +157,7 @@ function ProfileMenu({
             </svg>
           }
         >
-          Saved jobs
+          My Jobs
         </ProfileMenuItem>
         <ProfileMenuItem
           href="/settings"

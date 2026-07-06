@@ -103,10 +103,10 @@ export default async function SettingsPage() {
                 <div className="flex items-center justify-between gap-4 px-5 py-4">
                   <div>
                     <p className="text-[13.2px] font-medium text-weldoo-ink">
-                      Saved jobs
+                      My Jobs
                     </p>
                     <p className="mt-0.5 text-[11.5px] text-weldoo-muted">
-                      Review jobs you saved from the jobs board.
+                      Review jobs you applied to or saved from the jobs board.
                     </p>
                   </div>
                   <Link

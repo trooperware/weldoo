@@ -163,7 +163,7 @@ export function MobileProfileDrawer({
     { href: "/jobs", icon: <DrawerIcon name="briefcase" />, label: "Jobs" },
     { href: "/academy", icon: <DrawerIcon name="academy" />, label: "Academy" },
     ...companyLinks,
-    { href: "/saved/jobs", icon: <DrawerIcon name="briefcase" />, label: "Saved jobs" },
+    { href: "/saved/jobs", icon: <DrawerIcon name="briefcase" />, label: "My Jobs" },
     { href: "/settings", icon: <DrawerIcon name="settings" />, label: "Settings" },
   ];
 
