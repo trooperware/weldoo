@@ -242,6 +242,14 @@ function ChevronDownIcon({ className = "h-3 w-3" }: { className?: string }) {
   );
 }
 
+function BackIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <polyline points="15 18 9 12 15 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 function DetailPill({
   children,
   icon,
@@ -410,7 +418,7 @@ function JobLogo({ job }: { job: JobListItem }) {
   const initial = company?.name?.slice(0, 1).toUpperCase() ?? "W";
 
   return (
-    <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-weldoo-border-light bg-white text-lg font-extrabold text-weldoo-indigo">
+    <div className="flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-weldoo-border-light bg-white text-xl font-extrabold text-weldoo-indigo">
       {company?.logo_url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img alt="" className="h-full w-full object-contain" src={company.logo_url} />
@@ -627,10 +635,12 @@ function JobDetailPanel({
 
 function JobCard({
   active,
+  activeDesktopOnly = false,
   filters,
   job,
 }: {
   active: boolean;
+  activeDesktopOnly?: boolean;
   filters: JobFilters;
   job: JobListItem;
 }) {
@@ -659,8 +669,13 @@ function JobCard({
   return (
     <Link
       className={[
-        "group relative flex items-start gap-2.5 border-b border-weldoo-border-light px-3.5 py-3.5 transition hover:bg-weldoo-bg-strong",
-        active ? "bg-weldoo-indigo/[0.06] before:absolute before:bottom-0 before:left-0 before:top-0 before:w-[3px] before:rounded-r-sm before:bg-weldoo-indigo" : "",
+        "group relative flex items-start gap-3 border-b border-weldoo-border-light px-4 py-3.5 transition hover:bg-weldoo-bg-strong sm:px-[18px]",
+        active && activeDesktopOnly
+          ? "lg:bg-weldoo-indigo/[0.06] lg:before:absolute lg:before:bottom-0 lg:before:left-0 lg:before:top-0 lg:before:w-[3px] lg:before:rounded-r-sm lg:before:bg-weldoo-indigo"
+          : "",
+        active && !activeDesktopOnly
+          ? "bg-weldoo-indigo/[0.06] before:absolute before:bottom-0 before:left-0 before:top-0 before:w-[3px] before:rounded-r-sm before:bg-weldoo-indigo"
+          : "",
       ].join(" ")}
       data-job-card
       data-search-text={searchText}
@@ -711,9 +726,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const supabase = await createSupabaseServerClient();
   const listing = await getJobsListing(supabase, filters);
   const selectedJobId = params.job?.trim();
+  const selectedJobHref = selectedJobId ? getJobsHref(filters) : null;
   const selectedJob =
     listing.items.find((job) => job.id === selectedJobId) ??
     (selectedJobId ? await getPublishedJobById(supabase, selectedJobId) : listing.items[0] ?? null);
+  const hasMobileBottomNav = Boolean(appShellAuth && appShellAuth.onboardingCompleted);
   const selectedApplication =
     selectedJob && appShellAuth?.profileType === "professional" && appShellAuth.profileId
       ? await getApplicationForCurrentUser(supabase, selectedJob.id, appShellAuth.profileId)
@@ -748,8 +765,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
   return (
     <AppShell auth={appShellAuth}>
-      <main className="mx-auto max-w-[1128px] px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-7 lg:pb-20">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <main className="mx-auto max-w-[1128px] px-2 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-5 sm:px-4 lg:pb-20 lg:pt-7">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-0 sm:px-0">
           <h1 className="text-[18px] font-extrabold tracking-[-0.3px] text-weldoo-ink">
             Jobs in Spain
             <span className="ml-2 text-sm font-medium text-weldoo-muted" data-jobs-results-count>
@@ -797,6 +814,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                 {listing.items.map((job) => (
                   <JobCard
                     active={job.id === selectedJob?.id}
+                    activeDesktopOnly={!selectedJobId}
                     filters={filters}
                     job={job}
                     key={job.id}
@@ -816,13 +834,44 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               </div>
             )}
           </div>
-          <JobDetailPanel
-            application={selectedApplication}
-            isSaved={Boolean(selectedSavedJob)}
-            job={selectedJob}
-            profileType={appShellAuth?.profileType}
-          />
+          <div className="hidden lg:block">
+            <JobDetailPanel
+              application={selectedApplication}
+              isSaved={Boolean(selectedSavedJob)}
+              job={selectedJob}
+              profileType={appShellAuth?.profileType}
+            />
+          </div>
         </section>
+
+        {selectedJobId && selectedJob ? (
+          <div
+            className={[
+              "fixed inset-x-0 top-[93px] z-[300] overflow-y-auto bg-white lg:hidden",
+              hasMobileBottomNav
+                ? "bottom-[calc(70px+env(safe-area-inset-bottom))]"
+                : "bottom-0",
+            ].join(" ")}
+          >
+            <div className="px-4 pb-6 pt-4">
+              <Link
+                className="mb-4 inline-flex h-9 items-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-3.5 text-[13px] font-semibold text-weldoo-ink shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
+                href={selectedJobHref ?? "/jobs"}
+              >
+                <BackIcon />
+                Back to Jobs
+              </Link>
+              <div className="-mx-4">
+                <JobDetailPanel
+                  application={selectedApplication}
+                  isSaved={Boolean(selectedSavedJob)}
+                  job={selectedJob}
+                  profileType={appShellAuth?.profileType}
+                />
+              </div>
+            </div>
+          </div>
+        ) : null}
       </main>
     </AppShell>
   );
