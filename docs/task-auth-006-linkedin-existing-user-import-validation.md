@@ -42,6 +42,10 @@ When LinkedIn returns the field through Supabase Auth identity metadata, Weldoo 
 - Display name.
 - Profile image URL.
 - Professional headline, if returned.
+- Bio/about summary, if returned.
+- Location, if returned.
+- Website or public profile URL, if returned.
+- Years of experience, if returned and the Weldoo account is a professional profile.
 
 These fields are displayed for review but not persisted separately in the current model:
 
@@ -51,6 +55,8 @@ These fields are displayed for review but not persisted separately in the curren
 
 Weldoo currently stores a single `profiles.display_name`. First and last name may be used to build the display name proposal when LinkedIn returns them.
 
+LinkedIn OpenID Connect currently documents the standard scopes `openid`, `profile`, and `email`, with lite profile claims such as `name`, `given_name`, `family_name`, `picture`, `email`, and `locale`. It does not document access to full biography, work history, skills, certifications, or complete experience data through the standard sign-in product. Weldoo must not scrape LinkedIn pages or claim those fields are available unless LinkedIn/Supabase returns them through an official granted flow.
+
 ## Fallback Behavior
 
 - If LinkedIn does not return a field, the field is shown as unavailable and cannot be selected.
@@ -58,6 +64,7 @@ Weldoo currently stores a single `profiles.display_name`. First and last name ma
 - If LinkedIn is already connected, the user goes directly to the review screen.
 - If identity linking is disabled in Supabase, the user sees a visible error on `/settings/linkedin-import`.
 - If the LinkedIn identity is already linked to a different Weldoo account, Supabase rejects the linking flow and Weldoo shows the provider error.
+- If years of experience is returned for a company or training provider account, Weldoo rejects that field because only professional profiles have `professional_profiles.years_experience`.
 
 ## Disconnect Behavior
 
@@ -78,7 +85,8 @@ If needed during testing, disconnect LinkedIn from the Supabase dashboard or add
 9. Select one available field and import it.
 10. Confirm only the selected field changes in the Weldoo profile.
 11. Repeat with no fields selected and confirm a visible validation error appears.
-12. Repeat with a LinkedIn account that does not return image/headline and confirm unavailable fields cannot be selected.
+12. Repeat with a LinkedIn account that does not return image/headline/bio/location/experience and confirm unavailable fields cannot be selected.
+13. For a professional account, simulate official metadata containing `yearsExperience` or `years_experience`, import it, and confirm `professional_profiles.years_experience` changes only after explicit selection.
 
 ## Security and Privacy Notes
 
@@ -86,3 +94,4 @@ If needed during testing, disconnect LinkedIn from the Supabase dashboard or add
 - Do not request or assume LinkedIn work history, skills, certifications, or full profile details.
 - Do not import anything without explicit user consent.
 - Profile updates use the authenticated Supabase user and existing RLS ownership constraints.
+- Base profile updates write only to `profiles.id = auth.uid()`. Professional experience updates write only to `professional_profiles.profile_id = auth.uid()` and should be covered by the existing owner RLS policies before release.

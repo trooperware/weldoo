@@ -123,12 +123,20 @@ export default async function TrainingProviderPublicPage({
               </div>
               <div className="flex flex-wrap gap-2">
                 {isOwner ? (
-                  <Link
-                    className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-white px-5 text-sm font-semibold text-[var(--weldoo-slate)] transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
-                    href="/training-provider/edit"
-                  >
-                    Edit profile
-                  </Link>
+                  <>
+                    <Link
+                      className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] border border-[var(--weldoo-border-light)] bg-white px-5 text-sm font-semibold text-[var(--weldoo-slate)] transition hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)]"
+                      href="/training-provider/edit"
+                    >
+                      Edit profile
+                    </Link>
+                    <Link
+                      className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[var(--weldoo-indigo)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
+                      href="/settings/linkedin-import"
+                    >
+                      Import linkedin profile
+                    </Link>
+                  </>
                 ) : null}
                 <ContactRequestButton
                   canContact={Boolean(user && !isOwner)}

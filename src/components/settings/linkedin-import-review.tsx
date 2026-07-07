@@ -7,21 +7,33 @@ import type { LinkedInProfileImport } from "@/lib/auth/linkedin-profile-import";
 
 type CurrentProfileValues = {
   avatarUrl: string | null;
+  bio: string | null;
   displayName: string;
   headline: string | null;
+  location: string | null;
+  websiteUrl: string | null;
+  yearsExperience: number | null;
 };
 
 type ImportField = {
   current: string | null;
   description: string;
-  imported: string | undefined;
+  imported: string | number | undefined;
   label: string;
-  name: "avatarUrl" | "displayName" | "headline";
+  name:
+    | "avatarUrl"
+    | "bio"
+    | "displayName"
+    | "headline"
+    | "location"
+    | "websiteUrl"
+    | "yearsExperience";
 };
 
 type LinkedInImportReviewProps = {
   currentProfile: CurrentProfileValues;
   importedProfile: LinkedInProfileImport;
+  isProfessionalProfile: boolean;
 };
 
 type ImportState = {
@@ -29,8 +41,43 @@ type ImportState = {
   status?: "error" | "success";
 };
 
-function normalize(value: string | null | undefined) {
-  return value?.trim() || "";
+function normalize(value: string | number | null | undefined) {
+  return value?.toString().trim() || "";
+}
+
+function ImagePreview({ value }: { value: string | null | undefined }) {
+  if (!value) {
+    return (
+      <div className="mt-1 flex h-16 w-16 items-center justify-center rounded-full bg-weldoo-bg text-[11.5px] font-semibold text-weldoo-muted">
+        Empty
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1 flex items-center rounded-weldoo-sm bg-weldoo-bg px-3 py-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        alt=""
+        className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-weldoo-border-light"
+        src={value}
+      />
+    </div>
+  );
+}
+
+function FieldValue({ field, source }: { field: ImportField; source: "current" | "imported" }) {
+  const value = source === "current" ? field.current : field.imported;
+
+  if (field.name === "avatarUrl") {
+    return <ImagePreview value={typeof value === "string" ? value : undefined} />;
+  }
+
+  return (
+    <p className="mt-1 break-words rounded-weldoo-sm bg-weldoo-bg px-3 py-2 text-weldoo-ink">
+      {value?.toString() || (source === "current" ? "Empty" : "Not returned")}
+    </p>
+  );
 }
 
 function FieldComparison({
@@ -61,15 +108,11 @@ function FieldComparison({
       <div className="grid gap-2 text-[12.1px] sm:grid-cols-2 sm:gap-3">
         <div>
           <p className="font-semibold text-weldoo-muted">Current</p>
-          <p className="mt-1 break-words rounded-weldoo-sm bg-weldoo-bg px-3 py-2 text-weldoo-ink">
-            {field.current || "Empty"}
-          </p>
+          <FieldValue field={field} source="current" />
         </div>
         <div>
           <p className="font-semibold text-weldoo-muted">LinkedIn</p>
-          <p className="mt-1 break-words rounded-weldoo-sm bg-weldoo-bg px-3 py-2 text-weldoo-ink">
-            {field.imported || "Not returned"}
-          </p>
+          <FieldValue field={field} source="imported" />
         </div>
       </div>
       <div className="flex items-center justify-end">
@@ -90,9 +133,11 @@ function FieldComparison({
 export function LinkedInImportReview({
   currentProfile,
   importedProfile,
+  isProfessionalProfile,
 }: LinkedInImportReviewProps) {
   const fields = useMemo<ImportField[]>(
-    () => [
+    () => {
+      const baseFields: ImportField[] = [
       {
         current: currentProfile.displayName,
         description: "Used as your visible Weldoo identity.",
@@ -114,8 +159,46 @@ export function LinkedInImportReview({
         label: "Profile image",
         name: "avatarUrl",
       },
-    ],
-    [currentProfile, importedProfile],
+      {
+        current: currentProfile.bio,
+        description: "Used as the long summary on your Weldoo profile.",
+        imported: importedProfile.bio,
+        label: "Bio",
+        name: "bio",
+      },
+      {
+        current: currentProfile.location,
+        description: "Used in profile cards, search, and your public profile.",
+        imported: importedProfile.location,
+        label: "Location",
+        name: "location",
+      },
+      {
+        current: currentProfile.websiteUrl,
+        description: "Used as your profile website or portfolio link.",
+        imported: importedProfile.websiteUrl,
+        label: "Website or portfolio URL",
+        name: "websiteUrl",
+      },
+      ];
+
+      if (isProfessionalProfile) {
+        baseFields.push({
+          current:
+            currentProfile.yearsExperience === null
+              ? null
+              : currentProfile.yearsExperience.toString(),
+          description:
+            "Only available if LinkedIn returns approved experience metadata. Standard OIDC does not include work history.",
+          imported: importedProfile.yearsExperience,
+          label: "Years of experience",
+          name: "yearsExperience",
+        });
+      }
+
+      return baseFields;
+    },
+    [currentProfile, importedProfile, isProfessionalProfile],
   );
   const initialSelected = useMemo(
     () =>
@@ -202,6 +285,11 @@ export function LinkedInImportReview({
           First name, last name, and email are shown for review. Weldoo currently stores
           a single display name, so name changes are applied through the display name field.
         </p>
+        <p className="mt-2 text-[11.5px] leading-5 text-weldoo-muted">
+          LinkedIn OpenID Connect normally returns only lite profile data. Bio, website,
+          location, headline, years of experience, and work history are importable only when
+          LinkedIn or Supabase returns them through official granted metadata.
+        </p>
       </div>
 
       <div className="space-y-3">
@@ -223,6 +311,13 @@ export function LinkedInImportReview({
       <div className="flex flex-wrap items-center gap-3">
         <Button disabled={pending || selectedFields.size === 0} type="submit">
           {pending ? "Importing" : "Import selected fields"}
+        </Button>
+        <Button
+          disabled={pending || selectedFields.size === 0}
+          type="submit"
+          variant="secondary"
+        >
+          {pending ? "Importing" : "Re import profile"}
         </Button>
         <p className="text-[11.5px] leading-5 text-weldoo-muted">
           Nothing is changed until you confirm this import.

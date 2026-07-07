@@ -8,6 +8,8 @@ import {
   hasLinkedInIdentity,
 } from "@/lib/auth/linkedin-profile-import";
 import { getAppShellAuth, requireCompletedOnboarding } from "@/lib/auth/session";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { Tables } from "@/types/database";
 
 type LinkedInImportPageProps = {
   searchParams: Promise<{
@@ -44,6 +46,29 @@ export default async function LinkedInImportPage({
   const isConnected = hasLinkedInIdentity(user);
   const importedProfile = getLinkedInProfileImport(user);
   const errorMessage = getErrorMessage(error, message);
+  const supabase = await createSupabaseServerClient();
+  const [baseProfileResult, professionalProfileResult] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("avatar_url, bio, display_name, headline, location, website_url")
+      .eq("id", user.id)
+      .maybeSingle(),
+    profile.profile_type === "professional"
+      ? supabase
+          .from("professional_profiles")
+          .select("years_experience")
+          .eq("profile_id", user.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const currentBaseProfile = baseProfileResult.data as Pick<
+    Tables<"profiles">,
+    "avatar_url" | "bio" | "display_name" | "headline" | "location" | "website_url"
+  > | null;
+  const currentProfessionalProfile = professionalProfileResult.data as Pick<
+    Tables<"professional_profiles">,
+    "years_experience"
+  > | null;
 
   return (
     <AppShell auth={appShellAuth}>
@@ -103,11 +128,16 @@ export default async function LinkedInImportPage({
               {isConnected && importedProfile ? (
                 <LinkedInImportReview
                   currentProfile={{
-                    avatarUrl: profile.avatar_url,
-                    displayName: profile.display_name,
-                    headline: profile.headline,
+                    avatarUrl: currentBaseProfile?.avatar_url ?? profile.avatar_url,
+                    bio: currentBaseProfile?.bio ?? null,
+                    displayName: currentBaseProfile?.display_name ?? profile.display_name,
+                    headline: currentBaseProfile?.headline ?? profile.headline,
+                    location: currentBaseProfile?.location ?? profile.location,
+                    websiteUrl: currentBaseProfile?.website_url ?? null,
+                    yearsExperience: currentProfessionalProfile?.years_experience ?? null,
                   }}
                   importedProfile={importedProfile}
+                  isProfessionalProfile={profile.profile_type === "professional"}
                 />
               ) : null}
 
