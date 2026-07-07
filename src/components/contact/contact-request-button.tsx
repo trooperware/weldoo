@@ -1,23 +1,32 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button, Modal, Textarea } from "@/components/ui";
 
+export type ContactRequestStatus = "none" | "sent" | "received";
+
 type ContactRequestButtonProps = {
   canContact: boolean;
+  contactRequestId?: string | null;
+  contactRequestStatus?: ContactRequestStatus;
   recipientName: string;
   recipientProfileId: string;
   size?: "card" | "profile";
 };
 
 type RequestState = {
+  contactRequestId: string | null;
   message?: string;
-  status: "idle" | "error" | "success";
+  requestStatus: ContactRequestStatus;
+  status: "idle" | "error";
 };
 
 export function ContactRequestButton({
   canContact,
+  contactRequestId,
+  contactRequestStatus = "none",
   recipientName,
   recipientProfileId,
   size = "profile",
@@ -25,7 +34,11 @@ export function ContactRequestButton({
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
-  const [state, setState] = useState<RequestState>({ status: "idle" });
+  const [state, setState] = useState<RequestState>({
+    contactRequestId: contactRequestId ?? null,
+    requestStatus: contactRequestStatus,
+    status: "idle",
+  });
 
   if (!canContact) {
     return null;
@@ -35,17 +48,25 @@ export function ContactRequestButton({
     const trimmedMessage = message.trim();
 
     if (trimmedMessage.length < 1) {
-      setState({ message: "Write a short message before sending.", status: "error" });
+      setState((current) => ({
+        ...current,
+        message: "Write a short message before sending.",
+        status: "error",
+      }));
       return;
     }
 
     if (trimmedMessage.length > 1000) {
-      setState({ message: "Contact message must be 1000 characters or fewer.", status: "error" });
+      setState((current) => ({
+        ...current,
+        message: "Contact message must be 1000 characters or fewer.",
+        status: "error",
+      }));
       return;
     }
 
     setPending(true);
-    setState({ status: "idle" });
+    setState((current) => ({ ...current, message: undefined, status: "idle" }));
 
     try {
       const response = await fetch("/api/contact-requests", {
@@ -56,11 +77,18 @@ export function ContactRequestButton({
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
-      const payload = (await response.json()) as { message?: string; status?: string };
+      const payload = (await response.json()) as {
+        contactRequestId?: string;
+        contactRequestStatus?: ContactRequestStatus;
+        message?: string;
+        status?: string;
+      };
 
       if (!response.ok || payload.status === "error") {
         setState({
+          contactRequestId: payload.contactRequestId ?? state.contactRequestId,
           message: payload.message ?? "Could not send contact request.",
+          requestStatus: payload.contactRequestStatus ?? state.requestStatus,
           status: "error",
         });
         return;
@@ -68,8 +96,9 @@ export function ContactRequestButton({
 
       setMessage("");
       setState({
-        message: payload.message ?? "Contact request sent.",
-        status: "success",
+        contactRequestId: payload.contactRequestId ?? null,
+        requestStatus: "sent",
+        status: "idle",
       });
       setOpen(false);
     } finally {
@@ -83,6 +112,25 @@ export function ContactRequestButton({
       : "inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105";
   const buttonStyle =
     size === "card" ? { fontSize: "12px", lineHeight: 1 } : undefined;
+  const messagesHref = state.contactRequestId
+    ? `/contact-requests?request=${state.contactRequestId}`
+    : "/contact-requests";
+
+  if (state.requestStatus !== "none") {
+    const label =
+      state.requestStatus === "sent" ? "Request sent" : "View request";
+
+    return (
+      <>
+        <Link className={buttonClass} href={messagesHref} style={buttonStyle}>
+          {label}
+        </Link>
+        {state.status === "error" && state.message ? (
+          <p className="mt-2 text-[11px] font-medium text-red-600">{state.message}</p>
+        ) : null}
+      </>
+    );
+  }
 
   return (
     <>
@@ -94,9 +142,6 @@ export function ContactRequestButton({
       >
         Contact
       </button>
-      {state.status === "success" && state.message ? (
-        <p className="mt-2 text-[11px] font-medium text-emerald-700">{state.message}</p>
-      ) : null}
       <Modal
         description="Send a short message. This is not real-time chat; the recipient will see it in contact requests."
         footer={
@@ -121,7 +166,13 @@ export function ContactRequestButton({
             maxLength={1000}
             onChange={(event) => {
               setMessage(event.target.value);
-              if (state.status === "error") setState({ status: "idle" });
+              if (state.status === "error") {
+                setState((current) => ({
+                  ...current,
+                  message: undefined,
+                  status: "idle",
+                }));
+              }
             }}
             placeholder="Introduce yourself and explain why you want to connect."
             value={message}

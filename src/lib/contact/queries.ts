@@ -5,6 +5,11 @@ import type { Database, Tables } from "@/types/database";
 type ContactRequestRow = Tables<"contact_requests">;
 type ProfileRow = Tables<"profiles">;
 
+export type ContactRequestRelationship = {
+  contactRequestId: string | null;
+  contactRequestStatus: "none" | "sent" | "received";
+};
+
 export type ContactRequestListItem = ContactRequestRow & {
   otherProfile: Pick<
     ProfileRow,
@@ -12,6 +17,43 @@ export type ContactRequestListItem = ContactRequestRow & {
   > | null;
   otherProfileHref: string | null;
 };
+
+export async function getOpenContactRequestRelationship(
+  supabase: SupabaseClient<Database>,
+  currentProfileId: string | null | undefined,
+  targetProfileId: string,
+): Promise<ContactRequestRelationship> {
+  if (!currentProfileId || currentProfileId === targetProfileId) {
+    return { contactRequestId: null, contactRequestStatus: "none" };
+  }
+
+  const { data, error } = await supabase
+    .from("contact_requests")
+    .select("id, sender_profile_id, recipient_profile_id")
+    .is("archived_at", null)
+    .or(
+      `and(sender_profile_id.eq.${currentProfileId},recipient_profile_id.eq.${targetProfileId}),and(sender_profile_id.eq.${targetProfileId},recipient_profile_id.eq.${currentProfileId})`,
+    )
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  const request = data as Pick<
+    ContactRequestRow,
+    "id" | "recipient_profile_id" | "sender_profile_id"
+  > | null;
+
+  if (!request) {
+    return { contactRequestId: null, contactRequestStatus: "none" };
+  }
+
+  return {
+    contactRequestId: request.id,
+    contactRequestStatus: request.sender_profile_id === currentProfileId ? "sent" : "received",
+  };
+}
 
 async function loadProfileMaps(
   supabase: SupabaseClient<Database>,

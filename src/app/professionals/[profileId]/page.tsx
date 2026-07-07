@@ -7,6 +7,7 @@ import { ContactRequestButton } from "@/components/contact/contact-request-butto
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
+import { getOpenContactRequestRelationship } from "@/lib/contact/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -77,7 +78,10 @@ export default async function ProfessionalPublicPage({
   const profile = profileData as ProfileRow;
   const professional = professionalData as ProfessionalProfileRow | null;
   const isOwner = user?.id === profile.id;
-  const appShellAuth = await getAppShellAuth();
+  const [appShellAuth, contactRequestRelationship] = await Promise.all([
+    getAppShellAuth(),
+    getOpenContactRequestRelationship(supabase, user?.id, profile.id),
+  ]);
 
   return (
     <AppShell auth={appShellAuth}>
@@ -150,6 +154,8 @@ export default async function ProfessionalPublicPage({
                 ) : null}
                 <ContactRequestButton
                   canContact={Boolean(user && !isOwner)}
+                  contactRequestId={contactRequestRelationship.contactRequestId}
+                  contactRequestStatus={contactRequestRelationship.contactRequestStatus}
                   recipientName={profile.display_name}
                   recipientProfileId={profile.id}
                 />

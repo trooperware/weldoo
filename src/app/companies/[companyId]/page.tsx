@@ -7,6 +7,7 @@ import { ContactRequestButton } from "@/components/contact/contact-request-butto
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
+import { getOpenContactRequestRelationship } from "@/lib/contact/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -63,7 +64,10 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === company.owner_profile_id;
-  const appShellAuth = await getAppShellAuth();
+  const [appShellAuth, contactRequestRelationship] = await Promise.all([
+    getAppShellAuth(),
+    getOpenContactRequestRelationship(supabase, user?.id, company.owner_profile_id),
+  ]);
 
   return (
     <AppShell auth={appShellAuth}>
@@ -131,6 +135,8 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
                 ) : null}
                 <ContactRequestButton
                   canContact={Boolean(user && !isOwner)}
+                  contactRequestId={contactRequestRelationship.contactRequestId}
+                  contactRequestStatus={contactRequestRelationship.contactRequestStatus}
                   recipientName={company.name}
                   recipientProfileId={company.owner_profile_id}
                 />

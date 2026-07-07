@@ -231,6 +231,8 @@ function NetworkCard({
         </Link>
         <ContactRequestButton
           canContact={canContact}
+          contactRequestId={item.contactRequestId}
+          contactRequestStatus={item.contactRequestStatus}
           recipientName={item.name}
           recipientProfileId={item.targetProfileId}
           size="card"

@@ -21,6 +21,8 @@ export type NetworkDirectoryFilters = {
 export type NetworkDirectoryItem = {
   avatarUrl: string | null;
   canConnect: boolean;
+  contactRequestId: string | null;
+  contactRequestStatus: "none" | "sent" | "received";
   connectionId: string | null;
   connectionStatus: "none" | "pending_sent" | "pending_received" | "accepted";
   createdAt: string;
@@ -84,6 +86,8 @@ function professionalToItem(
   return {
     avatarUrl: profile.avatar_url,
     canConnect: false,
+    contactRequestId: null,
+    contactRequestStatus: "none",
     connectionId: null,
     connectionStatus: "none",
     createdAt: profile.created_at,
@@ -108,6 +112,8 @@ function companyToItem(company: CompanyRow): NetworkDirectoryItem {
   return {
     avatarUrl: company.logo_url,
     canConnect: false,
+    contactRequestId: null,
+    contactRequestStatus: "none",
     connectionId: null,
     connectionStatus: "none",
     createdAt: company.created_at,
@@ -128,6 +134,8 @@ function trainingProviderToItem(provider: TrainingProviderRow): NetworkDirectory
   return {
     avatarUrl: provider.logo_url,
     canConnect: false,
+    contactRequestId: null,
+    contactRequestStatus: "none",
     connectionId: null,
     connectionStatus: "none",
     createdAt: provider.created_at,
@@ -397,6 +405,50 @@ export async function getNetworkDirectoryPage(
           connection.requester_profile_id === currentProfileId
             ? "pending_sent"
             : "pending_received";
+      });
+
+      const { data: contactRequestsData, error: contactRequestsError } = await supabase
+        .from("contact_requests")
+        .select("id, sender_profile_id, recipient_profile_id")
+        .is("archived_at", null)
+        .or(
+          `and(sender_profile_id.eq.${currentProfileId},recipient_profile_id.in.(${targetProfileIds.join(",")})),and(recipient_profile_id.eq.${currentProfileId},sender_profile_id.in.(${targetProfileIds.join(",")}))`,
+        );
+
+      if (contactRequestsError) {
+        throw new Error(contactRequestsError.message);
+      }
+
+      const contactRequestsByProfileId = ((contactRequestsData ?? []) as Array<{
+        id: string;
+        recipient_profile_id: string;
+        sender_profile_id: string;
+      }>).reduce<
+        Record<
+          string,
+          {
+            id: string;
+            recipient_profile_id: string;
+            sender_profile_id: string;
+          }
+        >
+      >((accumulator, contactRequest) => {
+        const otherProfileId =
+          contactRequest.sender_profile_id === currentProfileId
+            ? contactRequest.recipient_profile_id
+            : contactRequest.sender_profile_id;
+        accumulator[otherProfileId] = contactRequest;
+        return accumulator;
+      }, {});
+
+      visibleItems.forEach((item) => {
+        const contactRequest = contactRequestsByProfileId[item.targetProfileId];
+
+        if (!contactRequest) return;
+
+        item.contactRequestId = contactRequest.id;
+        item.contactRequestStatus =
+          contactRequest.sender_profile_id === currentProfileId ? "sent" : "received";
       });
     }
 

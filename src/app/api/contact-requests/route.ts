@@ -60,6 +60,47 @@ export async function POST(request: Request) {
     );
   }
 
+  const { data: existingContactRequest, error: existingContactRequestError } = await supabase
+    .from("contact_requests")
+    .select("id, sender_profile_id, recipient_profile_id")
+    .is("archived_at", null)
+    .or(
+      `and(sender_profile_id.eq.${user.id},recipient_profile_id.eq.${recipientProfileId}),and(sender_profile_id.eq.${recipientProfileId},recipient_profile_id.eq.${user.id})`,
+    )
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingContactRequestError) {
+    return NextResponse.json(
+      { message: existingContactRequestError.message, status: "error" },
+      { status: 400 },
+    );
+  }
+
+  const existingRequest = existingContactRequest as Pick<
+    Tables<"contact_requests">,
+    "id" | "recipient_profile_id" | "sender_profile_id"
+  > | null;
+
+  if (existingRequest) {
+    const contactRequestStatus =
+      existingRequest.sender_profile_id === user.id ? "sent" : "received";
+
+    return NextResponse.json(
+      {
+        contactRequestId: existingRequest.id,
+        contactRequestStatus,
+        message:
+          contactRequestStatus === "sent"
+            ? "There is already an open contact request with this profile."
+            : "This profile already sent you a contact request. Review it in Messages.",
+        status: "error",
+      },
+      { status: 409 },
+    );
+  }
+
   const insertPayload: TablesInsert<"contact_requests"> = {
     message,
     recipient_profile_id: recipientProfileId,
@@ -79,6 +120,7 @@ export async function POST(request: Request) {
         message: duplicate
           ? "There is already an open contact request with this profile."
           : error.message,
+        ...(duplicate ? { contactRequestStatus: "sent" } : {}),
         status: "error",
       },
       { status: duplicate ? 409 : 400 },
@@ -89,6 +131,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     contactRequestId: contactRequest.id,
+    contactRequestStatus: "sent",
     message: "Contact request sent.",
     status: "success",
   });
