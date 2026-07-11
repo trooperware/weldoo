@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getJobApplicationFieldErrors,
@@ -63,7 +64,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const { data: job, error: jobError } = await supabase
       .from("jobs")
-      .select("id, application_mode")
+      .select("id, application_mode, created_by_profile_id, title")
       .eq("id", jobId)
       .eq("status", "published")
       .maybeSingle();
@@ -116,6 +117,20 @@ export async function POST(request: Request, context: RouteContext) {
         },
         { status: duplicate ? 409 : 400 },
       );
+    }
+
+    const jobRow = job as {
+      created_by_profile_id?: string;
+      title?: string | null;
+    } | null;
+    if (jobRow?.created_by_profile_id) {
+      await publishNotificationEvent({
+        actorProfileId: user.id,
+        recipientProfileId: jobRow.created_by_profile_id,
+        subject: jobRow.title,
+        targetPath: "/company/applications",
+        type: "job_application",
+      });
     }
 
     return NextResponse.json({

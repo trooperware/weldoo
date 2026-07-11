@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables, TablesUpdate } from "@/types/database";
 
@@ -113,6 +114,15 @@ export async function PATCH(request: Request, { params }: ConnectionRouteProps) 
       { message: "Connection request could not be updated.", status: "error" },
       { status: 409 },
     );
+  }
+
+  if (payload.action === "accept") {
+    await publishNotificationEvent({
+      actorProfileId: user.id,
+      recipientProfileId: connectionRow.requester_profile_id,
+      targetPath: "/network",
+      type: "connection_accepted",
+    });
   }
 
   return NextResponse.json({

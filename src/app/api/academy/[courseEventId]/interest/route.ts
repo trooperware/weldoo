@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type CourseInterestRouteContext = {
@@ -40,6 +41,20 @@ export async function POST(request: Request, context: CourseInterestRouteContext
     const body = (await request.json().catch(() => ({}))) as { note?: unknown };
     const note = typeof body.note === "string" ? body.note.trim().slice(0, 1000) : "";
 
+    const [{ data: courseEvent }, { data: existingInterest }] = await Promise.all([
+      supabase
+        .from("course_events")
+        .select("id, created_by_profile_id, title")
+        .eq("id", courseEventId)
+        .maybeSingle(),
+      supabase
+        .from("course_event_interests")
+        .select("id")
+        .eq("course_event_id", courseEventId)
+        .eq("profile_id", user.id)
+        .maybeSingle(),
+    ]);
+
     const { error: insertError } = await supabase.from("course_event_interests").insert([
       {
         course_event_id: courseEventId,
@@ -56,6 +71,21 @@ export async function POST(request: Request, context: CourseInterestRouteContext
         },
         { status: 400 },
       );
+    }
+
+    const courseEventRow = courseEvent as {
+      created_by_profile_id?: string;
+      title?: string | null;
+    } | null;
+    if (!existingInterest && courseEventRow?.created_by_profile_id) {
+      await publishNotificationEvent({
+        actorProfileId: user.id,
+        body: note || null,
+        recipientProfileId: courseEventRow.created_by_profile_id,
+        subject: courseEventRow.title,
+        targetPath: "/training-provider/academy/interests",
+        type: "course_event_interest",
+      });
     }
 
     return NextResponse.json({ message: "Interest registered.", status: "success" });

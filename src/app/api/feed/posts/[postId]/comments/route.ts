@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { commentSchema, getCommentFieldErrors } from "@/lib/validators/comment";
 import type { Tables } from "@/types/database";
@@ -116,6 +117,12 @@ export async function POST(request: Request, context: CommentCreateContext) {
       );
     }
 
+    const { data: post } = await supabase
+      .from("posts")
+      .select("id, author_profile_id")
+      .eq("id", postId)
+      .maybeSingle();
+
     const { data: comment, error: insertError } = await supabase
       .from("comments")
       .insert([
@@ -134,6 +141,17 @@ export async function POST(request: Request, context: CommentCreateContext) {
         { message: `Could not post comment: ${insertError.message}`, status: "error" },
         { status: 400 },
       );
+    }
+
+    const postRow = post as { author_profile_id?: string } | null;
+    if (postRow?.author_profile_id) {
+      await publishNotificationEvent({
+        actorProfileId: user.id,
+        body: parsed.data.body,
+        recipientProfileId: postRow.author_profile_id,
+        targetPath: "/",
+        type: "post_comment",
+      });
     }
 
     return NextResponse.json({

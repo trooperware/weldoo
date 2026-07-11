@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables, TablesInsert } from "@/types/database";
 
@@ -128,6 +129,14 @@ export async function POST(request: Request) {
   }
 
   const contactRequest = data as Pick<Tables<"contact_requests">, "id">;
+
+  await publishNotificationEvent({
+    actorProfileId: user.id,
+    body: message,
+    recipientProfileId,
+    targetPath: "/contact-requests",
+    type: "contact_request",
+  });
 
   return NextResponse.json({
     contactRequestId: contactRequest.id,

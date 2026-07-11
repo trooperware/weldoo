@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type LikeRouteContext = {
@@ -37,6 +38,20 @@ export async function POST(_request: Request, context: LikeRouteContext) {
 
     if (error) return error;
 
+    const [{ data: post }, { data: existingLike }] = await Promise.all([
+      supabase
+        .from("posts")
+        .select("id, author_profile_id")
+        .eq("id", postId)
+        .maybeSingle(),
+      supabase
+        .from("likes")
+        .select("id")
+        .eq("post_id", postId)
+        .eq("profile_id", user.id)
+        .maybeSingle(),
+    ]);
+
     const { error: insertError } = await supabase.from("likes").upsert(
       [
         {
@@ -52,6 +67,16 @@ export async function POST(_request: Request, context: LikeRouteContext) {
         { message: `Could not like post: ${insertError.message}`, status: "error" },
         { status: 400 },
       );
+    }
+
+    const postRow = post as { author_profile_id?: string } | null;
+    if (!existingLike && postRow?.author_profile_id) {
+      await publishNotificationEvent({
+        actorProfileId: user.id,
+        recipientProfileId: postRow.author_profile_id,
+        targetPath: "/",
+        type: "post_like",
+      });
     }
 
     return NextResponse.json({ message: "Post liked.", status: "success" });

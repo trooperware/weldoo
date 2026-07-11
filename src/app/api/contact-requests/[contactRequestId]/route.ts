@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database";
 
@@ -146,6 +147,15 @@ export async function PATCH(request: Request, { params }: ContactRequestRoutePro
 
   if (error) {
     return NextResponse.json({ message: error.message, status: "error" }, { status: 400 });
+  }
+
+  if (payload.action === "accept") {
+    await publishNotificationEvent({
+      actorProfileId: user.id,
+      recipientProfileId: requestRow.sender_profile_id,
+      targetPath: "/network",
+      type: "connection_accepted",
+    });
   }
 
   return NextResponse.json({
