@@ -8,6 +8,7 @@ import type { FeedComment } from "@/components/feed/feed-post-card";
 
 type FeedCommentsProps = {
   canComment: boolean;
+  commentCount: number;
   comments: FeedComment[];
   postId: string;
   viewerAvatarUrl?: string | null;
@@ -18,24 +19,36 @@ type FeedCommentsProps = {
 
 type CommentState = {
   comment?: FeedComment["comment"];
+  comments?: FeedComment[];
   errors?: CommentFieldErrors;
   message?: string;
   status?: "error" | "success";
 };
 
-function emitCommentCountChange(postId: string) {
+function emitCommentCountChange(postId: string, delta: number) {
   window.dispatchEvent(
     new CustomEvent("weldoo:post-comment-count", {
       detail: {
-        delta: 1,
+        delta,
         postId,
       },
     }),
   );
 }
 
+function MoreIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" />
+    </svg>
+  );
+}
+
 export function FeedComments({
   canComment,
+  commentCount,
   comments,
   postId,
   viewerAvatarUrl,
@@ -45,8 +58,18 @@ export function FeedComments({
 }: FeedCommentsProps) {
   const [open, setOpen] = useState(false);
   const [submitPending, setSubmitPending] = useState(false);
+  const [activeMenuCommentId, setActiveMenuCommentId] = useState<string | null>(null);
+  const [deletePendingCommentId, setDeletePendingCommentId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editPendingCommentId, setEditPendingCommentId] = useState<string | null>(null);
+  const [allCommentsLoaded, setAllCommentsLoaded] = useState(comments.length >= commentCount);
+  const [loadAllPending, setLoadAllPending] = useState(false);
+  const [totalCommentCount, setTotalCommentCount] = useState(commentCount);
   const [visibleComments, setVisibleComments] = useState(comments);
   const [state, setState] = useState<CommentState>({});
+  const shouldShowAllComments =
+    totalCommentCount > visibleComments.length && !allCommentsLoaded;
 
   useEffect(() => {
     function handleToggleComments(event: Event) {
@@ -102,13 +125,12 @@ export function FeedComments({
       form.reset();
       if (payload.comment) {
         const createdComment = payload.comment;
+        const didAddComment = !visibleComments.some(
+          (item) => item.comment.id === createdComment.id,
+        );
 
-        setVisibleComments((currentComments) => {
-          if (currentComments.some((item) => item.comment.id === createdComment.id)) {
-            return currentComments;
-          }
-
-          const nextComments = [
+        if (didAddComment) {
+          setVisibleComments((currentComments) => [
             {
               author: {
                 avatar_url: viewerAvatarUrl ?? null,
@@ -116,16 +138,14 @@ export function FeedComments({
                 headline: viewerHeadline ?? null,
                 id: createdComment.author_profile_id,
               },
-              canDelete: false,
+              canDelete: true,
               comment: createdComment,
             },
             ...currentComments,
-          ];
-
-          emitCommentCountChange(postId);
-
-          return nextComments;
-        });
+          ]);
+          emitCommentCountChange(postId, 1);
+          setTotalCommentCount((currentCount) => currentCount + 1);
+        }
       }
       setOpen(true);
     } catch (error) {
@@ -135,6 +155,128 @@ export function FeedComments({
       });
     } finally {
       setSubmitPending(false);
+    }
+  }
+
+  function startEdit(comment: FeedComment) {
+    setActiveMenuCommentId(null);
+    setEditingCommentId(comment.comment.id);
+    setEditBody(comment.comment.body);
+    setState({});
+  }
+
+  function cancelEdit() {
+    setEditingCommentId(null);
+    setEditBody("");
+    setState({});
+  }
+
+  async function saveEdit(commentId: string) {
+    setEditPendingCommentId(commentId);
+    setState({});
+
+    try {
+      const formData = new FormData();
+      formData.set("body", editBody);
+
+      const response = await fetch(`/api/feed/comments/${commentId}`, {
+        body: formData,
+        method: "PATCH",
+      });
+      const payload = (await response.json()) as CommentState;
+
+      if (!response.ok || payload.status === "error") {
+        setState(payload);
+        return;
+      }
+
+      if (payload.comment) {
+        setVisibleComments((currentComments) =>
+          currentComments.map((item) =>
+            item.comment.id === commentId
+              ? {
+                  ...item,
+                  comment: {
+                    ...item.comment,
+                    body: payload.comment?.body ?? item.comment.body,
+                    updated_at: payload.comment?.updated_at ?? item.comment.updated_at,
+                  },
+                }
+              : item,
+          ),
+        );
+      }
+
+      setEditingCommentId(null);
+      setEditBody("");
+    } catch (error) {
+      setState({
+        message: error instanceof Error ? error.message : "Could not update comment.",
+        status: "error",
+      });
+    } finally {
+      setEditPendingCommentId(null);
+    }
+  }
+
+  async function deleteComment(commentId: string) {
+    setActiveMenuCommentId(null);
+    setDeletePendingCommentId(commentId);
+    setState({});
+
+    try {
+      const response = await fetch(`/api/feed/comments/${commentId}`, {
+        method: "DELETE",
+      });
+      const payload = (await response.json()) as CommentState;
+
+      if (!response.ok || payload.status === "error") {
+        setState(payload);
+        return;
+      }
+
+      const didDeleteComment = visibleComments.some((item) => item.comment.id === commentId);
+
+      if (didDeleteComment) {
+        setVisibleComments((currentComments) =>
+          currentComments.filter((item) => item.comment.id !== commentId),
+        );
+        emitCommentCountChange(postId, -1);
+        setTotalCommentCount((currentCount) => Math.max(0, currentCount - 1));
+      }
+    } catch (error) {
+      setState({
+        message: error instanceof Error ? error.message : "Could not delete comment.",
+        status: "error",
+      });
+    } finally {
+      setDeletePendingCommentId(null);
+    }
+  }
+
+  async function loadAllComments() {
+    setLoadAllPending(true);
+    setState({});
+
+    try {
+      const response = await fetch(`/api/feed/posts/${postId}/comments`);
+      const payload = (await response.json()) as CommentState;
+
+      if (!response.ok || payload.status === "error") {
+        setState(payload);
+        return;
+      }
+
+      setVisibleComments(payload.comments ?? []);
+      setTotalCommentCount(payload.comments?.length ?? 0);
+      setAllCommentsLoaded(true);
+    } catch (error) {
+      setState({
+        message: error instanceof Error ? error.message : "Could not load comments.",
+        status: "error",
+      });
+    } finally {
+      setLoadAllPending(false);
     }
   }
 
@@ -228,13 +370,99 @@ export function FeedComments({
                       {comment.author?.headline ?? "Weldoo member"}
                     </p>
                   </div>
+                  {comment.canDelete ? (
+                    <div className="relative shrink-0">
+                      <button
+                        aria-expanded={activeMenuCommentId === comment.comment.id}
+                        aria-label="Comment actions"
+                        className="flex h-7 w-7 items-center justify-center rounded-full text-weldoo-muted transition hover:bg-white hover:text-weldoo-indigo"
+                        disabled={
+                          deletePendingCommentId === comment.comment.id ||
+                          editPendingCommentId === comment.comment.id
+                        }
+                        onClick={() =>
+                          setActiveMenuCommentId((currentId) =>
+                            currentId === comment.comment.id ? null : comment.comment.id,
+                          )
+                        }
+                        type="button"
+                      >
+                        <MoreIcon />
+                      </button>
+                      {activeMenuCommentId === comment.comment.id ? (
+                        <div className="absolute right-0 z-20 mt-1 w-32 overflow-hidden rounded-weldoo-sm border border-weldoo-border-light bg-white shadow-weldoo-lg">
+                          <button
+                            className="block w-full px-3 py-2 text-left text-[12.5px] font-semibold text-weldoo-slate transition hover:bg-weldoo-bg hover:text-weldoo-ink"
+                            onClick={() => startEdit(comment)}
+                            type="button"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="block w-full px-3 py-2 text-left text-[12.5px] font-semibold text-red-600 transition hover:bg-red-50"
+                            onClick={() => deleteComment(comment.comment.id)}
+                            type="button"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
-                <p className="whitespace-pre-line text-[13.5px] leading-[1.55] text-weldoo-ink">
-                  {comment.comment.body}
-                </p>
+                {editingCommentId === comment.comment.id ? (
+                  <div className="mt-1.5">
+                    <textarea
+                      aria-label="Edit comment"
+                      className="min-h-[76px] w-full resize-y rounded-weldoo-sm border border-weldoo-border-light bg-white px-3 py-2 text-[13.5px] leading-[1.55] text-weldoo-ink outline-none transition focus:border-weldoo-indigo focus:ring-4 focus:ring-weldoo-indigo/10"
+                      maxLength={2000}
+                      onChange={(event) => setEditBody(event.currentTarget.value)}
+                      value={editBody}
+                    />
+                    {state.errors?.body ? (
+                      <p className="mt-1 text-xs font-medium text-red-600">
+                        {state.errors.body}
+                      </p>
+                    ) : null}
+                    <div className="mt-2 flex justify-end gap-2">
+                      <button
+                        className="inline-flex h-8 items-center justify-center rounded-weldoo-sm border border-weldoo-border-light bg-white px-3 text-xs font-semibold text-weldoo-slate transition hover:bg-weldoo-bg"
+                        disabled={editPendingCommentId === comment.comment.id}
+                        onClick={cancelEdit}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="inline-flex h-8 items-center justify-center rounded-weldoo-sm bg-weldoo-indigo px-3 text-xs font-semibold text-white transition hover:brightness-105 disabled:cursor-wait disabled:opacity-60"
+                        disabled={editPendingCommentId === comment.comment.id}
+                        onClick={() => saveEdit(comment.comment.id)}
+                        type="button"
+                      >
+                        {editPendingCommentId === comment.comment.id ? "Saving" : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="whitespace-pre-line text-[13.5px] leading-[1.55] text-weldoo-ink">
+                    {comment.comment.body}
+                  </p>
+                )}
               </div>
             </article>
           ))}
+          {shouldShowAllComments ? (
+            <button
+              className="mx-4 my-1 self-start rounded-weldoo-sm px-2 py-1 text-[12.5px] font-semibold text-weldoo-muted transition hover:bg-weldoo-bg hover:text-weldoo-indigo"
+              disabled={loadAllPending}
+              onClick={loadAllComments}
+              type="button"
+            >
+              {loadAllPending
+                ? "Loading comments"
+                : `Show all ${totalCommentCount} comments`}
+            </button>
+          ) : null}
         </div>
       ) : null}
 

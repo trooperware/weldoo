@@ -100,7 +100,9 @@ function getHighlights(item: AcademyDetail) {
     item.capacity ? `Maximum ${item.capacity.toLocaleString()} attendees` : "Limited event capacity",
     "Sector updates and practical welding case studies",
     "Networking with welding professionals, companies, and training providers",
-    item.external_registration_url ? "External registration available" : "Interest registration available on Weldoo",
+    item.external_registration_url
+      ? "Registration managed by the event organizer"
+      : "Interest registration available on Weldoo",
   ];
 
   return base;
@@ -412,25 +414,26 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 ) : null}
 
                 <div className="flex flex-col gap-2">
-                  <CourseInterestButton
-                    allowCancel
-                    courseEventId={item.id}
-                    initialInterested={Boolean(interest)}
-                    itemLabel="event"
-                    ownerLabel="event organizer"
-                    signedIn={Boolean(appShellAuth)}
-                  />
                   {item.external_registration_url ? (
                     <a
-                      className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border bg-white px-5 text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"
+                      className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(135deg,#3d3db4,#5558e8)] px-5 text-[15.4px] font-bold tracking-[-0.01em] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] transition hover:brightness-105 hover:shadow-[0_4px_16px_rgba(61,61,180,0.32)]"
                       href={item.external_registration_url}
                       rel="noreferrer"
                       target="_blank"
                     >
-                      <IconExternal />
-                      External registration
+                      <IconExternal className="h-[17px] w-[17px]" />
+                      Register now
                     </a>
-                  ) : null}
+                  ) : (
+                    <CourseInterestButton
+                      allowCancel
+                      courseEventId={item.id}
+                      initialInterested={Boolean(interest)}
+                      itemLabel="event"
+                      ownerLabel="event organizer"
+                      signedIn={Boolean(appShellAuth)}
+                    />
+                  )}
                   <CourseSaveButton
                     courseEventId={item.id}
                     initialSaved={Boolean(savedItem)}

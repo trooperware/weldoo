@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Tables, TablesUpdate } from "@/types/database";
+import type { Tables, TablesInsert, TablesUpdate } from "@/types/database";
 
-type ContactRequestAction = "archive" | "mark_read" | "unarchive";
+type ContactRequestAction = "accept" | "archive" | "mark_read" | "reject" | "unarchive";
 
 type UpdateContactRequestPayload = {
   action?: ContactRequestAction;
@@ -28,7 +28,10 @@ export async function PATCH(request: Request, { params }: ContactRequestRoutePro
 
   const payload = (await request.json()) as UpdateContactRequestPayload;
 
-  if (!payload.action || !["archive", "mark_read", "unarchive"].includes(payload.action)) {
+  if (
+    !payload.action ||
+    !["accept", "archive", "mark_read", "reject", "unarchive"].includes(payload.action)
+  ) {
     return NextResponse.json(
       { message: "Invalid contact request action.", status: "error" },
       { status: 400 },
@@ -62,12 +65,79 @@ export async function PATCH(request: Request, { params }: ContactRequestRoutePro
   }
 
   const now = new Date().toISOString();
+  let connectionAccepted = false;
+
+  if (payload.action === "accept") {
+    const { data: existingConnection, error: connectionLoadError } = await supabase
+      .from("connections")
+      .select("id, status")
+      .or(
+        `and(requester_profile_id.eq.${requestRow.sender_profile_id},recipient_profile_id.eq.${requestRow.recipient_profile_id}),and(requester_profile_id.eq.${requestRow.recipient_profile_id},recipient_profile_id.eq.${requestRow.sender_profile_id})`,
+      )
+      .in("status", ["pending", "accepted"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (connectionLoadError) {
+      return NextResponse.json(
+        { message: connectionLoadError.message, status: "error" },
+        { status: 400 },
+      );
+    }
+
+    const connection = existingConnection as Pick<
+      Tables<"connections">,
+      "id" | "status"
+    > | null;
+
+    if (connection) {
+      if (connection.status === "pending") {
+        const { error: connectionUpdateError } = await supabase
+          .from("connections")
+          .update({
+            responded_at: now,
+            status: "accepted",
+          } satisfies TablesUpdate<"connections"> as never)
+          .eq("id", connection.id);
+
+        if (connectionUpdateError) {
+          return NextResponse.json(
+            { message: connectionUpdateError.message, status: "error" },
+            { status: 400 },
+          );
+        }
+      }
+    } else {
+      const insertPayload: TablesInsert<"connections"> = {
+        message: null,
+        recipient_profile_id: requestRow.sender_profile_id,
+        requester_profile_id: user.id,
+        responded_at: now,
+        status: "accepted",
+      };
+
+      const { error: connectionInsertError } = await supabase
+        .from("connections")
+        .insert([insertPayload] as never);
+
+      if (connectionInsertError) {
+        return NextResponse.json(
+          { message: connectionInsertError.message, status: "error" },
+          { status: 400 },
+        );
+      }
+    }
+
+    connectionAccepted = true;
+  }
+
   const updatePayload: TablesUpdate<"contact_requests"> =
     payload.action === "mark_read"
       ? { read_at: requestRow.read_at ?? now }
-      : payload.action === "archive"
-        ? { archived_at: requestRow.archived_at ?? now, read_at: requestRow.read_at ?? now }
-        : { archived_at: null };
+      : payload.action === "unarchive"
+        ? { archived_at: null }
+        : { archived_at: requestRow.archived_at ?? now, read_at: requestRow.read_at ?? now };
 
   const { error } = await supabase
     .from("contact_requests")
@@ -80,8 +150,14 @@ export async function PATCH(request: Request, { params }: ContactRequestRoutePro
 
   return NextResponse.json({
     message:
-      payload.action === "mark_read"
+      payload.action === "accept"
+        ? connectionAccepted
+          ? "Contact request accepted."
+          : "Contact request updated."
+        : payload.action === "mark_read"
         ? "Contact request marked as read."
+        : payload.action === "reject"
+          ? "Contact request declined."
         : payload.action === "archive"
           ? "Contact request archived."
           : "Contact request restored.",

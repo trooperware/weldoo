@@ -18,6 +18,24 @@ export type ContactRequestListItem = ContactRequestRow & {
   otherProfileHref: string | null;
 };
 
+export async function getUnreadContactRequestCount(
+  supabase: SupabaseClient<Database>,
+  profileId: string | null | undefined,
+) {
+  if (!profileId) return 0;
+
+  const { count, error } = await supabase
+    .from("contact_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_profile_id", profileId)
+    .is("read_at", null)
+    .is("archived_at", null);
+
+  if (error) throw new Error(error.message);
+
+  return count ?? 0;
+}
+
 export async function getOpenContactRequestRelationship(
   supabase: SupabaseClient<Database>,
   currentProfileId: string | null | undefined,

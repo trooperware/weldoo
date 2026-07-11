@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { getUnreadContactRequestCount } from "@/lib/contact/queries";
+import { getUnreadMessageCount } from "@/lib/messages/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -121,18 +123,13 @@ export async function getAppShellAuth() {
             .eq("owner_profile_id", profile.id)
             .maybeSingle()
         : Promise.resolve({ data: null });
-  const unreadContactRequestPromise = profile?.id
-    ? supabase
-        .from("contact_requests")
-        .select("id", { count: "exact", head: true })
-        .eq("recipient_profile_id", profile.id)
-        .is("read_at", null)
-        .is("archived_at", null)
-    : Promise.resolve({ count: 0 });
+  const unreadContactRequestPromise = getUnreadContactRequestCount(supabase, profile?.id);
+  const unreadMessagePromise = getUnreadMessageCount(supabase, profile?.id);
 
-  const [entityResult, unreadContactRequestResult] = await Promise.all([
+  const [entityResult, unreadContactRequestResult, unreadMessageResult] = await Promise.all([
     entityPromise,
     unreadContactRequestPromise,
+    unreadMessagePromise,
   ]);
 
   if (profile?.profile_type === "company") {
@@ -158,7 +155,8 @@ export async function getAppShellAuth() {
     location: profile?.location ?? null,
     profileId: profile?.id ?? user.id,
     publicProfileHref,
-    unreadContactRequestCount: unreadContactRequestResult.count ?? 0,
+    unreadContactRequestCount: unreadContactRequestResult,
+    unreadMessageCount: unreadContactRequestResult + unreadMessageResult,
     onboardingCompleted: profile?.onboarding_completed ?? false,
     profileType: profile?.profile_type ?? null,
     status: profile?.status ?? null,

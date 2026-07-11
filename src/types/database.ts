@@ -157,6 +157,42 @@ export type Database = {
         Insert: Insert<Database["public"]["Tables"]["contact_requests"]["Row"]>;
         Update: Update<Database["public"]["Tables"]["contact_requests"]["Row"]>;
       };
+      message_conversations: {
+        Row: Row<{
+          id: string;
+          created_by_profile_id: string;
+          last_message_at: string | null;
+          created_at: string;
+          updated_at: string;
+        }>;
+        Insert: Insert<Database["public"]["Tables"]["message_conversations"]["Row"]>;
+        Update: Update<Database["public"]["Tables"]["message_conversations"]["Row"]>;
+      };
+      message_conversation_participants: {
+        Row: Row<{
+          id: string;
+          conversation_id: string;
+          profile_id: string;
+          last_read_at: string | null;
+          archived_at: string | null;
+          created_at: string;
+        }>;
+        Insert: Insert<Database["public"]["Tables"]["message_conversation_participants"]["Row"]>;
+        Update: Update<Database["public"]["Tables"]["message_conversation_participants"]["Row"]>;
+      };
+      messages: {
+        Row: Row<{
+          id: string;
+          conversation_id: string;
+          sender_profile_id: string;
+          body: string;
+          created_at: string;
+          edited_at: string | null;
+          deleted_at: string | null;
+        }>;
+        Insert: Insert<Database["public"]["Tables"]["messages"]["Row"]>;
+        Update: Update<Database["public"]["Tables"]["messages"]["Row"]>;
+      };
       jobs: {
         Row: Row<{
           application_deadline: string | null;

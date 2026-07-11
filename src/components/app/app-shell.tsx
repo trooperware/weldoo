@@ -20,6 +20,7 @@ type AppShellProps = {
     profileId?: string | null;
     publicProfileHref?: string | null;
     unreadContactRequestCount?: number;
+    unreadMessageCount?: number;
     onboardingCompleted?: boolean;
     profileType?: string | null;
     status?: string | null;
@@ -231,7 +232,14 @@ export function AppShell({ auth, children }: AppShellProps) {
           ? "Weldoo professional"
           : "Weldoo member";
   const avatarInitial = displayName.slice(0, 1).toUpperCase();
-  const unreadContactRequestCount = auth?.unreadContactRequestCount ?? 0;
+  const unreadMessageCount =
+    auth?.unreadMessageCount ?? auth?.unreadContactRequestCount ?? 0;
+  const unreadMessageBadge =
+    unreadMessageCount > 99 ? "99+" : String(unreadMessageCount);
+  const messagesLabel =
+    unreadMessageCount > 0
+      ? `Messages, ${unreadMessageCount} unread`
+      : "Messages";
   const profileHref =
     auth?.profileType === "professional"
       ? "/profile/edit"
@@ -260,16 +268,17 @@ export function AppShell({ auth, children }: AppShellProps) {
             {isSignedIn ? (
               <>
                 <Link
-                  aria-label="Contact requests"
+                  aria-label={messagesLabel}
                   className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
-                  href="/contact-requests"
+                  href="/messages"
+                  title={messagesLabel}
                 >
                   <svg aria-hidden="true" className="h-[19px] w-[19px]" fill="none" viewBox="0 0 24 24">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
                   </svg>
-                  {unreadContactRequestCount > 0 ? (
+                  {unreadMessageCount > 0 ? (
                     <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-weldoo-indigo px-[3px] text-[9px] font-bold leading-none text-white">
-                      {unreadContactRequestCount > 9 ? "9+" : unreadContactRequestCount}
+                      {unreadMessageBadge}
                     </span>
                   ) : null}
                 </Link>

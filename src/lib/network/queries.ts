@@ -285,7 +285,7 @@ export async function getNetworkDirectoryPage(
     includeProfessionals
       ? professionalProfilesQuery
       : Promise.resolve(emptyResult<ProfileRow>()),
-    includeProfessionals
+    includeProfessionals && Boolean(process || availability || experience)
       ? professionalDetailsQuery
       : Promise.resolve(emptyResult<ProfessionalProfileRow>()),
     includeCompanies ? companiesQuery : Promise.resolve(emptyResult<CompanyRow>()),
@@ -307,8 +307,39 @@ export async function getNetworkDirectoryPage(
     throw new Error(trainingProvidersResult.error.message);
   }
 
-  const professionalDetailsRows =
+  const professionalProfileRows = (professionalProfilesResult.data ?? []) as Array<
+    Pick<
+      ProfileRow,
+      "avatar_url" | "created_at" | "display_name" | "headline" | "id" | "location"
+    >
+  >;
+  let professionalDetailsRows =
     (professionalDetailsResult.data ?? []) as ProfessionalProfileRow[];
+  const shouldLoadVisibleProfessionalDetails =
+    includeProfessionals &&
+    !process &&
+    !availability &&
+    !experience &&
+    professionalProfileRows.length > 0;
+
+  if (shouldLoadVisibleProfessionalDetails) {
+    const { data: visibleDetailsData, error: visibleDetailsError } = await supabase
+      .from("professional_profiles")
+      .select(
+        "profile_id, years_experience, availability, welding_processes, materials, positions, certifications, work_preferences, travel_availability, created_at, updated_at",
+      )
+      .in(
+        "profile_id",
+        professionalProfileRows.map((profile) => profile.id),
+      );
+
+    if (visibleDetailsError) {
+      throw new Error(visibleDetailsError.message);
+    }
+
+    professionalDetailsRows = (visibleDetailsData ?? []) as ProfessionalProfileRow[];
+  }
+
   const professionalDetailsById = professionalDetailsRows.reduce<
     Record<string, ProfessionalProfileRow>
   >((accumulator, profile) => {
@@ -320,12 +351,7 @@ export async function getNetworkDirectoryPage(
       ? new Set(professionalDetailsRows.map((profile) => profile.profile_id))
       : null;
 
-  const professionals = ((professionalProfilesResult.data ?? []) as Array<
-    Pick<
-      ProfileRow,
-      "avatar_url" | "created_at" | "display_name" | "headline" | "id" | "location"
-    >
-  >)
+  const professionals = professionalProfileRows
     .filter((profile) => !filteredProfessionalIds || filteredProfessionalIds.has(profile.id))
     .map((profile) =>
       professionalToItem(profile, professionalDetailsById[profile.id] ?? null),

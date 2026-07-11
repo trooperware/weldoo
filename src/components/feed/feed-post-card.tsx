@@ -169,6 +169,7 @@ export function FeedPostCard({
       ) : null}
       <FeedComments
         canComment={canInteract}
+        commentCount={commentCount}
         comments={comments}
         postId={post.id}
         viewerAvatarUrl={viewerAvatarUrl}

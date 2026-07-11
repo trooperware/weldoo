@@ -215,7 +215,9 @@ function getIncludedItems(item: AcademyDetail) {
       item.capacity ? `Maximum ${item.capacity} attendees` : "Limited event capacity",
       "Sector updates and practical welding case studies",
       "Networking with welding professionals and companies",
-      item.external_registration_url ? "External registration available" : "Interest registration available on Weldoo",
+      item.external_registration_url
+        ? "Registration managed by the organizer"
+        : "Interest registration available on Weldoo",
     ];
   }
 
@@ -223,7 +225,9 @@ function getIncludedItems(item: AcademyDetail) {
     item.capacity ? `Maximum ${item.capacity} participants` : "Limited group format",
     "Training provider-led practical content",
     "Welding process and topic-focused agenda",
-    item.external_registration_url ? "External registration available" : "Interest registration available on Weldoo",
+    item.external_registration_url
+      ? "Registration managed by the organizer"
+      : "Interest registration available on Weldoo",
     "Certificate or attendance details provided by the training provider",
   ];
 }
@@ -704,7 +708,7 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                 ) : null}
 
                 <div className="flex flex-col gap-2">
-                  {isSectorEvent && item.external_registration_url ? (
+                  {item.external_registration_url ? (
                     <a
                       className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(135deg,#3d3db4,#5555e8)] px-5 text-[15.4px] font-bold tracking-[-0.01em] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] transition hover:brightness-105 hover:shadow-[0_4px_16px_rgba(61,61,180,0.32)]"
                       href={item.external_registration_url}
@@ -727,17 +731,6 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
                     itemLabel={isSectorEvent ? "event" : "course"}
                     signedIn={Boolean(appShellAuth)}
                   />
-                  {item.external_registration_url && !isSectorEvent ? (
-                    <a
-                      className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border bg-white px-5 text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"
-                      href={item.external_registration_url}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      <IconExternal />
-                      External registration
-                    </a>
-                  ) : null}
                   {item.recording_url ? (
                     <a
                       className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-border bg-white px-5 text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"

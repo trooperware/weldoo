@@ -1,12 +1,101 @@
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { commentSchema, getCommentFieldErrors } from "@/lib/validators/comment";
 
 type CommentDeleteContext = {
   params: Promise<{
     commentId: string;
   }>;
 };
+
+export async function PATCH(request: Request, context: CommentDeleteContext) {
+  try {
+    const { commentId } = await context.params;
+    const formData = await request.formData();
+    const parsed = commentSchema.safeParse({
+      body: formData.get("body"),
+    });
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          errors: getCommentFieldErrors(parsed.error),
+          status: "error",
+        },
+        { status: 400 },
+      );
+    }
+
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { message: "You must be signed in to edit comments.", status: "error" },
+        { status: 401 },
+      );
+    }
+
+    const { data: comment, error: commentError } = await supabase
+      .from("comments")
+      .select("id, author_profile_id")
+      .eq("id", commentId)
+      .maybeSingle();
+
+    if (commentError) {
+      return NextResponse.json(
+        { message: `Could not load comment: ${commentError.message}`, status: "error" },
+        { status: 400 },
+      );
+    }
+
+    if (!comment) {
+      return NextResponse.json(
+        { message: "Comment not found.", status: "error" },
+        { status: 404 },
+      );
+    }
+
+    if ((comment as { author_profile_id: string }).author_profile_id !== user.id) {
+      return NextResponse.json(
+        { message: "You can only edit your own comments.", status: "error" },
+        { status: 403 },
+      );
+    }
+
+    const { data: updatedComment, error: updateError } = await supabase
+      .from("comments")
+      .update({ body: parsed.data.body } as never)
+      .eq("id", commentId)
+      .select("id, post_id, author_profile_id, body, status, created_at, updated_at")
+      .single();
+
+    if (updateError) {
+      return NextResponse.json(
+        { message: `Could not update comment: ${updateError.message}`, status: "error" },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({
+      comment: updatedComment,
+      message: "Comment updated.",
+      status: "success",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message: error instanceof Error ? error.message : "Could not update comment.",
+        status: "error",
+      },
+      { status: 500 },
+    );
+  }
+}
 
 export async function DELETE(_request: Request, context: CommentDeleteContext) {
   try {
