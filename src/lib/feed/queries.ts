@@ -10,7 +10,7 @@ type LikeRow = Tables<"likes">;
 type CommentRow = Tables<"comments">;
 type SavedItemRow = Tables<"saved_items">;
 
-export const FEED_PAGE_SIZE = 10;
+export const FEED_PAGE_SIZE = 5;
 const COMMENT_PREVIEW_LIMIT = 4;
 
 type CommentCountRow = {

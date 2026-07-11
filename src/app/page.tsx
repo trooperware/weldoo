@@ -33,22 +33,13 @@ function getFeedRefreshKey(feed: Awaited<ReturnType<typeof getFeedPage>>) {
     .map((item) =>
       [
         item.post.id,
-        item.post.body,
-        item.post.image_url ?? "",
-        item.post.tags.join(","),
         item.post.updated_at ?? item.post.created_at,
         item.likeCount,
         item.commentCount,
         item.isLiked ? "liked" : "not-liked",
         item.isSaved ? "saved" : "not-saved",
         item.comments
-          .map((comment) =>
-            [
-              comment.comment.id,
-              comment.comment.body,
-              comment.comment.updated_at ?? comment.comment.created_at,
-            ].join("~"),
-          )
+          .map((comment) => `${comment.comment.id}~${comment.comment.updated_at ?? comment.comment.created_at}`)
           .join("|"),
       ].join("::"),
     )

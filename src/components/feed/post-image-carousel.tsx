@@ -15,7 +15,13 @@ export function PostImageCarousel({ imageUrls }: PostImageCarouselProps) {
   if (safeImages.length === 1) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img alt="" className="mt-1.5 aspect-video w-full object-cover" src={safeImages[0]} />
+      <img
+        alt=""
+        className="mt-1.5 aspect-video w-full object-cover"
+        decoding="async"
+        loading="lazy"
+        src={safeImages[0]}
+      />
     );
   }
 
@@ -35,7 +41,9 @@ export function PostImageCarousel({ imageUrls }: PostImageCarouselProps) {
             <img
               alt=""
               className="max-h-[420px] min-w-full flex-shrink-0 object-cover"
+              decoding="async"
               key={imageUrl}
+              loading="lazy"
               src={imageUrl}
             />
           ))}
