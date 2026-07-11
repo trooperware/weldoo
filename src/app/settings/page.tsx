@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
 import { DeleteTestAccountCard } from "@/components/settings/delete-test-account-card";
+import { ResetTestActivityCard } from "@/components/settings/reset-test-activity-card";
 import { hasLinkedInIdentity } from "@/lib/auth/linkedin-profile-import";
 import { getAppShellAuth, getCurrentUser } from "@/lib/auth/session";
 
@@ -10,9 +11,17 @@ export const metadata: Metadata = {
   title: "Settings | Weldoo",
 };
 
-export default async function SettingsPage() {
+type SettingsPageProps = {
+  searchParams?: Promise<{
+    status?: string;
+  }>;
+};
+
+export default async function SettingsPage({ searchParams }: SettingsPageProps) {
+  const resolvedSearchParams = await searchParams;
   const [appShellAuth, user] = await Promise.all([getAppShellAuth(), getCurrentUser()]);
   const linkedInConnected = user ? hasLinkedInIdentity(user) : false;
+  const activityWasReset = resolvedSearchParams?.status === "activity-reset";
 
   return (
     <AppShell auth={appShellAuth}>
@@ -30,6 +39,11 @@ export default async function SettingsPage() {
               prototype. Editable preferences will be connected in the later settings and
               notifications tasks.
             </p>
+            {activityWasReset ? (
+              <div className="mt-4 rounded-weldoo-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                Test activity has been reset. Your account and profile were preserved.
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -170,6 +184,7 @@ export default async function SettingsPage() {
                   </div>
                   </>
                 ) : null}
+                <ResetTestActivityCard />
                 <DeleteTestAccountCard />
               </div>
             </div>
