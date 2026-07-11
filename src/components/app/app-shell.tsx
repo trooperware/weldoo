@@ -8,6 +8,11 @@ import { NotificationsPopover } from "@/components/app/notifications-popover";
 import { PopoverDismissListener } from "@/components/app/popover-dismiss-listener";
 import { WeldooLogo } from "@/components/auth/auth-card";
 import { Avatar } from "@/components/ui";
+import {
+  getNotificationDropdownData,
+  type NotificationDropdownData,
+} from "@/lib/notifications/queries";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { signOutAction } from "@/server/actions/auth";
 
 type AppShellProps = {
@@ -220,7 +225,7 @@ function ProfileMenu({
   );
 }
 
-export function AppShell({ auth, children }: AppShellProps) {
+export async function AppShell({ auth, children }: AppShellProps) {
   const isSignedIn = Boolean(auth);
   const displayName = auth?.displayName ?? auth?.email?.split("@")[0] ?? "Weldoo member";
   const roleLabel =
@@ -249,6 +254,18 @@ export function AppShell({ auth, children }: AppShellProps) {
           ? "/training-provider/edit"
           : null;
   const showMobileBottomNav = isSignedIn && auth?.onboardingCompleted;
+  let notificationData: NotificationDropdownData = { items: [], unreadCount: 0 };
+
+  if (isSignedIn && auth?.profileId) {
+    try {
+      notificationData = await getNotificationDropdownData(
+        await createSupabaseServerClient(),
+        auth.profileId,
+      );
+    } catch {
+      notificationData = { items: [], unreadCount: 0 };
+    }
+  }
 
   return (
     <div className="min-h-screen bg-weldoo-bg text-weldoo-ink">
@@ -282,7 +299,7 @@ export function AppShell({ auth, children }: AppShellProps) {
                     </span>
                   ) : null}
                 </Link>
-                <NotificationsPopover />
+                <NotificationsPopover initialData={notificationData} />
                 {auth && profileHref ? (
                   <>
                     <MobileProfileDrawer
