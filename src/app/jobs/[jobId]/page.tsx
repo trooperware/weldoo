@@ -211,7 +211,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       <main className="mx-auto max-w-[900px] px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-7 sm:px-6 lg:px-8 lg:pb-20">
         <Link
           className="mb-4 inline-flex h-8 items-center gap-1.5 text-[13px] font-semibold text-weldoo-muted transition hover:text-weldoo-indigo"
-          href={`/jobs?job=${job.id}`}
+          href="/jobs"
         >
           <BackIcon />
           Back to jobs

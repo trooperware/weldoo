@@ -331,7 +331,7 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
           {selectedJobId && selectedJob.status === "published" ? (
             <Link
               className="inline-flex h-9 items-center justify-center rounded-full border border-weldoo-border-light px-4 text-[12px] font-semibold text-weldoo-slate transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
-              href={`/jobs?job=${selectedJobId}`}
+              href={`/jobs/${selectedJobId}`}
             >
               View public job
             </Link>

@@ -103,12 +103,6 @@ function clearFilterHref(filters: JobFilters, key: keyof JobFilters) {
   return getJobsHref({ ...filters, [key]: undefined });
 }
 
-function getJobSelectionHref(filters: JobFilters, jobId: string) {
-  const baseHref = getJobsHref(filters);
-  const separator = baseHref.includes("?") ? "&" : "?";
-  return `${baseHref}${separator}job=${jobId}`;
-}
-
 type MultiFilterKey = "areas" | "contractTypes" | "locations" | "workModes";
 
 function toggleFilterValueHref(
@@ -651,12 +645,10 @@ function JobDetailPanel({
 function JobCard({
   active,
   activeDesktopOnly = false,
-  filters,
   job,
 }: {
   active: boolean;
   activeDesktopOnly?: boolean;
-  filters: JobFilters;
   job: JobListItem;
 }) {
   const tags = getJobTags(job).slice(0, 3);
@@ -694,7 +686,7 @@ function JobCard({
       ].join(" ")}
       data-job-card
       data-search-text={searchText}
-      href={getJobSelectionHref(filters, job.id)}
+      href={`/jobs/${job.id}`}
     >
       <JobLogo job={job} />
       <div className="min-w-0 flex-1">
@@ -830,7 +822,6 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                   <JobCard
                     active={job.id === selectedJob?.id}
                     activeDesktopOnly={!selectedJobId}
-                    filters={filters}
                     job={job}
                     key={job.id}
                   />
