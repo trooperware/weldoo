@@ -200,12 +200,19 @@ export function NetworkDirectory({
   totalPages,
 }: NetworkDirectoryProps) {
   const activeType = filters.type ?? "all";
+  const pendingInvitationProfileIds = new Set(
+    invitations.map((invitation) => invitation.profileId),
+  );
+  const visibleItems = items.filter(
+    (item) => !pendingInvitationProfileIds.has(item.targetProfileId),
+  );
+  const visibleTotalCount = Math.max(0, totalCount - (items.length - visibleItems.length));
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[18px] font-extrabold tracking-[-0.3px] text-weldoo-ink">
-          <span>{totalCount}</span> profiles
+          <span>{visibleTotalCount}</span> profiles
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           <TypePill active={activeType === "all"} href={getTypeHref(filters, "all")}>
@@ -253,9 +260,9 @@ export function NetworkDirectory({
 
       <NetworkInvitationsSummary invitations={invitations} />
 
-      {items.length ? (
+      {visibleItems.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <NetworkCard item={item} key={`${item.type}-${item.id}`} />
           ))}
         </div>
