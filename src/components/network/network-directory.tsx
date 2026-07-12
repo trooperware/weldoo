@@ -93,10 +93,15 @@ function TypePill({
 
 function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
   return (
-    <article className="group flex flex-col items-center overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white text-center shadow-weldoo-sm transition hover:-translate-y-[3px] hover:border-[#d0d0ea] hover:shadow-[0_8px_32px_rgba(61,61,180,0.12)]">
+    <article className="group relative flex flex-col items-center overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white text-center shadow-weldoo-sm transition hover:-translate-y-[3px] hover:border-[#d0d0ea] hover:shadow-[0_8px_32px_rgba(61,61,180,0.12)]">
+      <Link
+        aria-label={`View ${item.name} profile`}
+        className="absolute inset-0 z-0 rounded-[16px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-weldoo-indigo"
+        href={item.href}
+      />
       <div
         className={[
-          "h-[60px] w-full",
+          "pointer-events-none relative z-10 h-[60px] w-full",
           item.type === "professional"
             ? "bg-[linear-gradient(135deg,#1e1e4a,#2a2a6a)]"
             : item.type === "company"
@@ -104,7 +109,7 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
               : "bg-[linear-gradient(135deg,#0a2a1a,#0e3a2a)]",
         ].join(" ")}
       />
-      <div className="-mt-[26px] mb-2.5">
+      <div className="pointer-events-none relative z-10 -mt-[26px] mb-2.5">
         <div
           className={[
             "flex h-14 w-14 items-center justify-center overflow-hidden rounded-full text-lg font-extrabold text-white",
@@ -124,7 +129,7 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
         </div>
       </div>
 
-      <div className="w-full px-3.5 pb-4">
+      <div className="pointer-events-none relative z-10 w-full px-3.5 pb-4">
         <Badge
           className="mb-2 h-5 px-[9px] text-[9.5px] font-bold uppercase tracking-[0.06em]"
           variant={typeBadgeVariant(item.type)}
@@ -186,13 +191,9 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
           </span>
         </div>
 
-        <Link
-          className="mt-3 inline-flex h-8 w-full items-center justify-center rounded-full border border-weldoo-border-light bg-white text-[12px] font-semibold tracking-[-0.01em] text-weldoo-muted transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo"
-          href={item.href}
-        >
-          View profile
-        </Link>
-        <ConnectionActionButton item={item} />
+        <div className="pointer-events-auto relative z-20">
+          <ConnectionActionButton item={item} />
+        </div>
       </div>
     </article>
   );
