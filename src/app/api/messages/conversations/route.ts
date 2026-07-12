@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
+  getMessagesInbox,
   sendDirectMessage,
 } from "@/lib/messages/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -14,6 +15,39 @@ function getApiErrorMessage(error: unknown) {
   }
 
   return message;
+}
+
+export async function GET() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { message: "Sign in to load messages.", status: "error" },
+        { status: 401 },
+      );
+    }
+
+    const conversations = await getMessagesInbox(supabase, user.id);
+
+    return NextResponse.json({
+      conversations,
+      status: "success",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : "Unable to load messages.",
+        status: "error",
+      },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(request: Request) {

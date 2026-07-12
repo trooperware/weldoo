@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { AutoDismissNotice } from "@/components/ui/auto-dismiss-notice";
@@ -13,6 +13,7 @@ import type {
   MessageItem,
   MessageRecipientSuggestion,
 } from "@/lib/messages/queries";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type MessagesInboxProps = {
   conversations: MessageConversationListItem[];
@@ -86,6 +87,11 @@ type MessageApiPayload = {
   conversationId?: string;
   message?: string;
   sentMessage?: MessageItem;
+  status?: string;
+};
+
+type MessagesInboxPayload = {
+  conversations?: MessageConversationListItem[];
   status?: string;
 };
 
@@ -207,6 +213,99 @@ export function MessagesInbox({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const refreshTimerRef = useRef<number | null>(null);
+
+  const refreshConversations = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch("/api/messages/conversations", {
+        cache: "no-store",
+        signal,
+      });
+
+      if (!response.ok) return;
+
+      const payload = (await response.json()) as MessagesInboxPayload;
+
+      if (payload.status !== "success" || !payload.conversations) return;
+
+      setConversationItems(payload.conversations);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    }
+  }, []);
+
+  const scheduleRefreshConversations = useCallback(() => {
+    if (refreshTimerRef.current) {
+      window.clearTimeout(refreshTimerRef.current);
+    }
+
+    refreshTimerRef.current = window.setTimeout(() => {
+      refreshTimerRef.current = null;
+      void refreshConversations();
+    }, 160);
+  }, [refreshConversations]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        void refreshConversations(controller.signal);
+      }
+    }
+
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("focus", refreshWhenVisible);
+
+    return () => {
+      controller.abort();
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("focus", refreshWhenVisible);
+    };
+  }, [refreshConversations]);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    const channel = supabase
+      .channel(`messages-inbox:${currentProfileId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+        },
+        scheduleRefreshConversations,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          filter: `profile_id=eq.${currentProfileId}`,
+          schema: "public",
+          table: "message_conversation_participants",
+        },
+        scheduleRefreshConversations,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "message_conversations",
+        },
+        scheduleRefreshConversations,
+      )
+      .subscribe();
+
+    return () => {
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+      void supabase.removeChannel(channel);
+    };
+  }, [currentProfileId, scheduleRefreshConversations]);
 
   useEffect(() => {
     if (!activeConversationId) return;
@@ -366,8 +465,9 @@ export function MessagesInbox({
       setRecipientQuery("");
       setSelectedRecipient(null);
       setStatusMessage("Message sent.");
+      setActiveConversationId(payload.conversationId);
       router.replace(`/messages?conversation=${payload.conversationId}`, { scroll: false });
-      router.refresh();
+      await refreshConversations();
     });
   }
 
