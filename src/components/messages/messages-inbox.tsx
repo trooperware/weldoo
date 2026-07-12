@@ -27,9 +27,9 @@ type MessagesInboxProps = {
 };
 
 const quickReplies = [
-  "Thanks for reaching out. Happy to continue the conversation.",
-  "Sounds interesting. Can you share a few more details?",
-  "I am available this week if you want to schedule a quick call.",
+  "Sounds good!",
+  "Let me check my calendar",
+  "Thanks for reaching out",
 ];
 
 function formatShortDate(value: string | null) {
@@ -372,8 +372,8 @@ export function MessagesInbox({
 
   return (
     <>
-      <section className="mx-auto h-[calc(100dvh-163px)] max-w-[1536px] overflow-hidden px-0 py-0 md:h-[calc(100dvh-93px)] md:px-8 md:py-8">
-        <div className="grid h-full min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] xl:gap-7">
+      <section className="mx-auto h-[calc(100dvh-163px)] max-w-[1200px] overflow-hidden px-0 py-0 md:h-[calc(100dvh-93px)] md:px-8 md:py-8">
+        <div className="grid h-full min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="hidden lg:block">
             <div className="overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
               <div className="h-[74px] bg-[linear-gradient(135deg,#3d3db4,#5558e8)]" />
@@ -419,7 +419,7 @@ export function MessagesInbox({
               </button>
             </div>
 
-            <div className="grid min-h-0 flex-1 overflow-hidden border-weldoo-border-light bg-white shadow-weldoo-sm md:rounded-[18px] md:border lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[460px_minmax(0,1fr)]">
+            <div className="grid min-h-0 flex-1 overflow-hidden border-weldoo-border-light bg-white shadow-weldoo-sm md:rounded-[18px] md:border lg:grid-cols-[340px_minmax(0,1fr)]">
               <aside
                 className={[
                   "min-h-0 border-r border-weldoo-border-light bg-white",
@@ -596,21 +596,21 @@ export function MessagesInbox({
                       )}
                     </div>
 
-                    <div className="shrink-0 border-t border-weldoo-border-light bg-white px-4 py-4 sm:px-5">
+                    <div className="shrink-0 bg-white">
                       {statusMessage ? (
-                        <p className="mb-3 rounded-weldoo-sm bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+                        <p className="mx-4 mb-3 rounded-weldoo-sm bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 sm:mx-5">
                           {statusMessage}
                         </p>
                       ) : null}
                       {errorMessage ? (
-                        <p className="mb-3 rounded-weldoo-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+                        <p className="mx-4 mb-3 rounded-weldoo-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-600 sm:mx-5">
                           {errorMessage}
                         </p>
                       ) : null}
-                      <div className="mb-3 flex max-w-full gap-2 overflow-x-auto pb-1">
+                      <div className="flex flex-wrap gap-2 px-4 pb-0 pt-2 sm:px-5">
                         {quickReplies.map((text) => (
                           <button
-                            className="shrink-0 rounded-full border border-weldoo-indigo bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-weldoo-indigo transition hover:bg-weldoo-indigo/[0.06]"
+                            className="h-[30px] shrink-0 whitespace-nowrap rounded-full border-[1.5px] border-weldoo-indigo bg-white px-3.5 text-[12.5px] font-medium text-weldoo-indigo transition hover:bg-weldoo-indigo/[0.06]"
                             key={text}
                             onClick={() => setReply(text)}
                             type="button"
@@ -619,7 +619,7 @@ export function MessagesInbox({
                           </button>
                         ))}
                       </div>
-                      <div className="flex items-end gap-3">
+                      <div className="mt-6 flex items-end gap-3 border-t border-weldoo-border-light px-4 py-3.5 sm:px-5">
                         <div className="min-w-0 flex-1">
                           <Textarea
                             aria-label="Message reply"
