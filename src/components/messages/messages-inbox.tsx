@@ -427,18 +427,22 @@ export function MessagesInbox({
   useEffect(() => {
     const scrollContainer = messagesScrollRef.current;
 
-    if (!scrollContainer || !activeConversation) return;
+    if (!scrollContainer || !activeConversationId) return;
 
-    const scrollTarget = `${activeConversation.id}:${activeConversationLastMessageId ?? "empty"}`;
+    const scrollTarget = `${activeConversationId}:${activeConversationLastMessageId ?? "empty"}`;
 
     if (lastAutoScrollTargetRef.current === scrollTarget) return;
 
+    const previousConversationId =
+      lastAutoScrollTargetRef.current?.split(":")[0] ?? null;
+    const changedConversation = previousConversationId !== activeConversationId;
+
     lastAutoScrollTargetRef.current = scrollTarget;
     scrollContainer.scrollTo({
-      behavior: "smooth",
+      behavior: changedConversation ? "auto" : "smooth",
       top: scrollContainer.scrollHeight,
     });
-  }, [activeConversation?.id, activeConversationLastMessageId, activeConversation]);
+  }, [activeConversationId, activeConversationLastMessageId]);
 
   async function sendReply() {
     if (!activeConversation || isPending) return;
