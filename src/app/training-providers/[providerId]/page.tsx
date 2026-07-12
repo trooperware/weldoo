@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app/app-shell";
 import { ContactRequestButton } from "@/components/contact/contact-request-button";
+import { PublicProfileBackLink } from "@/components/profile/public-profile-back-link";
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
@@ -84,6 +85,7 @@ export default async function TrainingProviderPublicPage({
   return (
     <AppShell auth={appShellAuth}>
       <main className="px-4 py-8 sm:px-6 lg:px-8">
+        <PublicProfileBackLink />
         <article className="mx-auto max-w-5xl overflow-hidden rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white shadow-weldoo-sm">
           <div className="min-h-40 bg-[linear-gradient(135deg,#f5f7fb_0%,#e9ecf8_100%)]">
             {provider.cover_url ? (
