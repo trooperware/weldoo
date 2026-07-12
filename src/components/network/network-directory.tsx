@@ -18,17 +18,6 @@ type NetworkDirectoryProps = {
   totalPages: number;
 };
 
-function hasActiveFilters(filters: NetworkDirectoryFilters) {
-  return Boolean(
-    filters.query ||
-      filters.type !== "all" ||
-      filters.location ||
-      filters.process ||
-      filters.availability ||
-      filters.experience,
-  );
-}
-
 function getPageHref(filters: NetworkDirectoryFilters, page: number) {
   const params = new URLSearchParams();
 
@@ -255,14 +244,6 @@ export function NetworkDirectory({
               type="search"
             />
           </form>
-          {hasActiveFilters(filters) ? (
-            <Link
-              className="inline-flex h-8 items-center rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-slate shadow-weldoo-sm transition hover:border-[#c8c8e4] hover:text-weldoo-indigo"
-              href="/network"
-            >
-              Clear
-            </Link>
-          ) : null}
         </div>
       </div>
 
