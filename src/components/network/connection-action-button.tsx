@@ -102,7 +102,7 @@ export function ConnectionActionButton({
     `${baseButtonClass} group border-[1.5px] border-[var(--weldoo-border-light)] bg-[rgba(122,122,154,0.10)] text-[var(--weldoo-muted)] hover:border-[rgba(220,50,50,0.25)] hover:bg-[rgba(220,50,50,0.08)] hover:text-[#c0392b]`;
   const primaryButtonClass =
     size === "profile"
-      ? `${baseButtonClass} border border-transparent bg-[var(--weldoo-gradient)] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] hover:brightness-105 hover:shadow-[0_4px_14px_rgba(61,61,180,0.32)] disabled:opacity-60`
+      ? `${baseButtonClass} border border-transparent bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] hover:brightness-105 hover:shadow-[0_4px_14px_rgba(61,61,180,0.32)] disabled:opacity-60`
       : "inline-flex h-9 items-center justify-center rounded-full bg-weldoo-indigo text-[12px] font-semibold leading-none tracking-[-0.01em] text-white shadow-weldoo-sm transition hover:brightness-105 disabled:opacity-60";
 
   if (!item.canConnect) {
