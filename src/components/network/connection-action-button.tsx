@@ -237,26 +237,37 @@ export function ConnectionActionButton({
   }
 
   if (state.status === "pending_received") {
+    const receivedActionWrapperClass =
+      size === "profile"
+        ? "flex flex-nowrap items-center justify-end gap-2"
+        : "mt-3 flex w-full flex-nowrap items-center justify-center gap-2";
+    const ignoreButtonClass =
+      "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md bg-transparent px-2 text-[13px] font-semibold text-weldoo-muted transition hover:text-weldoo-ink disabled:opacity-60";
+    const acceptInvitationButtonClass =
+      size === "profile"
+        ? `${baseButtonClass} shrink-0 whitespace-nowrap border-[1.5px] border-weldoo-indigo bg-transparent px-5 py-2 text-weldoo-indigo hover:bg-weldoo-indigo hover:text-white disabled:opacity-60`
+        : "inline-flex h-9 min-w-[104px] shrink-0 items-center justify-center whitespace-nowrap rounded-full border-[1.5px] border-weldoo-indigo bg-transparent px-4 text-[13px] font-semibold text-weldoo-indigo transition hover:bg-weldoo-indigo hover:text-white disabled:opacity-60";
+
     return (
       <>
-        <div className={size === "profile" ? "grid grid-cols-2 gap-2" : "mt-3 grid grid-cols-2 gap-2"}>
+        <div className={receivedActionWrapperClass}>
           <button
-            className={primaryButtonClass}
-            disabled={pending}
-            onClick={() => updateRequest("accept")}
-            style={buttonTextStyle}
-            type="button"
-          >
-            Accept
-          </button>
-          <button
-            className={secondaryButtonClass}
+            className={ignoreButtonClass}
             disabled={pending}
             onClick={() => updateRequest("reject")}
             style={buttonTextStyle}
             type="button"
           >
-            Reject
+            {pending ? "Ignoring" : "Ignore"}
+          </button>
+          <button
+            className={acceptInvitationButtonClass}
+            disabled={pending}
+            onClick={() => updateRequest("accept")}
+            style={buttonTextStyle}
+            type="button"
+          >
+            {pending ? "Accepting" : "Accept"}
           </button>
         </div>
         {state.message ? (
