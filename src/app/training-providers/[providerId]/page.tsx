@@ -3,15 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app/app-shell";
-import { ContactRequestButton } from "@/components/contact/contact-request-button";
+import { ProfileMessageButton } from "@/components/messages/profile-message-button";
+import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { PublicProfileBackLink } from "@/components/profile/public-profile-back-link";
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
-import {
-  getOpenContactRequestRelationship,
-  hasAcceptedConnection,
-} from "@/lib/contact/queries";
+import { getConnectionActionState } from "@/lib/network/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -76,11 +74,12 @@ export default async function TrainingProviderPublicPage({
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === provider.owner_profile_id;
-  const [appShellAuth, contactRequestRelationship, canContactProfile] = await Promise.all([
+  const [appShellAuth, connectionAction] = await Promise.all([
     getAppShellAuth(),
-    getOpenContactRequestRelationship(supabase, user?.id, provider.owner_profile_id),
-    hasAcceptedConnection(supabase, user?.id, provider.owner_profile_id),
+    getConnectionActionState(supabase, user?.id, provider.owner_profile_id),
   ]);
+  const canMessageProfile =
+    Boolean(user && !isOwner) && connectionAction.connectionStatus === "accepted";
 
   return (
     <AppShell auth={appShellAuth}>
@@ -148,10 +147,9 @@ export default async function TrainingProviderPublicPage({
                     </Link>
                   </>
                 ) : null}
-                <ContactRequestButton
-                  canContact={Boolean(user && !isOwner && canContactProfile)}
-                  contactRequestId={contactRequestRelationship.contactRequestId}
-                  contactRequestStatus={contactRequestRelationship.contactRequestStatus}
+                <ConnectionActionButton item={connectionAction} size="profile" />
+                <ProfileMessageButton
+                  canMessage={canMessageProfile}
                   recipientName={provider.name}
                   recipientProfileId={provider.owner_profile_id}
                 />

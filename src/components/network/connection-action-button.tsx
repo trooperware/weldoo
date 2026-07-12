@@ -10,6 +10,7 @@ type ConnectionActionButtonProps = {
     NetworkDirectoryItem,
     "canConnect" | "connectionId" | "connectionStatus" | "targetProfileId"
   >;
+  size?: "card" | "profile";
 };
 
 type RequestState = {
@@ -44,14 +45,30 @@ function ClockIcon() {
   );
 }
 
-export function ConnectionActionButton({ item }: ConnectionActionButtonProps) {
+export function ConnectionActionButton({ item, size = "card" }: ConnectionActionButtonProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<RequestState>({
     connectionId: item.connectionId,
     status: item.connectionStatus,
   });
-  const buttonTextStyle = { fontSize: "12px", lineHeight: 1 };
+  const buttonTextStyle = size === "card" ? { fontSize: "12px", lineHeight: 1 } : undefined;
+  const baseButtonClass =
+    size === "profile"
+      ? "inline-flex h-11 items-center justify-center gap-1.5 rounded-[var(--weldoo-radius-sm)] px-5 text-sm font-semibold leading-none tracking-[-0.01em] transition"
+      : "mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full text-[12px] font-semibold leading-none tracking-[-0.01em] transition";
+  const secondaryButtonClass =
+    size === "profile"
+      ? `${baseButtonClass} border border-[var(--weldoo-border-light)] bg-white text-[var(--weldoo-slate)] hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)] disabled:opacity-60`
+      : `${baseButtonClass} border-[1.5px] border-[#e0e0ed] bg-white text-weldoo-slate hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)] disabled:opacity-60`;
+  const acceptedButtonClass =
+    size === "profile"
+      ? `${baseButtonClass} border border-[var(--weldoo-indigo)] bg-[var(--weldoo-indigo)]/10 text-[var(--weldoo-indigo)]`
+      : `${baseButtonClass} border-[1.5px] border-weldoo-indigo bg-weldoo-indigo/[0.06] text-weldoo-indigo`;
+  const primaryButtonClass =
+    size === "profile"
+      ? `${baseButtonClass} bg-[var(--weldoo-indigo)] text-white shadow-weldoo-md hover:brightness-105 disabled:opacity-60`
+      : "inline-flex h-9 items-center justify-center rounded-full bg-weldoo-indigo text-[12px] font-semibold leading-none tracking-[-0.01em] text-white shadow-weldoo-sm transition hover:brightness-105 disabled:opacity-60";
 
   if (!item.canConnect) {
     return null;
@@ -126,7 +143,7 @@ export function ConnectionActionButton({ item }: ConnectionActionButtonProps) {
   if (state.status === "accepted") {
     return (
       <button
-        className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border-[1.5px] border-weldoo-indigo bg-weldoo-indigo/[0.06] text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-indigo"
+        className={acceptedButtonClass}
         disabled
         style={buttonTextStyle}
         type="button"
@@ -141,7 +158,7 @@ export function ConnectionActionButton({ item }: ConnectionActionButtonProps) {
     return (
       <>
         <button
-          className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border-[1.5px] border-[#e0e0ed] bg-white text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)] disabled:opacity-60"
+          className={secondaryButtonClass}
           disabled={pending}
           onClick={() => updateRequest("cancel")}
           style={buttonTextStyle}
@@ -160,9 +177,9 @@ export function ConnectionActionButton({ item }: ConnectionActionButtonProps) {
   if (state.status === "pending_received") {
     return (
       <>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className={size === "profile" ? "grid grid-cols-2 gap-2" : "mt-3 grid grid-cols-2 gap-2"}>
           <button
-            className="inline-flex h-9 items-center justify-center rounded-full bg-weldoo-indigo text-[12px] font-semibold leading-none tracking-[-0.01em] text-white shadow-weldoo-sm transition hover:brightness-105 disabled:opacity-60"
+            className={primaryButtonClass}
             disabled={pending}
             onClick={() => updateRequest("accept")}
             style={buttonTextStyle}
@@ -171,7 +188,7 @@ export function ConnectionActionButton({ item }: ConnectionActionButtonProps) {
             Accept
           </button>
           <button
-            className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-[#e0e0ed] bg-white text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo disabled:opacity-60"
+            className={secondaryButtonClass}
             disabled={pending}
             onClick={() => updateRequest("reject")}
             style={buttonTextStyle}
@@ -190,7 +207,7 @@ export function ConnectionActionButton({ item }: ConnectionActionButtonProps) {
   return (
     <>
       <button
-        className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border-[1.5px] border-[#e0e0ed] bg-white text-[12px] font-semibold leading-none tracking-[-0.01em] text-weldoo-slate transition hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)] disabled:opacity-60"
+        className={secondaryButtonClass}
         disabled={pending}
         onClick={sendRequest}
         style={buttonTextStyle}

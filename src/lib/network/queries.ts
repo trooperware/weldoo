@@ -44,6 +44,11 @@ type DirectoryQueryResult = {
   totalPages: number;
 };
 
+export type ConnectionActionState = Pick<
+  NetworkDirectoryItem,
+  "canConnect" | "connectionId" | "connectionStatus" | "targetProfileId"
+>;
+
 function compactTags(values: Array<string | null | undefined>, limit = 4) {
   return values
     .flatMap((value) => (Array.isArray(value) ? value : [value]))
@@ -143,6 +148,55 @@ function trainingProviderToItem(provider: TrainingProviderRow): NetworkDirectory
     targetProfileId: provider.owner_profile_id,
     type: "training_provider",
     typeLabel: "Training provider",
+  };
+}
+
+export async function getConnectionActionState(
+  supabase: SupabaseClient<Database>,
+  currentProfileId: string | null | undefined,
+  targetProfileId: string,
+): Promise<ConnectionActionState> {
+  const connectionState: ConnectionActionState = {
+    canConnect: Boolean(currentProfileId && currentProfileId !== targetProfileId),
+    connectionId: null,
+    connectionStatus: "none",
+    targetProfileId,
+  };
+
+  if (!currentProfileId || currentProfileId === targetProfileId) {
+    return connectionState;
+  }
+
+  const { data, error } = await supabase
+    .from("connections")
+    .select("id, requester_profile_id, status")
+    .or(
+      `and(requester_profile_id.eq.${currentProfileId},recipient_profile_id.eq.${targetProfileId}),and(requester_profile_id.eq.${targetProfileId},recipient_profile_id.eq.${currentProfileId})`,
+    )
+    .in("status", ["pending", "accepted"])
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  const connection = data as Pick<
+    Tables<"connections">,
+    "id" | "requester_profile_id" | "status"
+  > | null;
+
+  if (!connection) {
+    return connectionState;
+  }
+
+  return {
+    ...connectionState,
+    connectionId: connection.id,
+    connectionStatus:
+      connection.status === "accepted"
+        ? "accepted"
+        : connection.requester_profile_id === currentProfileId
+          ? "pending_sent"
+          : "pending_received",
   };
 }
 
