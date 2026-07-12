@@ -6,6 +6,7 @@ import { NetworkDirectory } from "@/components/network/network-directory";
 import { getAppShellAuth } from "@/lib/auth/session";
 import {
   getNetworkDirectoryPage,
+  getNetworkInvitations,
   type NetworkDirectoryFilters,
 } from "@/lib/network/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -69,7 +70,10 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
   const page = parsePage(params.page);
   const filters = getFilters(params);
   const supabase = await createSupabaseServerClient();
-  const directory = await getNetworkDirectoryPage(supabase, page, filters, appShellAuth?.profileId);
+  const [directory, invitations] = await Promise.all([
+    getNetworkDirectoryPage(supabase, page, filters, appShellAuth?.profileId),
+    getNetworkInvitations(supabase, appShellAuth?.profileId),
+  ]);
   const ownProfileEditHref = getOwnProfileEditHref(appShellAuth?.profileType);
 
   return (
@@ -119,6 +123,7 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
 
           <NetworkDirectory
             filters={filters}
+            invitations={invitations.received}
             items={directory.items}
             page={directory.page}
             totalCount={directory.totalCount}

@@ -3,15 +3,18 @@
 import Link from "next/link";
 
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
+import { NetworkInvitationsSummary } from "@/components/network/network-invitations";
 import { Badge, EmptyState } from "@/components/ui";
 import {
   NETWORK_PAGE_SIZE,
   type NetworkDirectoryFilters,
   type NetworkDirectoryItem,
+  type NetworkInvitationItem,
 } from "@/lib/network/queries";
 
 type NetworkDirectoryProps = {
   filters: NetworkDirectoryFilters;
+  invitations: NetworkInvitationItem[];
   items: NetworkDirectoryItem[];
   page: number;
   totalCount: number;
@@ -190,6 +193,7 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
 
 export function NetworkDirectory({
   filters,
+  invitations,
   items,
   page,
   totalCount,
@@ -246,6 +250,8 @@ export function NetworkDirectory({
           </form>
         </div>
       </div>
+
+      <NetworkInvitationsSummary invitations={invitations} />
 
       {items.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -8,6 +8,7 @@ type ProfessionalProfileRow = Tables<"professional_profiles">;
 type ProfileRow = Tables<"profiles">;
 type CompanyRow = Tables<"companies">;
 type TrainingProviderRow = Tables<"training_providers">;
+type ConnectionRow = Tables<"connections">;
 
 export type NetworkDirectoryFilters = {
   availability?: string;
@@ -44,6 +45,22 @@ type DirectoryQueryResult = {
   totalPages: number;
 };
 
+export type NetworkInvitationItem = {
+  avatarUrl: string | null;
+  connectionId: string;
+  createdAt: string;
+  initials: string;
+  message: string | null;
+  name: string;
+  profileId: string;
+  role: string;
+};
+
+export type NetworkInvitationsResult = {
+  received: NetworkInvitationItem[];
+  sent: NetworkInvitationItem[];
+};
+
 export type ConnectionActionState = Pick<
   NetworkDirectoryItem,
   "canConnect" | "connectionId" | "connectionStatus" | "targetProfileId"
@@ -60,6 +77,25 @@ function compactTags(values: Array<string | null | undefined>, limit = 4) {
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return parts.map((part) => part.slice(0, 1).toUpperCase()).join("") || "W";
+}
+
+function profileToInvitationItem(
+  connection: Pick<
+    ConnectionRow,
+    "created_at" | "id" | "message" | "recipient_profile_id" | "requester_profile_id"
+  >,
+  profile: Pick<ProfileRow, "avatar_url" | "display_name" | "headline" | "id" | "location">,
+): NetworkInvitationItem {
+  return {
+    avatarUrl: profile.avatar_url,
+    connectionId: connection.id,
+    createdAt: connection.created_at,
+    initials: getInitials(profile.display_name),
+    message: connection.message,
+    name: profile.display_name,
+    profileId: profile.id,
+    role: profile.headline ?? profile.location ?? "Weldoo member",
+  };
 }
 
 function normalizeFilter(value?: string) {
@@ -197,6 +233,87 @@ export async function getConnectionActionState(
         : connection.requester_profile_id === currentProfileId
           ? "pending_sent"
           : "pending_received",
+  };
+}
+
+export async function getNetworkInvitations(
+  supabase: SupabaseClient<Database>,
+  currentProfileId: string | null | undefined,
+): Promise<NetworkInvitationsResult> {
+  if (!currentProfileId) {
+    return { received: [], sent: [] };
+  }
+
+  const [receivedResult, sentResult] = await Promise.all([
+    supabase
+      .from("connections")
+      .select("id, requester_profile_id, recipient_profile_id, message, created_at")
+      .eq("recipient_profile_id", currentProfileId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("connections")
+      .select("id, requester_profile_id, recipient_profile_id, message, created_at")
+      .eq("requester_profile_id", currentProfileId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false }),
+  ]);
+
+  if (receivedResult.error) throw new Error(receivedResult.error.message);
+  if (sentResult.error) throw new Error(sentResult.error.message);
+
+  const receivedConnections = (receivedResult.data ?? []) as Array<
+    Pick<
+      ConnectionRow,
+      "created_at" | "id" | "message" | "recipient_profile_id" | "requester_profile_id"
+    >
+  >;
+  const sentConnections = (sentResult.data ?? []) as Array<
+    Pick<
+      ConnectionRow,
+      "created_at" | "id" | "message" | "recipient_profile_id" | "requester_profile_id"
+    >
+  >;
+  const profileIds = [
+    ...receivedConnections.map((connection) => connection.requester_profile_id),
+    ...sentConnections.map((connection) => connection.recipient_profile_id),
+  ];
+  const uniqueProfileIds = [...new Set(profileIds)];
+
+  if (!uniqueProfileIds.length) {
+    return { received: [], sent: [] };
+  }
+
+  const { data: profileRows, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, display_name, headline, location, avatar_url")
+    .in("id", uniqueProfileIds);
+
+  if (profilesError) throw new Error(profilesError.message);
+
+  const profilesById = ((profileRows ?? []) as Array<
+    Pick<ProfileRow, "avatar_url" | "display_name" | "headline" | "id" | "location">
+  >).reduce<Record<string, Pick<ProfileRow, "avatar_url" | "display_name" | "headline" | "id" | "location">>>(
+    (accumulator, profile) => {
+      accumulator[profile.id] = profile;
+      return accumulator;
+    },
+    {},
+  );
+
+  return {
+    received: receivedConnections
+      .map((connection) => {
+        const profile = profilesById[connection.requester_profile_id];
+        return profile ? profileToInvitationItem(connection, profile) : null;
+      })
+      .filter((item): item is NetworkInvitationItem => Boolean(item)),
+    sent: sentConnections
+      .map((connection) => {
+        const profile = profilesById[connection.recipient_profile_id];
+        return profile ? profileToInvitationItem(connection, profile) : null;
+      })
+      .filter((item): item is NetworkInvitationItem => Boolean(item)),
   };
 }
 
