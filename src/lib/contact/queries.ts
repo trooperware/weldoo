@@ -73,6 +73,30 @@ export async function getOpenContactRequestRelationship(
   };
 }
 
+export async function hasAcceptedConnection(
+  supabase: SupabaseClient<Database>,
+  currentProfileId: string | null | undefined,
+  targetProfileId: string,
+) {
+  if (!currentProfileId || currentProfileId === targetProfileId) {
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from("connections")
+    .select("id")
+    .eq("status", "accepted")
+    .or(
+      `and(requester_profile_id.eq.${currentProfileId},recipient_profile_id.eq.${targetProfileId}),and(requester_profile_id.eq.${targetProfileId},recipient_profile_id.eq.${currentProfileId})`,
+    )
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return Boolean(data);
+}
+
 async function loadProfileMaps(
   supabase: SupabaseClient<Database>,
   profileIds: string[],

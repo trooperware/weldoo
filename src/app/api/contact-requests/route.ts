@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { hasAcceptedConnection } from "@/lib/contact/queries";
 import { publishNotificationEvent } from "@/lib/notifications/events";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables, TablesInsert } from "@/types/database";
@@ -57,6 +58,22 @@ export async function POST(request: Request) {
   if (!profile?.onboarding_completed || profile.status !== "active") {
     return NextResponse.json(
       { message: "Complete your profile before sending contact requests.", status: "error" },
+      { status: 403 },
+    );
+  }
+
+  const canContactRecipient = await hasAcceptedConnection(
+    supabase,
+    user.id,
+    recipientProfileId,
+  );
+
+  if (!canContactRecipient) {
+    return NextResponse.json(
+      {
+        message: "You can only contact profiles you are connected with.",
+        status: "error",
+      },
       { status: 403 },
     );
   }

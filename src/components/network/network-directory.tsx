@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { ContactRequestButton } from "@/components/contact/contact-request-button";
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { Badge, EmptyState } from "@/components/ui";
 import {
@@ -78,13 +77,7 @@ function TypePill({
   );
 }
 
-function NetworkCard({
-  canContact,
-  item,
-}: {
-  canContact: boolean;
-  item: NetworkDirectoryItem;
-}) {
+function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
   return (
     <article className="group flex flex-col items-center overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white text-center shadow-weldoo-sm transition hover:-translate-y-[3px] hover:border-[#d0d0ea] hover:shadow-[0_8px_32px_rgba(61,61,180,0.12)]">
       <div
@@ -185,14 +178,6 @@ function NetworkCard({
         >
           View profile
         </Link>
-        <ContactRequestButton
-          canContact={canContact}
-          contactRequestId={item.contactRequestId}
-          contactRequestStatus={item.contactRequestStatus}
-          recipientName={item.name}
-          recipientProfileId={item.targetProfileId}
-          size="card"
-        />
         <ConnectionActionButton item={item} />
       </div>
     </article>
@@ -200,7 +185,6 @@ function NetworkCard({
 }
 
 export function NetworkDirectory({
-  currentProfileId,
   filters,
   items,
   page,
@@ -277,13 +261,7 @@ export function NetworkDirectory({
       {visibleItems.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {visibleItems.map((item) => (
-            <NetworkCard
-              canContact={Boolean(
-                currentProfileId && item.targetProfileId !== currentProfileId,
-              )}
-              item={item}
-              key={`${item.type}-${item.id}`}
-            />
+            <NetworkCard item={item} key={`${item.type}-${item.id}`} />
           ))}
         </div>
       ) : (
