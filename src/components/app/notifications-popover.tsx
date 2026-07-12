@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   formatNotificationTime,
@@ -184,6 +184,53 @@ export function NotificationsPopover({
     unreadCount > 0
       ? `Notifications, ${unreadCount} unread`
       : "Notifications";
+  const refreshNotifications = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch("/api/notifications", {
+        cache: "no-store",
+        signal,
+      });
+
+      if (!response.ok) return;
+
+      const payload = (await response.json()) as {
+        data?: NotificationDropdownData;
+        status?: string;
+      };
+
+      if (payload.status !== "success" || !payload.data) return;
+
+      setItems(payload.data.items);
+      setUnreadCount(payload.data.unreadCount);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refreshNotifications(controller.signal);
+      }
+    }, 10000);
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        void refreshNotifications(controller.signal);
+      }
+    }
+
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("focus", refreshWhenVisible);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("focus", refreshWhenVisible);
+    };
+  }, [refreshNotifications]);
 
   function markRead(id: string) {
     const wasUnread = items.some((item) => item.id === id && !item.readAt);
