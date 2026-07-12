@@ -108,7 +108,7 @@ export async function signUpAction(
   const fullName = [parsed.data.firstName, parsed.data.lastName]
     .filter(Boolean)
     .join(" ");
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -124,6 +124,12 @@ export async function signUpAction(
 
   if (error) {
     return getErrorState(error.message);
+  }
+
+  if (data.user?.identities?.length === 0) {
+    return getErrorState(
+      "This email is already registered. Sign in or reset your password.",
+    );
   }
 
   return {

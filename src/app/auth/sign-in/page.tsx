@@ -8,6 +8,7 @@ import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 
 type SignInPageProps = {
   searchParams: Promise<{
+    emailConfirmed?: string;
     error?: string;
     message?: string;
     passwordReset?: string;
@@ -26,7 +27,7 @@ function getOAuthErrorMessage(error?: string, message?: string) {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ error, message, passwordReset, redirectTo }, user, profile] = await Promise.all([
+  const [{ emailConfirmed, error, message, passwordReset, redirectTo }, user, profile] = await Promise.all([
     searchParams,
     getCurrentUser(),
     getCurrentProfile(),
@@ -64,7 +65,9 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         oauthError={getOAuthErrorMessage(error, message)}
         redirectTo={redirectTo}
         successMessage={
-          passwordReset === "1"
+          emailConfirmed === "1"
+            ? "Email confirmed. Sign in to continue."
+            : passwordReset === "1"
             ? "Password updated. Sign in again with your new password."
             : undefined
         }

@@ -3,6 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getPostAuthRedirectPath, getSafeRedirectPath } from "@/lib/auth/redirects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+function isPkceVerifierMismatch(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  return (
+    normalizedMessage.includes("code challenge") ||
+    normalizedMessage.includes("code verifier")
+  );
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
@@ -33,8 +42,13 @@ export async function GET(request: NextRequest) {
 
     if (exchangeError) {
       const signInUrl = new URL("/auth/sign-in", requestUrl.origin);
-      signInUrl.searchParams.set("error", "oauth_callback");
-      signInUrl.searchParams.set("message", exchangeError.message);
+      if (isPkceVerifierMismatch(exchangeError.message) && next === "/onboarding") {
+        signInUrl.searchParams.set("emailConfirmed", "1");
+        signInUrl.searchParams.set("redirectTo", next);
+      } else {
+        signInUrl.searchParams.set("error", "oauth_callback");
+        signInUrl.searchParams.set("message", exchangeError.message);
+      }
 
       return NextResponse.redirect(signInUrl);
     }
