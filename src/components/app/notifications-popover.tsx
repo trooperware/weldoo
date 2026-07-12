@@ -8,6 +8,7 @@ import {
   type NotificationDropdownData,
   type NotificationDropdownItem,
 } from "@/lib/notifications/queries";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type NotificationType = NotificationDropdownItem["type"];
 
@@ -169,8 +170,10 @@ function EmptyNotifications() {
 
 export function NotificationsPopover({
   initialData,
+  profileId,
 }: {
   initialData: NotificationDropdownData;
+  profileId?: string | null;
 }) {
   const [items, setItems] = useState(initialData.items);
   const [unreadCount, setUnreadCount] = useState(initialData.unreadCount);
@@ -231,6 +234,31 @@ export function NotificationsPopover({
       window.removeEventListener("focus", refreshWhenVisible);
     };
   }, [refreshNotifications]);
+
+  useEffect(() => {
+    if (!profileId) return;
+
+    const supabase = createSupabaseBrowserClient();
+    const channel = supabase
+      .channel(`notifications:${profileId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          filter: `recipient_profile_id=eq.${profileId}`,
+          schema: "public",
+          table: "notifications",
+        },
+        () => {
+          void refreshNotifications();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [profileId, refreshNotifications]);
 
   function markRead(id: string) {
     const wasUnread = items.some((item) => item.id === id && !item.readAt);

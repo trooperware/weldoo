@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { DeployInfoBar } from "@/components/app/deploy-info-bar";
 import { MainNavigation, MobileBottomNavigation } from "@/components/app/app-shell-nav";
+import { MessagesNavLink } from "@/components/app/messages-nav-link";
 import { MobileProfileDrawer } from "@/components/app/mobile-profile-drawer";
 import { NotificationsPopover } from "@/components/app/notifications-popover";
 import { PopoverDismissListener } from "@/components/app/popover-dismiss-listener";
@@ -239,12 +240,6 @@ export async function AppShell({ auth, children }: AppShellProps) {
   const avatarInitial = displayName.slice(0, 1).toUpperCase();
   const unreadMessageCount =
     auth?.unreadMessageCount ?? auth?.unreadContactRequestCount ?? 0;
-  const unreadMessageBadge =
-    unreadMessageCount > 99 ? "99+" : String(unreadMessageCount);
-  const messagesLabel =
-    unreadMessageCount > 0
-      ? `Messages, ${unreadMessageCount} unread`
-      : "Messages";
   const profileHref =
     auth?.profileType === "professional"
       ? "/profile/edit"
@@ -284,22 +279,14 @@ export async function AppShell({ auth, children }: AppShellProps) {
           <div className="flex items-center justify-end gap-1.5 md:gap-1">
             {isSignedIn ? (
               <>
-                <Link
-                  aria-label={messagesLabel}
-                  className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-weldoo-muted transition hover:bg-weldoo-bg-strong hover:text-weldoo-indigo"
-                  href="/messages"
-                  title={messagesLabel}
-                >
-                  <svg aria-hidden="true" className="h-[19px] w-[19px]" fill="none" viewBox="0 0 24 24">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-                  </svg>
-                  {unreadMessageCount > 0 ? (
-                    <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-weldoo-indigo px-[3px] text-[9px] font-bold leading-none text-white">
-                      {unreadMessageBadge}
-                    </span>
-                  ) : null}
-                </Link>
-                <NotificationsPopover initialData={notificationData} />
+                <MessagesNavLink
+                  initialUnreadCount={unreadMessageCount}
+                  profileId={auth?.profileId}
+                />
+                <NotificationsPopover
+                  initialData={notificationData}
+                  profileId={auth?.profileId}
+                />
                 {auth && profileHref ? (
                   <>
                     <MobileProfileDrawer
