@@ -521,13 +521,13 @@ export function MessagesInbox({
                     src={currentProfile.avatarUrl}
                   />
                 </div>
-                <h2 className="mt-3 truncate text-[16px] font-bold text-weldoo-ink">
+                <h2 className="mt-3 truncate text-[16px] font-bold leading-tight text-weldoo-ink">
                   {currentProfile.displayName}
                 </h2>
-                <p className="mt-1 line-clamp-2 text-[12.5px] leading-5 text-weldoo-muted">
+                <p className="mt-2 line-clamp-2 text-[13px] leading-[1.55] text-weldoo-muted">
                   {currentProfile.headline ?? profileTypeLabel}
                 </p>
-                <div className="mt-4 rounded-weldoo-sm bg-weldoo-bg px-3 py-2">
+                <div className="mt-5 rounded-weldoo-sm bg-weldoo-bg px-3 py-2.5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-weldoo-muted">
                     Inbox
                   </p>
@@ -731,7 +731,7 @@ export function MessagesInbox({
                                 <Avatar name={senderName} size="sm" src={senderAvatar} />
                                 <div className="min-w-0 flex-1">
                                   <div className="mb-1 flex items-baseline gap-2">
-                                    <span className="font-bold text-weldoo-ink">{senderName}</span>
+                                    <span className="text-[13.5px] font-bold text-weldoo-ink">{senderName}</span>
                                     <span className="text-[12px] text-weldoo-muted">· {formatShortDate(message.created_at)}</span>
                                   </div>
                                   <p className="whitespace-pre-wrap break-words text-sm leading-[1.65] text-weldoo-ink">
