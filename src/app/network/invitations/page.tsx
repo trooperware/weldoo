@@ -31,7 +31,7 @@ function TabLink({
   return (
     <Link
       className={[
-        "border-b-[2.5px] px-5 py-2.5 text-sm font-semibold transition",
+        "-mb-[2px] border-b-[2.5px] px-5 py-2.5 text-sm font-semibold transition",
         active
           ? "border-weldoo-indigo text-weldoo-indigo"
           : "border-transparent text-weldoo-muted hover:text-weldoo-ink",

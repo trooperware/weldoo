@@ -5,11 +5,13 @@ import { useState } from "react";
 
 type NetworkInvitationActionsProps = {
   connectionId: string;
+  density?: "page" | "summary";
   mode: "received" | "sent";
 };
 
 export function NetworkInvitationActions({
   connectionId,
+  density = "summary",
   mode,
 }: NetworkInvitationActionsProps) {
   const router = useRouter();
@@ -43,7 +45,10 @@ export function NetworkInvitationActions({
     return (
       <div className="flex flex-col items-end gap-2">
         <button
-          className="inline-flex h-9 items-center justify-center rounded-full border-[1.5px] border-[#d0d0e8] bg-white px-4 text-[13px] font-semibold text-weldoo-muted transition hover:border-red-300 hover:text-red-600 disabled:opacity-60"
+          className={[
+            "inline-flex items-center justify-center rounded-full border-[1.5px] border-[#d0d0e8] bg-transparent text-[13px] font-semibold text-weldoo-muted transition hover:border-[#e53e3e] hover:text-[#e53e3e] disabled:opacity-60",
+            density === "page" ? "px-4 py-2" : "px-4 py-1.5",
+          ].join(" ")}
           disabled={Boolean(pendingAction)}
           onClick={() => updateInvitation("cancel")}
           type="button"
@@ -59,7 +64,7 @@ export function NetworkInvitationActions({
     <div className="flex flex-col items-end gap-2">
       <div className="flex items-center gap-2">
         <button
-          className="rounded-md px-2 py-1 text-[13px] font-semibold text-weldoo-muted transition hover:text-weldoo-ink disabled:opacity-60"
+          className="rounded-md bg-transparent px-2 py-1 text-[13px] font-semibold text-weldoo-muted transition hover:text-weldoo-ink disabled:opacity-60"
           disabled={Boolean(pendingAction)}
           onClick={() => updateInvitation("reject")}
           type="button"
@@ -67,7 +72,10 @@ export function NetworkInvitationActions({
           {pendingAction === "reject" ? "Ignoring" : "Ignore"}
         </button>
         <button
-          className="inline-flex h-8 items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo bg-white px-4 text-[13px] font-semibold text-weldoo-indigo transition hover:bg-weldoo-indigo hover:text-white disabled:opacity-60"
+          className={[
+            "inline-flex items-center justify-center rounded-full border-[1.5px] border-weldoo-indigo bg-transparent text-[13px] font-semibold text-weldoo-indigo transition hover:bg-weldoo-indigo hover:text-white disabled:opacity-60",
+            density === "page" ? "px-5 py-2" : "px-4 py-1.5",
+          ].join(" ")}
           disabled={Boolean(pendingAction)}
           onClick={() => updateInvitation("accept")}
           type="button"
