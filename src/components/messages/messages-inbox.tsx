@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { AutoDismissNotice } from "@/components/ui/auto-dismiss-notice";
@@ -44,6 +44,28 @@ function formatShortDate(value: string | null) {
   return new Intl.DateTimeFormat("en", sameDay
     ? { hour: "2-digit", minute: "2-digit" }
     : { day: "numeric", month: "short" }).format(date);
+}
+
+function getMessageDayKey(value: string) {
+  const date = new Date(value);
+
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function formatMessageDay(value: string) {
+  const date = new Date(value);
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  if (date.toDateString() === now.toDateString()) return "Today";
+  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+  return new Intl.DateTimeFormat("en", {
+    day: "numeric",
+    month: "long",
+    year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
+  }).format(date);
 }
 
 function getInitial(name: string) {
@@ -214,6 +236,7 @@ export function MessagesInbox({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const refreshTimerRef = useRef<number | null>(null);
+  const messagesScrollRef = useRef<HTMLDivElement | null>(null);
 
   const refreshConversations = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -381,6 +404,7 @@ export function MessagesInbox({
 
   const activeConversation =
     conversationItems.find((conversation) => conversation.id === activeConversationId) ?? null;
+  const activeConversationLastMessageId = activeConversation?.lastMessage?.id ?? null;
   const activeProfile = activeConversation?.otherParticipant;
   const activeName = activeProfile?.display_name ?? "Weldoo member";
   const profileTypeLabel =
@@ -396,6 +420,17 @@ export function MessagesInbox({
     setActiveConversationId(conversationId);
     router.replace(`/messages?conversation=${conversationId}`, { scroll: false });
   }
+
+  useEffect(() => {
+    const scrollContainer = messagesScrollRef.current;
+
+    if (!scrollContainer || !activeConversation) return;
+
+    scrollContainer.scrollTo({
+      behavior: "smooth",
+      top: scrollContainer.scrollHeight,
+    });
+  }, [activeConversation?.id, activeConversationLastMessageId, activeConversation]);
 
   async function sendReply() {
     if (!activeConversation || isPending) return;
@@ -666,28 +701,45 @@ export function MessagesInbox({
                       </div>
                     </div>
 
-                    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-white px-4 py-5 sm:px-6">
+                    <div
+                      className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-5 sm:px-6"
+                      ref={messagesScrollRef}
+                    >
                       {activeConversation.messages.length ? (
-                        activeConversation.messages.map((message) => {
+                        activeConversation.messages.map((message, index) => {
                           const fromCurrentUser = message.sender_profile_id === currentProfileId;
                           const senderName = fromCurrentUser ? currentProfile.displayName : activeName;
                           const senderAvatar = fromCurrentUser
                             ? currentProfile.avatarUrl
                             : activeProfile?.avatar_url;
+                          const previousMessage = activeConversation.messages[index - 1];
+                          const showDaySeparator =
+                            !previousMessage ||
+                            getMessageDayKey(previousMessage.created_at) !==
+                              getMessageDayKey(message.created_at);
 
                           return (
-                            <div className="flex items-start gap-3" key={message.id}>
-                              <Avatar name={senderName} size="sm" src={senderAvatar} />
-                              <div className="min-w-0 flex-1">
-                                <div className="mb-1 flex items-baseline gap-2">
-                                  <span className="font-bold text-weldoo-ink">{senderName}</span>
-                                  <span className="text-[12px] text-weldoo-muted">· {formatShortDate(message.created_at)}</span>
+                            <Fragment key={message.id}>
+                              {showDaySeparator ? (
+                                <div className="relative my-5 text-center text-[11px] font-semibold uppercase tracking-[0.07em] text-weldoo-muted before:absolute before:left-0 before:right-0 before:top-1/2 before:h-px before:bg-weldoo-border-light">
+                                  <span className="relative z-[1] bg-white px-3">
+                                    {formatMessageDay(message.created_at)}
+                                  </span>
                                 </div>
-                                <p className="whitespace-pre-wrap break-words text-sm leading-[1.65] text-weldoo-ink">
-                                  {message.body}
-                                </p>
+                              ) : null}
+                              <div className="mb-5 flex items-start gap-3">
+                                <Avatar name={senderName} size="sm" src={senderAvatar} />
+                                <div className="min-w-0 flex-1">
+                                  <div className="mb-1 flex items-baseline gap-2">
+                                    <span className="font-bold text-weldoo-ink">{senderName}</span>
+                                    <span className="text-[12px] text-weldoo-muted">· {formatShortDate(message.created_at)}</span>
+                                  </div>
+                                  <p className="whitespace-pre-wrap break-words text-sm leading-[1.65] text-weldoo-ink">
+                                    {message.body}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
+                            </Fragment>
                           );
                         })
                       ) : (
