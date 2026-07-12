@@ -372,8 +372,8 @@ export function MessagesInbox({
 
   return (
     <>
-      <section className="mx-auto min-h-[calc(100vh-4rem)] max-w-[1200px] px-0 py-0 md:px-8 md:py-8">
-        <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <section className="mx-auto h-[calc(100dvh-163px)] max-w-[1536px] overflow-hidden px-0 py-0 md:h-[calc(100dvh-93px)] md:px-8 md:py-8">
+        <div className="grid h-full min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] xl:gap-7">
           <aside className="hidden lg:block">
             <div className="overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
               <div className="h-[74px] bg-[linear-gradient(135deg,#3d3db4,#5558e8)]" />
@@ -403,7 +403,7 @@ export function MessagesInbox({
             </div>
           </aside>
 
-          <div className="min-w-0">
+          <div className="flex min-h-0 min-w-0 flex-col">
             <div className="mb-4 flex h-11 items-center justify-between gap-3 px-4 md:px-0">
               <h1 className="text-[22px] font-bold tracking-tight text-weldoo-ink">
                 Messages
@@ -419,10 +419,10 @@ export function MessagesInbox({
               </button>
             </div>
 
-            <div className="grid min-h-[calc(100vh-9rem)] overflow-hidden border-weldoo-border-light bg-white shadow-weldoo-sm md:rounded-[18px] md:border lg:grid-cols-[340px_minmax(0,1fr)]">
+            <div className="grid min-h-0 flex-1 overflow-hidden border-weldoo-border-light bg-white shadow-weldoo-sm md:rounded-[18px] md:border lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[460px_minmax(0,1fr)]">
               <aside
                 className={[
-                  "min-h-[calc(100vh-9rem)] border-r border-weldoo-border-light bg-white lg:min-h-[680px]",
+                  "min-h-0 border-r border-weldoo-border-light bg-white",
                   activeConversation ? "hidden lg:block" : "block",
                 ].join(" ")}
               >
@@ -449,7 +449,7 @@ export function MessagesInbox({
                 </div>
 
                 {filteredConversations.length ? (
-                  <div className="max-h-[calc(100vh-14rem)] overflow-y-auto lg:max-h-[620px]">
+                  <div className="max-h-[calc(100dvh-14rem)] overflow-y-auto lg:max-h-none">
                     {filteredConversations.map((conversation) => {
                       const profile = conversation.otherParticipant;
                       const name = profile?.display_name ?? "Weldoo member";
@@ -523,7 +523,7 @@ export function MessagesInbox({
 
               <main
                 className={[
-                  "flex min-h-[calc(100vh-9rem)] flex-col bg-white lg:min-h-[680px]",
+                  "min-h-0 min-w-0 flex-col bg-white",
                   activeConversation ? "flex" : "hidden lg:flex",
                 ].join(" ")}
               >
@@ -565,7 +565,7 @@ export function MessagesInbox({
                       </div>
                     </div>
 
-                    <div className="flex-1 space-y-5 overflow-y-auto bg-white px-4 py-5 sm:px-6">
+                    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-white px-4 py-5 sm:px-6">
                       {activeConversation.messages.length ? (
                         activeConversation.messages.map((message) => {
                           const fromCurrentUser = message.sender_profile_id === currentProfileId;
@@ -596,7 +596,7 @@ export function MessagesInbox({
                       )}
                     </div>
 
-                    <div className="border-t border-weldoo-border-light bg-white px-4 py-4 sm:px-5">
+                    <div className="shrink-0 border-t border-weldoo-border-light bg-white px-4 py-4 sm:px-5">
                       {statusMessage ? (
                         <p className="mb-3 rounded-weldoo-sm bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
                           {statusMessage}
@@ -607,7 +607,7 @@ export function MessagesInbox({
                           {errorMessage}
                         </p>
                       ) : null}
-                      <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+                      <div className="mb-3 flex max-w-full gap-2 overflow-x-auto pb-1">
                         {quickReplies.map((text) => (
                           <button
                             className="shrink-0 rounded-full border border-weldoo-indigo bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-weldoo-indigo transition hover:bg-weldoo-indigo/[0.06]"
@@ -620,14 +620,16 @@ export function MessagesInbox({
                         ))}
                       </div>
                       <div className="flex items-end gap-3">
-                        <Textarea
-                          aria-label="Message reply"
-                          className="min-h-[62px] resize-none bg-weldoo-bg"
-                          id="message-reply"
-                          onChange={(event) => setReply(event.target.value)}
-                          placeholder="Write a message..."
-                          value={reply}
-                        />
+                        <div className="min-w-0 flex-1">
+                          <Textarea
+                            aria-label="Message reply"
+                            className="min-h-[62px] resize-none bg-weldoo-bg"
+                            id="message-reply"
+                            onChange={(event) => setReply(event.target.value)}
+                            placeholder="Write a message..."
+                            value={reply}
+                          />
+                        </div>
                         <button
                           aria-label="Send message"
                           className="mb-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-weldoo-indigo text-white shadow-weldoo-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
