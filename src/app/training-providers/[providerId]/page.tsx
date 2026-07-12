@@ -146,7 +146,14 @@ export default async function TrainingProviderPublicPage({
                 ) : null}
                 <ConnectionActionButton
                   item={connectionAction}
+                  recipientAvatarUrl={provider.logo_url}
+                  recipientInitials={provider.name.slice(0, 1).toUpperCase()}
                   recipientName={provider.name}
+                  recipientRole={
+                    provider.training_types.length
+                      ? provider.training_types.join(", ")
+                      : "Training provider"
+                  }
                   size="profile"
                 />
                 <ProfileMessageButton

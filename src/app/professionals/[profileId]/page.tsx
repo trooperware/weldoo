@@ -174,7 +174,10 @@ export default async function ProfessionalPublicPage({
                 ) : null}
                 <ConnectionActionButton
                   item={connectionAction}
+                  recipientAvatarUrl={profile.avatar_url}
+                  recipientInitials={profile.display_name.slice(0, 1).toUpperCase()}
                   recipientName={profile.display_name}
+                  recipientRole={profile.headline ?? "Weldoo member"}
                   size="profile"
                 />
                 <ProfileMessageButton

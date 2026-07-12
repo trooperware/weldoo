@@ -135,7 +135,10 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
                 ) : null}
                 <ConnectionActionButton
                   item={connectionAction}
+                  recipientAvatarUrl={company.logo_url}
+                  recipientInitials={company.name.slice(0, 1).toUpperCase()}
                   recipientName={company.name}
+                  recipientRole={company.sector ?? "Weldoo member"}
                   size="profile"
                 />
                 <ProfileMessageButton

@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
-import { Button, Modal, Textarea } from "@/components/ui";
 import type { NetworkDirectoryItem } from "@/lib/network/queries";
 
 type ConnectionActionButtonProps = {
@@ -11,7 +11,10 @@ type ConnectionActionButtonProps = {
     NetworkDirectoryItem,
     "canConnect" | "connectionId" | "connectionStatus" | "targetProfileId"
   >;
+  recipientAvatarUrl?: string | null;
+  recipientInitials?: string;
   recipientName?: string;
+  recipientRole?: string | null;
   size?: "card" | "profile";
 };
 
@@ -74,19 +77,36 @@ function CancelIcon() {
   );
 }
 
+function getFirstName(name: string) {
+  return name.trim().split(/\s+/)[0] || "there";
+}
+
 export function ConnectionActionButton({
   item,
+  recipientAvatarUrl,
+  recipientInitials,
   recipientName = "this profile",
+  recipientRole,
   size = "card",
 }: ConnectionActionButtonProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [requestMessage, setRequestMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [state, setState] = useState<RequestState>({
     connectionId: item.connectionId,
     status: item.connectionStatus,
   });
+  const displayInitials =
+    recipientInitials ??
+    recipientName
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.slice(0, 1).toUpperCase())
+      .join("") ??
+    "W";
   const buttonTextStyle = size === "card" ? { fontSize: "12.5px", lineHeight: 1 } : undefined;
   const baseButtonClass =
     size === "profile"
@@ -105,6 +125,25 @@ export function ConnectionActionButton({
       ? `${baseButtonClass} border border-transparent bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] hover:brightness-105 hover:shadow-[0_4px_14px_rgba(61,61,180,0.32)] disabled:opacity-60`
       : "inline-flex h-9 items-center justify-center rounded-full bg-weldoo-indigo text-[12px] font-semibold leading-none tracking-[-0.01em] text-white shadow-weldoo-sm transition hover:brightness-105 disabled:opacity-60";
 
+  useEffect(() => {
+    if (!modalOpen) return;
+
+    const timer = window.setTimeout(() => textareaRef.current?.focus(), 100);
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setModalOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [modalOpen]);
+
   if (!item.canConnect) {
     return null;
   }
@@ -112,7 +151,7 @@ export function ConnectionActionButton({
   async function sendRequest() {
     const trimmedMessage = requestMessage.trim();
 
-    if (trimmedMessage.length > 1000) {
+    if (trimmedMessage.length > 300) {
       setState((current) => ({
         ...current,
         message: "Connection note is too long.",
@@ -292,42 +331,98 @@ export function ConnectionActionButton({
       {state.message ? (
         <p className="mt-2 text-[11px] font-medium text-red-600">{state.message}</p>
       ) : null}
-      <Modal
-        description="Send a short note with your connection request."
-        footer={
-          <>
-            <Button disabled={pending} onClick={() => setModalOpen(false)} variant="ghost">
-              Cancel
-            </Button>
-            <Button disabled={pending} onClick={sendRequest}>
-              {pending ? "Sending" : "Send request"}
-            </Button>
-          </>
-        }
-        onOpenChange={setModalOpen}
-        open={modalOpen}
-        title={`Connect with ${recipientName}`}
-      >
-        <div className="space-y-3">
-          <Textarea
-            error={state.message}
-            id={`connection-message-${item.targetProfileId}`}
-            label="Message"
-            maxLength={1000}
-            onChange={(event) => {
-              setRequestMessage(event.target.value);
-              if (state.message) {
-                setState((current) => ({ ...current, message: undefined }));
-              }
-            }}
-            placeholder="Write a short message to introduce yourself."
-            value={requestMessage}
-          />
-          <p className="text-right text-xs font-medium text-weldoo-muted">
-            {requestMessage.length}/1000
-          </p>
-        </div>
-      </Modal>
+      {modalOpen
+        ? createPortal(
+            <div
+              aria-modal="true"
+              className="fixed inset-0 z-[1100] flex items-center justify-center bg-[rgba(12,12,24,0.45)] p-4"
+              onClick={(event) => {
+                if (event.currentTarget === event.target) {
+                  setModalOpen(false);
+                }
+              }}
+              role="dialog"
+            >
+              <div className="w-full max-w-[420px] rounded-[16px] bg-white p-7 shadow-weldoo-xl">
+                <div className="mb-[18px] flex items-center gap-3.5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-[15.4px] font-bold text-white">
+                    {recipientAvatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img alt="" className="h-full w-full object-cover" src={recipientAvatarUrl} />
+                    ) : (
+                      displayInitials
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-[16.5px] font-bold leading-tight text-weldoo-ink">
+                      {recipientName}
+                    </div>
+                    <div className="mt-0.5 truncate text-[12.1px] text-weldoo-muted">
+                      {recipientRole ?? "Weldoo member"}
+                    </div>
+                  </div>
+                </div>
+
+                <label
+                  className="mb-2 block text-[13.2px] font-semibold text-weldoo-ink"
+                  htmlFor={`connection-message-${item.targetProfileId}`}
+                >
+                  Add a note to your request
+                </label>
+                <textarea
+                  aria-invalid={Boolean(state.message)}
+                  className={[
+                    "min-h-[100px] w-full resize-none rounded-[10px] border-[1.5px] border-weldoo-border-light bg-weldoo-bg px-3.5 py-3 text-[13.2px] leading-[1.55] text-weldoo-ink outline-none transition placeholder:text-weldoo-muted/55 focus:border-weldoo-indigo focus:bg-white focus:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]",
+                    state.message ? "border-red-300 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.10)]" : "",
+                  ].join(" ")}
+                  id={`connection-message-${item.targetProfileId}`}
+                  maxLength={300}
+                  onChange={(event) => {
+                    setRequestMessage(event.target.value);
+                    if (state.message) {
+                      setState((current) => ({ ...current, message: undefined }));
+                    }
+                  }}
+                  placeholder={`Hi ${getFirstName(recipientName)}, I'd love to connect and share insights on the welding industry...`}
+                  ref={textareaRef}
+                  value={requestMessage}
+                />
+                <div className="mb-[18px] mt-1.5 flex items-start justify-between gap-3">
+                  <p className="text-[11px] leading-4 text-weldoo-muted">
+                    Optional · Max 300 characters
+                  </p>
+                  <p className="shrink-0 text-[11px] leading-4 text-weldoo-muted">
+                    {requestMessage.length}/300
+                  </p>
+                </div>
+                {state.message ? (
+                  <p className="-mt-3 mb-4 text-[11.5px] font-medium text-red-600">
+                    {state.message}
+                  </p>
+                ) : null}
+                <div className="flex justify-end gap-2.5">
+                  <button
+                    className="h-[38px] rounded-full border-[1.5px] border-weldoo-border-light bg-transparent px-[18px] text-[13.2px] font-semibold text-weldoo-ink transition hover:border-weldoo-muted hover:bg-weldoo-bg disabled:opacity-60"
+                    disabled={pending}
+                    onClick={() => setModalOpen(false)}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="h-[38px] rounded-full border-0 bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-[22px] text-[13.2px] font-semibold text-white shadow-[0_2px_8px_rgba(61,61,180,0.20)] transition hover:brightness-105 hover:shadow-[0_4px_12px_rgba(61,61,180,0.30)] disabled:opacity-60"
+                    disabled={pending}
+                    onClick={sendRequest}
+                    type="button"
+                  >
+                    {pending ? "Sending" : "Send request"}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

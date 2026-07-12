@@ -184,7 +184,13 @@ function NetworkCard({ item }: { item: NetworkDirectoryItem }) {
         </div>
 
         <div className="pointer-events-auto relative z-20">
-          <ConnectionActionButton item={item} recipientName={item.name} />
+          <ConnectionActionButton
+            item={item}
+            recipientAvatarUrl={item.avatarUrl}
+            recipientInitials={item.initials}
+            recipientName={item.name}
+            recipientRole={item.description ?? "Weldoo member"}
+          />
         </div>
       </div>
     </article>
