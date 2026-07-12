@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
 
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { Badge, EmptyState } from "@/components/ui";
@@ -12,7 +11,6 @@ import {
 } from "@/lib/network/queries";
 
 type NetworkDirectoryProps = {
-  currentProfileId?: string | null;
   filters: NetworkDirectoryFilters;
   items: NetworkDirectoryItem[];
   page: number;
@@ -46,6 +44,23 @@ function getPageHref(filters: NetworkDirectoryFilters, page: number) {
   return query ? `/network?${query}` : "/network";
 }
 
+function getTypeHref(
+  filters: NetworkDirectoryFilters,
+  type: NonNullable<NetworkDirectoryFilters["type"]>,
+) {
+  const params = new URLSearchParams();
+
+  if (filters.query) params.set("q", filters.query);
+  if (type !== "all") params.set("type", type);
+  if (filters.location) params.set("location", filters.location);
+  if (filters.process) params.set("process", filters.process);
+  if (filters.availability) params.set("availability", filters.availability);
+  if (filters.experience) params.set("experience", filters.experience);
+
+  const query = params.toString();
+  return query ? `/network?${query}` : "/network";
+}
+
 function typeBadgeVariant(type: NetworkDirectoryItem["type"]) {
   if (type === "professional") return "default";
   if (type === "company") return "info";
@@ -55,25 +70,24 @@ function typeBadgeVariant(type: NetworkDirectoryItem["type"]) {
 function TypePill({
   active,
   children,
-  onClick,
+  href,
 }: {
   active: boolean;
   children: React.ReactNode;
-  onClick: () => void;
+  href: string;
 }) {
   return (
-    <button
+    <Link
       className={[
         "inline-flex h-8 cursor-pointer items-center rounded-full border-[1.5px] px-4 text-[12.5px] font-medium tracking-[-0.01em] shadow-weldoo-sm transition",
         active
           ? "border-weldoo-indigo bg-weldoo-indigo/[0.08] font-semibold text-weldoo-indigo shadow-[0_0_0_3px_rgba(61,61,180,0.08)]"
           : "border-weldoo-border-light bg-white text-weldoo-slate hover:border-[#c8c8e4] hover:text-weldoo-indigo",
       ].join(" ")}
-      onClick={onClick}
-      type="button"
+      href={href}
     >
       {children}
-    </button>
+    </Link>
   );
 }
 
@@ -191,40 +205,33 @@ export function NetworkDirectory({
   totalCount,
   totalPages,
 }: NetworkDirectoryProps) {
-  const [localType, setLocalType] = useState<NetworkDirectoryFilters["type"]>(
-    filters.type ?? "all",
-  );
-  const visibleItems = useMemo(
-    () =>
-      localType && localType !== "all"
-        ? items.filter((item) => item.type === localType)
-        : items,
-    [items, localType],
-  );
-  const isServerType = localType === filters.type;
+  const activeType = filters.type ?? "all";
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[18px] font-extrabold tracking-[-0.3px] text-weldoo-ink">
-          <span>{isServerType ? totalCount : visibleItems.length}</span> profiles
+          <span>{totalCount}</span> profiles
         </h1>
         <div className="flex flex-wrap items-center gap-2">
-          <TypePill active={localType === "all"} onClick={() => setLocalType("all")}>
+          <TypePill active={activeType === "all"} href={getTypeHref(filters, "all")}>
             All
           </TypePill>
           <TypePill
-            active={localType === "professional"}
-            onClick={() => setLocalType("professional")}
+            active={activeType === "professional"}
+            href={getTypeHref(filters, "professional")}
           >
             Professional
           </TypePill>
-          <TypePill active={localType === "company"} onClick={() => setLocalType("company")}>
+          <TypePill
+            active={activeType === "company"}
+            href={getTypeHref(filters, "company")}
+          >
             Company
           </TypePill>
           <TypePill
-            active={localType === "training_provider"}
-            onClick={() => setLocalType("training_provider")}
+            active={activeType === "training_provider"}
+            href={getTypeHref(filters, "training_provider")}
           >
             School
           </TypePill>
@@ -232,8 +239,8 @@ export function NetworkDirectory({
             action="/network"
             className="flex h-[38px] min-w-0 items-center gap-2 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 shadow-weldoo-sm transition focus-within:border-weldoo-indigo focus-within:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]"
           >
-            {localType && localType !== "all" ? (
-              <input name="type" type="hidden" value={localType} />
+            {activeType !== "all" ? (
+              <input name="type" type="hidden" value={activeType} />
             ) : null}
             <svg aria-hidden="true" className="h-[15px] w-[15px] shrink-0 text-weldoo-muted" fill="none" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -258,9 +265,9 @@ export function NetworkDirectory({
         </div>
       </div>
 
-      {visibleItems.length ? (
+      {items.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {visibleItems.map((item) => (
+          {items.map((item) => (
             <NetworkCard item={item} key={`${item.type}-${item.id}`} />
           ))}
         </div>
@@ -275,7 +282,7 @@ export function NetworkDirectory({
         aria-label="Network pagination"
         className="mt-6 flex items-center justify-between gap-3"
       >
-        {isServerType && page > 1 ? (
+        {page > 1 ? (
           <Link
             className="inline-flex h-10 items-center justify-center rounded-weldoo-sm border border-weldoo-border bg-white px-4 text-sm font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
             href={getPageHref(filters, page - 1)}
@@ -286,11 +293,9 @@ export function NetworkDirectory({
           <span />
         )}
         <span className="text-xs font-semibold text-weldoo-muted">
-          {isServerType
-            ? `Page ${page} of ${totalPages} · ${NETWORK_PAGE_SIZE} profiles per page`
-            : `Showing ${visibleItems.length} cards on this page`}
+          Page {page} of {totalPages} · {NETWORK_PAGE_SIZE} profiles per page
         </span>
-        {isServerType && page < totalPages ? (
+        {page < totalPages ? (
           <Link
             className="inline-flex h-10 items-center justify-center rounded-weldoo-sm border border-weldoo-border bg-white px-4 text-sm font-semibold text-weldoo-slate shadow-weldoo-sm transition hover:border-weldoo-indigo hover:text-weldoo-indigo"
             href={getPageHref(filters, page + 1)}

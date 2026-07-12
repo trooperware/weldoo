@@ -118,7 +118,6 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
           </aside>
 
           <NetworkDirectory
-            currentProfileId={appShellAuth?.profileId}
             filters={filters}
             items={directory.items}
             page={directory.page}
