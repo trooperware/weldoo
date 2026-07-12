@@ -509,7 +509,7 @@ export function MessagesInbox({
   return (
     <>
       <section className="mx-auto h-[calc(100dvh-163px)] max-w-[1200px] overflow-hidden px-0 py-0 md:h-[calc(100dvh-93px)] md:px-8 md:py-8">
-        <div className="grid h-full min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="grid h-full min-h-0 gap-6 lg:grid-cols-[225px_minmax(0,1fr)]">
           <aside className="hidden lg:block">
             <div className="overflow-hidden rounded-[16px] border border-weldoo-border-light bg-white shadow-weldoo-sm">
               <div className="h-[74px] bg-[linear-gradient(135deg,#3d3db4,#5558e8)]" />
