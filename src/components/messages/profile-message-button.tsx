@@ -73,10 +73,24 @@ export function ProfileMessageButton({
   return (
     <>
       <button
-        className="inline-flex h-11 items-center justify-center rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] px-5 text-sm font-semibold text-white shadow-weldoo-md transition hover:brightness-105"
+        className="inline-flex h-9 items-center justify-center gap-2 rounded-full border-[1.5px] border-weldoo-indigo bg-transparent px-4 text-[12.1px] font-semibold tracking-[-0.01em] text-weldoo-indigo transition hover:bg-weldoo-indigo/[0.05]"
         onClick={() => setOpen(true)}
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          className="h-3.5 w-3.5"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+          />
+        </svg>
         Message
       </button>
       <Modal
