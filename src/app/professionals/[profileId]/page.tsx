@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
 import { ProfileMessageButton } from "@/components/messages/profile-message-button";
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { PublicProfileBackLink } from "@/components/profile/public-profile-back-link";
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
+import {
+  PublicProfileHeaderCard,
+  PublicProfileSectionCard,
+  PublicProfileStatsCard,
+} from "@/components/profile/public-profile-layout";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
 import { getConnectionActionState } from "@/lib/network/queries";
@@ -86,61 +92,70 @@ export default async function ProfessionalPublicPage({
   ]);
   const canMessageProfile =
     Boolean(user && !isOwner) && connectionAction.connectionStatus === "accepted";
+  const professionalBadges = (
+    <>
+      {professional?.availability ? (
+        <Badge variant="info">{professional.availability.replaceAll("_", " ")}</Badge>
+      ) : null}
+      {professional?.years_experience !== null &&
+      professional?.years_experience !== undefined ? (
+        <Badge variant="neutral">{professional.years_experience} years experience</Badge>
+      ) : null}
+      {professional?.travel_availability ? (
+        <Badge variant="default">Available for travel</Badge>
+      ) : null}
+    </>
+  );
+  const professionalDetails = [
+    profile.website_url
+      ? {
+          label: "Website",
+          value: (
+            <a
+              className="break-words text-[var(--weldoo-indigo)] hover:underline"
+              href={profile.website_url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {profile.website_url}
+            </a>
+          ),
+        }
+      : null,
+    professional?.welding_processes?.length
+      ? {
+          label: "Welding processes",
+          value: professional.welding_processes.join(", "),
+        }
+      : null,
+    professional?.materials?.length
+      ? { label: "Materials", value: professional.materials.join(", ") }
+      : null,
+    professional?.positions?.length
+      ? { label: "Positions", value: professional.positions.join(", ") }
+      : null,
+    professional?.certifications?.length
+      ? {
+          label: "Self-declared certifications",
+          value: professional.certifications.join(", "),
+        }
+      : null,
+    professional?.work_preferences?.length
+      ? {
+          label: "Work preferences",
+          value: professional.work_preferences.join(", "),
+        }
+      : null,
+  ].filter(Boolean) as { label: string; value: ReactNode }[];
 
   return (
     <AppShell auth={appShellAuth}>
-      <main className="px-4 py-8 sm:px-6 lg:px-8">
+      <main className="px-4 pb-20 pt-7 sm:px-6">
         <PublicProfileBackLink />
-        <article className="mx-auto max-w-5xl overflow-hidden rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white shadow-weldoo-sm">
-          <div className="min-h-40 bg-[linear-gradient(135deg,#f5f7fb_0%,#e9ecf8_100%)]">
-            {profile.cover_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img alt="" className="h-56 w-full object-cover" src={profile.cover_url} />
-            ) : null}
-          </div>
-          <div className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex min-w-0 gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-lg font-bold text-white shadow-weldoo-md">
-                  {profile.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img alt="" className="h-full w-full object-cover" src={profile.avatar_url} />
-                  ) : (
-                    profile.display_name.slice(0, 1).toUpperCase()
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--weldoo-indigo)]">
-                    Professional
-                  </p>
-                  <h1 className="mt-2 text-3xl font-bold tracking-normal text-[var(--weldoo-ink)]">
-                    {profile.display_name}
-                  </h1>
-                  {profile.headline ? (
-                    <p className="mt-2 text-sm font-semibold text-[var(--weldoo-slate)]">
-                      {profile.headline}
-                    </p>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {profile.location ? (
-                      <Badge variant="success">{profile.location}</Badge>
-                    ) : null}
-                    {professional?.availability ? (
-                      <Badge variant="info">{professional.availability.replaceAll("_", " ")}</Badge>
-                    ) : null}
-                    {professional?.years_experience !== null &&
-                    professional?.years_experience !== undefined ? (
-                      <Badge variant="neutral">
-                        {professional.years_experience} years experience
-                      </Badge>
-                    ) : null}
-                    {professional?.travel_availability ? (
-                      <Badge variant="default">Available for travel</Badge>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
+        <div className="mx-auto flex max-w-[780px] flex-col gap-[18px]">
+          <PublicProfileHeaderCard
+            actions={
+              <>
                 {isOwner ? (
                   <>
                     <Link
@@ -157,69 +172,76 @@ export default async function ProfessionalPublicPage({
                     </Link>
                   </>
                 ) : null}
-                <ConnectionActionButton item={connectionAction} size="profile" />
+                <ConnectionActionButton
+                  item={connectionAction}
+                  recipientName={profile.display_name}
+                  size="profile"
+                />
                 <ProfileMessageButton
                   canMessage={canMessageProfile}
                   recipientName={profile.display_name}
                   recipientProfileId={profile.id}
                 />
+              </>
+            }
+            avatarShape="round"
+            avatarUrl={profile.avatar_url}
+            badges={professionalBadges}
+            bio={profile.bio}
+            coverUrl={profile.cover_url}
+            headline={profile.headline}
+            initials={profile.display_name.slice(0, 1).toUpperCase()}
+            metaItems={[
+              ...(profile.location
+                ? [{ label: profile.location, type: "location" as const }]
+                : []),
+              {
+                label: professional?.positions?.[0] ?? "Weldoo professional",
+                type: "role" as const,
+              },
+              ...(profile.website_url ? [{ label: "Website", type: "link" as const }] : []),
+            ]}
+            name={profile.display_name}
+            tone="professional"
+            typeLabel="Professional"
+          />
+
+          <PublicProfileStatsCard
+            stats={[
+              { label: "Profile views", value: "—" },
+              {
+                label: "Processes",
+                value: professional?.welding_processes?.length
+                  ? String(professional.welding_processes.length)
+                  : "—",
+              },
+              {
+                label: "Availability",
+                value: professional?.availability
+                  ? professional.availability.replaceAll("_", " ")
+                  : "—",
+              },
+            ]}
+          />
+
+          {professionalDetails.length ? (
+            <PublicProfileSectionCard title="Professional details">
+              <div className="grid gap-4 text-sm sm:grid-cols-2">
+                {professionalDetails.map((detail) => (
+                  <div key={detail.label}>
+                    <p className="font-semibold text-[var(--weldoo-ink)]">{detail.label}</p>
+                    <div className="mt-1 text-[var(--weldoo-muted)]">{detail.value}</div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </PublicProfileSectionCard>
+          ) : null}
 
-            {profile.bio ? (
-              <p className="mt-6 max-w-3xl whitespace-pre-line text-sm leading-6 text-[var(--weldoo-muted)]">
-                {profile.bio}
-              </p>
-            ) : null}
-
-            <div className="mt-6 grid gap-4 border-t border-[var(--weldoo-border-light)] pt-5 text-sm sm:grid-cols-2">
-              {profile.website_url ? (
-                <div>
-                  <p className="font-semibold text-[var(--weldoo-ink)]">Website</p>
-                  <a
-                    className="mt-1 block break-words text-[var(--weldoo-indigo)] hover:underline"
-                    href={profile.website_url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {profile.website_url}
-                  </a>
-                </div>
-              ) : null}
-              {professional?.welding_processes?.length ? (
-                <div>
-                  <p className="font-semibold text-[var(--weldoo-ink)]">Welding processes</p>
-                  <p className="mt-1 text-[var(--weldoo-muted)]">
-                    {professional.welding_processes.join(", ")}
-                  </p>
-                </div>
-              ) : null}
-              {professional?.materials?.length ? (
-                <div>
-                  <p className="font-semibold text-[var(--weldoo-ink)]">Materials</p>
-                  <p className="mt-1 text-[var(--weldoo-muted)]">
-                    {professional.materials.join(", ")}
-                  </p>
-                </div>
-              ) : null}
-              {professional?.certifications?.length ? (
-                <div>
-                  <p className="font-semibold text-[var(--weldoo-ink)]">
-                    Self-declared certifications
-                  </p>
-                  <p className="mt-1 text-[var(--weldoo-muted)]">
-                    {professional.certifications.join(", ")}
-                  </p>
-                </div>
-              ) : null}
-            </div>
-
-            <PublicProfileEmptySection
-              description="Posts from this professional will appear here once the feed is implemented."
-              title="No public posts yet"
-            />
-          </div>
-        </article>
+          <PublicProfileEmptySection
+            description="Posts from this professional will appear here once the feed is implemented."
+            title="No public posts yet"
+          />
+        </div>
       </main>
     </AppShell>
   );

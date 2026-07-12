@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function PublicProfileBackLink() {
   return (
-    <div className="mx-auto mb-4 max-w-5xl">
+    <div className="mx-auto mb-4 max-w-[780px]">
       <Link
         className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--weldoo-muted)] transition hover:text-[var(--weldoo-indigo)] hover:underline"
         href="/network"

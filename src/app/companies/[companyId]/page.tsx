@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/app/app-shell";
 import { ProfileMessageButton } from "@/components/messages/profile-message-button";
 import { ConnectionActionButton } from "@/components/network/connection-action-button";
 import { PublicProfileBackLink } from "@/components/profile/public-profile-back-link";
 import { PublicProfileEmptySection } from "@/components/profile/public-profile-empty-section";
+import {
+  PublicProfileHeaderCard,
+  PublicProfileSectionCard,
+  PublicProfileStatsCard,
+} from "@/components/profile/public-profile-layout";
 import { Badge } from "@/components/ui";
 import { getAppShellAuth } from "@/lib/auth/session";
 import { getConnectionActionState } from "@/lib/network/queries";
@@ -72,56 +78,45 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
   ]);
   const canMessageProfile =
     Boolean(user && !isOwner) && connectionAction.connectionStatus === "accepted";
+  const companyDetails = [
+    company.website_url
+      ? {
+          label: "Website",
+          value: (
+            <a
+              className="break-words text-[var(--weldoo-indigo)] hover:underline"
+              href={company.website_url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {company.website_url}
+            </a>
+          ),
+        }
+      : null,
+    company.contact_email
+      ? {
+          label: "Contact",
+          value: (
+            <a
+              className="break-words text-[var(--weldoo-indigo)] hover:underline"
+              href={`mailto:${company.contact_email}`}
+            >
+              {company.contact_email}
+            </a>
+          ),
+        }
+      : null,
+  ].filter(Boolean) as { label: string; value: ReactNode }[];
 
   return (
     <AppShell auth={appShellAuth}>
-      <main className="px-4 py-8 sm:px-6 lg:px-8">
+      <main className="px-4 pb-20 pt-7 sm:px-6">
         <PublicProfileBackLink />
-        <article className="mx-auto max-w-5xl overflow-hidden rounded-[var(--weldoo-radius-md)] border border-[var(--weldoo-border)] bg-white shadow-weldoo-sm">
-          <div className="min-h-40 bg-[linear-gradient(135deg,#f5f7fb_0%,#e9ecf8_100%)]">
-            {company.cover_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                alt=""
-                className="h-56 w-full object-cover"
-                src={company.cover_url}
-              />
-            ) : null}
-          </div>
-          <div className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex min-w-0 gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[var(--weldoo-radius-sm)] bg-[linear-gradient(135deg,#3d3db4_0%,#5558e8_100%)] text-lg font-bold text-white shadow-weldoo-md">
-                  {company.logo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt=""
-                      className="h-full w-full object-cover"
-                      src={company.logo_url}
-                    />
-                  ) : (
-                    company.name.slice(0, 1).toUpperCase()
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--weldoo-indigo)]">
-                    Company
-                  </p>
-                  <h1 className="mt-2 text-3xl font-bold tracking-normal text-[var(--weldoo-ink)]">
-                    {company.name}
-                  </h1>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {company.sector ? <Badge variant="info">{company.sector}</Badge> : null}
-                    {company.company_size ? (
-                      <Badge variant="neutral">{company.company_size}</Badge>
-                    ) : null}
-                    {company.location ? (
-                      <Badge variant="success">{company.location}</Badge>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
+        <div className="mx-auto flex max-w-[780px] flex-col gap-[18px]">
+          <PublicProfileHeaderCard
+            actions={
+              <>
                 {isOwner ? (
                   <>
                     <Link
@@ -138,54 +133,69 @@ export default async function CompanyPublicPage({ params }: CompanyPublicPagePro
                     </Link>
                   </>
                 ) : null}
-                <ConnectionActionButton item={connectionAction} size="profile" />
+                <ConnectionActionButton
+                  item={connectionAction}
+                  recipientName={company.name}
+                  size="profile"
+                />
                 <ProfileMessageButton
                   canMessage={canMessageProfile}
                   recipientName={company.name}
                   recipientProfileId={company.owner_profile_id}
                 />
+              </>
+            }
+            avatarShape="square"
+            avatarUrl={company.logo_url}
+            badges={
+              <>
+                {company.sector ? <Badge variant="info">{company.sector}</Badge> : null}
+                {company.company_size ? (
+                  <Badge variant="neutral">{company.company_size}</Badge>
+                ) : null}
+              </>
+            }
+            bio={company.description}
+            coverUrl={company.cover_url}
+            headline={company.sector}
+            initials={company.name.slice(0, 1).toUpperCase()}
+            metaItems={[
+              ...(company.location ? [{ label: company.location, type: "location" as const }] : []),
+              { label: company.company_size ?? "Weldoo company", type: "role" as const },
+              ...(company.website_url ? [{ label: "Website", type: "link" as const }] : []),
+            ]}
+            name={company.name}
+            tone="company"
+            typeLabel="Company"
+          />
+
+          <PublicProfileStatsCard
+            stats={[
+              { label: "Profile views", value: "—" },
+              { label: "Mutual connections", value: "—" },
+              { label: "Jobs posted", value: "—" },
+              { label: "Company size", value: company.company_size ?? "—" },
+            ]}
+          />
+
+          {companyDetails.length ? (
+            <PublicProfileSectionCard title="Company details">
+              <div className="grid gap-4 text-sm sm:grid-cols-2">
+                {companyDetails.map((detail) => (
+                  <div key={detail.label}>
+                    <p className="font-semibold text-[var(--weldoo-ink)]">{detail.label}</p>
+                    <div className="mt-1 text-[var(--weldoo-muted)]">{detail.value}</div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </PublicProfileSectionCard>
+          ) : null}
 
-            {company.description ? (
-              <p className="mt-6 max-w-3xl whitespace-pre-line text-sm leading-6 text-[var(--weldoo-muted)]">
-                {company.description}
-              </p>
-            ) : null}
-
-            <div className="mt-6 grid gap-4 border-t border-[var(--weldoo-border-light)] pt-5 text-sm sm:grid-cols-2">
-              {company.website_url ? (
-                <div>
-                  <p className="font-semibold text-[var(--weldoo-ink)]">Website</p>
-                  <a
-                    className="mt-1 block break-words text-[var(--weldoo-indigo)] hover:underline"
-                    href={company.website_url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {company.website_url}
-                  </a>
-                </div>
-              ) : null}
-              {company.contact_email ? (
-                <div>
-                  <p className="font-semibold text-[var(--weldoo-ink)]">Contact</p>
-                  <a
-                    className="mt-1 block break-words text-[var(--weldoo-indigo)] hover:underline"
-                    href={`mailto:${company.contact_email}`}
-                  >
-                    {company.contact_email}
-                  </a>
-                </div>
-              ) : null}
-            </div>
-
-            <PublicProfileEmptySection
-              description="Published jobs from this company will appear here once job posting is implemented."
-              title="No public jobs yet"
-            />
-          </div>
-        </article>
+          <PublicProfileEmptySection
+            description="Published jobs from this company will appear here once job posting is implemented."
+            title="No public jobs yet"
+          />
+        </div>
       </main>
     </AppShell>
   );

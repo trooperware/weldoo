@@ -10,7 +10,7 @@ export function PublicProfileEmptySection({
   title,
 }: PublicProfileEmptySectionProps) {
   return (
-    <section className="mt-6 border-t border-[var(--weldoo-border-light)] pt-5">
+    <section className="rounded-2xl border border-[var(--weldoo-border)] bg-white p-5 shadow-weldoo-sm sm:p-6">
       <EmptyState description={description} title={title} />
     </section>
   );

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button, Modal, Textarea } from "@/components/ui";
 import type { NetworkDirectoryItem } from "@/lib/network/queries";
 
 type ConnectionActionButtonProps = {
@@ -10,6 +11,7 @@ type ConnectionActionButtonProps = {
     NetworkDirectoryItem,
     "canConnect" | "connectionId" | "connectionStatus" | "targetProfileId"
   >;
+  recipientName?: string;
   size?: "card" | "profile";
 };
 
@@ -45,8 +47,14 @@ function ClockIcon() {
   );
 }
 
-export function ConnectionActionButton({ item, size = "card" }: ConnectionActionButtonProps) {
+export function ConnectionActionButton({
+  item,
+  recipientName = "this profile",
+  size = "card",
+}: ConnectionActionButtonProps) {
   const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<RequestState>({
     connectionId: item.connectionId,
@@ -75,12 +83,25 @@ export function ConnectionActionButton({ item, size = "card" }: ConnectionAction
   }
 
   async function sendRequest() {
+    const trimmedMessage = requestMessage.trim();
+
+    if (trimmedMessage.length > 1000) {
+      setState((current) => ({
+        ...current,
+        message: "Connection note is too long.",
+      }));
+      return;
+    }
+
     setPending(true);
     setState((current) => ({ ...current, message: undefined }));
 
     try {
       const response = await fetch("/api/network/connections", {
-        body: JSON.stringify({ recipientProfileId: item.targetProfileId }),
+        body: JSON.stringify({
+          message: trimmedMessage || undefined,
+          recipientProfileId: item.targetProfileId,
+        }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
@@ -102,6 +123,8 @@ export function ConnectionActionButton({ item, size = "card" }: ConnectionAction
         connectionId: payload.connectionId ?? null,
         status: "pending_sent",
       });
+      setModalOpen(false);
+      setRequestMessage("");
       router.refresh();
     } finally {
       setPending(false);
@@ -209,16 +232,52 @@ export function ConnectionActionButton({ item, size = "card" }: ConnectionAction
       <button
         className={secondaryButtonClass}
         disabled={pending}
-        onClick={sendRequest}
+        onClick={() => setModalOpen(true)}
         style={buttonTextStyle}
         type="button"
       >
         <PlusIcon />
-        {pending ? "Sending" : "Connect"}
+        Connect
       </button>
       {state.message ? (
         <p className="mt-2 text-[11px] font-medium text-red-600">{state.message}</p>
       ) : null}
+      <Modal
+        description="Send a short note with your connection request."
+        footer={
+          <>
+            <Button disabled={pending} onClick={() => setModalOpen(false)} variant="ghost">
+              Cancel
+            </Button>
+            <Button disabled={pending} onClick={sendRequest}>
+              {pending ? "Sending" : "Send request"}
+            </Button>
+          </>
+        }
+        onOpenChange={setModalOpen}
+        open={modalOpen}
+        title={`Connect with ${recipientName}`}
+      >
+        <div className="space-y-3">
+          <Textarea
+            error={state.message}
+            id={`connection-message-${item.targetProfileId}`}
+            label="Message"
+            maxLength={1000}
+            onChange={(event) => {
+              setRequestMessage(event.target.value);
+              if (state.message) {
+                setState((current) => ({ ...current, message: undefined }));
+              }
+            }}
+            placeholder="Write a short message to introduce yourself."
+            value={requestMessage}
+          />
+          <p className="text-right text-xs font-medium text-weldoo-muted">
+            {requestMessage.length}/1000
+          </p>
+        </div>
+      </Modal>
     </>
   );
 }
