@@ -47,6 +47,33 @@ function ClockIcon() {
   );
 }
 
+function CancelIcon() {
+  return (
+    <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+      <line
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.2"
+        x1="18"
+        x2="6"
+        y1="6"
+        y2="18"
+      />
+      <line
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.2"
+        x1="6"
+        x2="18"
+        y1="6"
+        y2="18"
+      />
+    </svg>
+  );
+}
+
 export function ConnectionActionButton({
   item,
   recipientName = "this profile",
@@ -60,22 +87,22 @@ export function ConnectionActionButton({
     connectionId: item.connectionId,
     status: item.connectionStatus,
   });
-  const buttonTextStyle = size === "card" ? { fontSize: "12px", lineHeight: 1 } : undefined;
+  const buttonTextStyle = size === "card" ? { fontSize: "12.5px", lineHeight: 1 } : undefined;
   const baseButtonClass =
     size === "profile"
-      ? "inline-flex h-11 items-center justify-center gap-1.5 rounded-[var(--weldoo-radius-sm)] px-5 text-sm font-semibold leading-none tracking-[-0.01em] transition"
-      : "mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full text-[12px] font-semibold leading-none tracking-[-0.01em] transition";
+      ? "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-[18px] text-[12.1px] font-semibold leading-none tracking-[-0.01em] transition"
+      : "mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full text-[12.5px] font-semibold leading-none tracking-[-0.01em] transition";
   const secondaryButtonClass =
     size === "profile"
-      ? `${baseButtonClass} border border-[var(--weldoo-border-light)] bg-white text-[var(--weldoo-slate)] hover:border-[var(--weldoo-indigo)] hover:text-[var(--weldoo-indigo)] disabled:opacity-60`
-      : `${baseButtonClass} border-[1.5px] border-[#e0e0ed] bg-white text-weldoo-slate hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)] disabled:opacity-60`;
+      ? `${baseButtonClass} border-[1.5px] border-[var(--weldoo-indigo)] bg-white text-[var(--weldoo-indigo)] hover:bg-[var(--weldoo-indigo)]/[0.04] hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)] disabled:opacity-60`
+      : `${baseButtonClass} border-[1.5px] border-[#e0e0ed] bg-transparent text-[#44446a] hover:border-weldoo-indigo hover:bg-weldoo-indigo/[0.04] hover:text-weldoo-indigo hover:shadow-[0_0_0_3px_rgba(61,61,180,0.08)] disabled:opacity-60`;
   const acceptedButtonClass =
-    size === "profile"
-      ? `${baseButtonClass} border border-[var(--weldoo-indigo)] bg-[var(--weldoo-indigo)]/10 text-[var(--weldoo-indigo)]`
-      : `${baseButtonClass} border-[1.5px] border-weldoo-indigo bg-weldoo-indigo/[0.06] text-weldoo-indigo`;
+    `${baseButtonClass} border-[1.5px] border-weldoo-indigo bg-weldoo-indigo/[0.06] text-weldoo-indigo`;
+  const pendingButtonClass =
+    `${baseButtonClass} group border-[1.5px] border-[var(--weldoo-border-light)] bg-[rgba(122,122,154,0.10)] text-[var(--weldoo-muted)] hover:border-[rgba(220,50,50,0.25)] hover:bg-[rgba(220,50,50,0.08)] hover:text-[#c0392b]`;
   const primaryButtonClass =
     size === "profile"
-      ? `${baseButtonClass} bg-[var(--weldoo-indigo)] text-white shadow-weldoo-md hover:brightness-105 disabled:opacity-60`
+      ? `${baseButtonClass} border border-transparent bg-[var(--weldoo-gradient)] text-white shadow-[0_2px_8px_rgba(61,61,180,0.25)] hover:brightness-105 hover:shadow-[0_4px_14px_rgba(61,61,180,0.32)] disabled:opacity-60`
       : "inline-flex h-9 items-center justify-center rounded-full bg-weldoo-indigo text-[12px] font-semibold leading-none tracking-[-0.01em] text-white shadow-weldoo-sm transition hover:brightness-105 disabled:opacity-60";
 
   if (!item.canConnect) {
@@ -181,14 +208,26 @@ export function ConnectionActionButton({
     return (
       <>
         <button
-          className={secondaryButtonClass}
+          className={pendingButtonClass}
           disabled={pending}
           onClick={() => updateRequest("cancel")}
           style={buttonTextStyle}
           type="button"
         >
-          <ClockIcon />
-          {pending ? "Cancelling" : "Pending"}
+          {pending ? (
+            "Cancelling"
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 group-hover:hidden">
+                <ClockIcon />
+                Pending
+              </span>
+              <span className="hidden items-center gap-1.5 group-hover:inline-flex">
+                <CancelIcon />
+                Cancel
+              </span>
+            </>
+          )}
         </button>
         {state.message ? (
           <p className="mt-2 text-[11px] font-medium text-red-600">{state.message}</p>
@@ -230,7 +269,7 @@ export function ConnectionActionButton({
   return (
     <>
       <button
-        className={secondaryButtonClass}
+        className={size === "profile" ? primaryButtonClass : secondaryButtonClass}
         disabled={pending}
         onClick={() => setModalOpen(true)}
         style={buttonTextStyle}
