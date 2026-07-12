@@ -236,6 +236,7 @@ export function MessagesInbox({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const refreshTimerRef = useRef<number | null>(null);
+  const lastAutoScrollTargetRef = useRef<string | null>(null);
   const messagesScrollRef = useRef<HTMLDivElement | null>(null);
 
   const refreshConversations = useCallback(async (signal?: AbortSignal) => {
@@ -417,6 +418,8 @@ export function MessagesInbox({
           : "Weldoo member";
 
   function selectConversation(conversationId: string) {
+    if (conversationId === activeConversationId) return;
+
     setActiveConversationId(conversationId);
     router.replace(`/messages?conversation=${conversationId}`, { scroll: false });
   }
@@ -426,6 +429,11 @@ export function MessagesInbox({
 
     if (!scrollContainer || !activeConversation) return;
 
+    const scrollTarget = `${activeConversation.id}:${activeConversationLastMessageId ?? "empty"}`;
+
+    if (lastAutoScrollTargetRef.current === scrollTarget) return;
+
+    lastAutoScrollTargetRef.current = scrollTarget;
     scrollContainer.scrollTo({
       behavior: "smooth",
       top: scrollContainer.scrollHeight,
