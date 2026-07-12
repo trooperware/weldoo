@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 
 import { ProfileMediaUploadField } from "@/components/profile/profile-media-upload-field";
-import { Button, FormError, Input, Select, Textarea } from "@/components/ui";
+import { AutoDismissNotice, Button, FormError, Input, Select, Textarea } from "@/components/ui";
 import type { ProfessionalProfileFieldErrors } from "@/lib/validators/professional-profile";
 
 type ProfessionalProfileFormValues = {
@@ -85,14 +85,7 @@ export function ProfessionalProfileForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <FormError>{state.status === "error" ? state.message : null}</FormError>
-      {state.status === "success" && state.message ? (
-        <div
-          className="rounded-[var(--weldoo-radius-sm)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
-          role="status"
-        >
-          {state.message}
-        </div>
-      ) : null}
+      <AutoDismissNotice message={state.status === "success" ? state.message : null} />
 
       <section className="grid gap-4 sm:grid-cols-2">
         <Input

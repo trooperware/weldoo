@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { AuthDivider, AuthSocialButtons } from "@/components/auth/auth-card";
-import { FormError, Input } from "@/components/ui";
+import { AutoDismissNotice, FormError, Input } from "@/components/ui";
 import { signUpAction, type AuthActionState } from "@/server/actions/auth";
 import { SubmitButton } from "./submit-button";
 
@@ -48,14 +48,10 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
         <input name="confirmPassword" type="hidden" value={password} />
         <input name="purposes" type="hidden" value={selectedPurposes.join(",")} />
         <FormError>{state.status === "error" ? state.message : null}</FormError>
-        {state.status === "success" && state.message ? (
-          <div
-            className="rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
-            role="status"
-          >
-            {state.message}
-          </div>
-        ) : null}
+        <AutoDismissNotice
+          className="px-4 py-3 font-semibold"
+          message={state.status === "success" ? state.message : null}
+        />
         <div className="grid gap-3 sm:grid-cols-2">
           <Input
             autoComplete="given-name"

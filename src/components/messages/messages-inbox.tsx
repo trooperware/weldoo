@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { AutoDismissNotice } from "@/components/ui/auto-dismiss-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
@@ -597,16 +598,15 @@ export function MessagesInbox({
                     </div>
 
                     <div className="shrink-0 bg-white">
-                      {statusMessage ? (
-                        <p className="mx-4 mb-3 rounded-weldoo-sm bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 sm:mx-5">
-                          {statusMessage}
-                        </p>
-                      ) : null}
-                      {errorMessage ? (
-                        <p className="mx-4 mb-3 rounded-weldoo-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-600 sm:mx-5">
-                          {errorMessage}
-                        </p>
-                      ) : null}
+                      <AutoDismissNotice
+                        className="mx-4 mb-3 sm:mx-5"
+                        message={statusMessage}
+                      />
+                      <AutoDismissNotice
+                        className="mx-4 mb-3 sm:mx-5"
+                        message={errorMessage}
+                        variant="error"
+                      />
                       <div className="flex flex-wrap gap-2 px-4 pb-0 pt-2 sm:px-5">
                         {quickReplies.map((text) => (
                           <button
@@ -731,11 +731,7 @@ export function MessagesInbox({
             placeholder="Write a short message"
             value={composeBody}
           />
-          {errorMessage ? (
-            <p className="rounded-weldoo-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
-              {errorMessage}
-            </p>
-          ) : null}
+          <AutoDismissNotice message={errorMessage} variant="error" />
         </div>
       </Modal>
     </>

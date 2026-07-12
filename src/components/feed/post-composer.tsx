@@ -14,7 +14,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { Avatar, FormError } from "@/components/ui";
+import { AutoDismissNotice, Avatar, FormError } from "@/components/ui";
 import { POST_BODY_MAX_LENGTH } from "@/lib/constants/posts";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { PostFieldErrors } from "@/lib/validators/post";
@@ -805,14 +805,10 @@ export function PostComposer({ avatarUrl, displayName, initial }: PostComposerPr
           </button>
         </div>
 
-        {state.status === "success" && state.message ? (
-          <div
-            className="mb-3 rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
-            role="status"
-          >
-            {state.message}
-          </div>
-        ) : null}
+        <AutoDismissNotice
+          className="mb-3"
+          message={state.status === "success" ? state.message : null}
+        />
 
         <div className="flex flex-wrap items-center justify-center gap-0">
           <ComposerActionButton icon={<PhotoIcon />} onClick={() => openComposer("photo")}>

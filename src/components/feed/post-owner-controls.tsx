@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { PostImageUploadField } from "@/components/feed/post-image-upload-field";
-import { Button, FormError, Input, Modal, Textarea } from "@/components/ui";
+import { AutoDismissNotice, Button, FormError, Input, Modal, Textarea } from "@/components/ui";
 import type { PostFieldErrors } from "@/lib/validators/post";
 
 type PostOwnerControlsProps = {
@@ -99,14 +99,10 @@ export function PostOwnerControls({ defaultValues, postId }: PostOwnerControlsPr
     return (
       <div className="mt-4 border-t border-[var(--weldoo-border-light)] pt-4">
         <FormError>{state.status === "error" ? state.message : null}</FormError>
-        {state.status === "success" && state.message ? (
-          <div
-            className="mb-3 rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12.5px] font-semibold text-emerald-700"
-            role="status"
-          >
-            {state.message}
-          </div>
-        ) : null}
+        <AutoDismissNotice
+          className="mb-3 text-[12.5px] font-semibold"
+          message={state.status === "success" ? state.message : null}
+        />
         <div className="flex flex-wrap gap-2">
           <Button
             disabled={deletePending}

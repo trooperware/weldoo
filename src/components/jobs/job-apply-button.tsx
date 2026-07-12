@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button, FormError, Modal } from "@/components/ui";
+import { AutoDismissNotice, Button, FormError, Modal } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { JobApplicationFieldErrors } from "@/lib/validators/job-application";
 
@@ -196,11 +196,7 @@ export function JobApplyButton({
       >
         <div className="space-y-4">
           <FormError>{state.status === "error" ? state.message : null}</FormError>
-          {state.status === "success" && state.message ? (
-            <div className="rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-              {state.message}
-            </div>
-          ) : null}
+          <AutoDismissNotice message={state.status === "success" ? state.message : null} />
           {state.errors?.message || state.errors?.externalCvUrl ? (
             <FormError>
               {state.errors.message ?? state.errors.externalCvUrl ?? null}

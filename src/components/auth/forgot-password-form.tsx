@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { FormError, Input } from "@/components/ui";
+import { AutoDismissNotice, FormError, Input } from "@/components/ui";
 import { forgotPasswordAction, type AuthActionState } from "@/server/actions/auth";
 import { SubmitButton } from "./submit-button";
 
@@ -14,14 +14,7 @@ export function ForgotPasswordForm() {
   return (
     <form action={formAction}>
       <FormError>{state.status === "error" ? state.message : null}</FormError>
-      {state.status === "success" && state.message ? (
-        <div
-          className="rounded-[var(--weldoo-radius-sm)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
-          role="status"
-        >
-          {state.message}
-        </div>
-      ) : null}
+      <AutoDismissNotice message={state.status === "success" ? state.message : null} />
       <Input
         autoComplete="email"
         error={state.errors?.email}

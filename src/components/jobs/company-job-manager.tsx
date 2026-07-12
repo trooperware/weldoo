@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, type FormEvent } from "react";
 
-import { Button, FormError, Input, Modal, Select, Textarea } from "@/components/ui";
+import { AutoDismissNotice, Button, FormError, Input, Modal, Select, Textarea } from "@/components/ui";
 import type { CompanyForJobs, CompanyJob } from "@/lib/jobs/company-management";
 import type { JobFieldErrors } from "@/lib/validators/job";
 
@@ -339,14 +339,10 @@ export function CompanyJobManager({ company, jobs }: CompanyJobManagerProps) {
         </div>
 
         <FormError>{state.status === "error" ? state.message : null}</FormError>
-        {state.status === "success" && state.message ? (
-          <div
-            className="mb-4 rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
-            role="status"
-          >
-            {state.message}
-          </div>
-        ) : null}
+        <AutoDismissNotice
+          className="mb-4"
+          message={state.status === "success" ? state.message : null}
+        />
 
         <form
           className="space-y-5"

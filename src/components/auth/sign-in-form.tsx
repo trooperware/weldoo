@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { AuthDivider, AuthSocialButtons } from "@/components/auth/auth-card";
-import { FormError, Input } from "@/components/ui";
+import { AutoDismissNotice, FormError, Input } from "@/components/ui";
 import { signInAction, type AuthActionState } from "@/server/actions/auth";
 import { SubmitButton } from "./submit-button";
 
@@ -23,14 +23,7 @@ export function SignInForm({ oauthError, redirectTo, successMessage }: SignInFor
   return (
     <div>
       <FormError className="mb-3">{oauthError}</FormError>
-      {successMessage ? (
-        <div
-          className="mb-3 rounded-[var(--weldoo-radius-sm)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
-          role="status"
-        >
-          {successMessage}
-        </div>
-      ) : null}
+      <AutoDismissNotice className="mb-3" message={successMessage} />
       <AuthSocialButtons redirectTo={redirectTo ?? "/"} />
       <AuthDivider />
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/app/app-shell";
 import { LinkedInImportReview } from "@/components/settings/linkedin-import-review";
-import { FormError } from "@/components/ui";
+import { AutoDismissNotice, FormError } from "@/components/ui";
 import {
   getLinkedInProfileImport,
   hasLinkedInIdentity,
@@ -100,11 +100,9 @@ export default async function LinkedInImportPage({
             <div className="space-y-5 px-5 py-5">
               <FormError>{errorMessage}</FormError>
 
-              {status === "success" ? (
-                <div className="rounded-weldoo-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-                  LinkedIn profile data imported.
-                </div>
-              ) : null}
+              <AutoDismissNotice
+                message={status === "success" ? "LinkedIn profile data imported." : null}
+              />
 
               {!isConnected ? (
                 <div className="rounded-weldoo-md border border-weldoo-border-light bg-weldoo-bg p-4">

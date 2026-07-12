@@ -1,4 +1,5 @@
 export { Avatar } from "./avatar";
+export { AutoDismissNotice } from "./auto-dismiss-notice";
 export { Badge } from "./badge";
 export { Button } from "./button";
 export { Card, CardContent, CardHeader, CardTitle } from "./card";
