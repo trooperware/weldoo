@@ -246,7 +246,7 @@ export function NetworkDirectory({
           </TypePill>
           <form
             action="/network"
-            className="flex h-[38px] items-center gap-2 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 shadow-weldoo-sm transition focus-within:border-weldoo-indigo focus-within:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]"
+            className="flex h-[38px] min-w-0 items-center gap-2 rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 shadow-weldoo-sm transition focus-within:border-weldoo-indigo focus-within:shadow-[0_0_0_3px_rgba(61,61,180,0.09)]"
           >
             {localType && localType !== "all" ? (
               <input name="type" type="hidden" value={localType} />
@@ -263,64 +263,14 @@ export function NetworkDirectory({
               type="search"
             />
           </form>
-          <details className="relative">
-            <summary className="inline-flex h-8 cursor-pointer list-none items-center rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-slate shadow-weldoo-sm transition hover:border-[#c8c8e4] hover:text-weldoo-indigo">
-              Filters
-            </summary>
-            <div className="absolute right-0 top-10 z-20 w-[min(640px,calc(100vw-32px))] rounded-weldoo-md border border-weldoo-border-light bg-white p-4 text-sm shadow-weldoo-lg">
-              <form action="/network" className="grid gap-3 md:grid-cols-4">
-                {filters.query ? <input name="q" type="hidden" value={filters.query} /> : null}
-                {localType && localType !== "all" ? (
-                  <input name="type" type="hidden" value={localType} />
-                ) : null}
-                <input
-                  className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none"
-                  defaultValue={filters.location ?? ""}
-                  name="location"
-                  placeholder="Location"
-                  type="search"
-                />
-                <input
-                  className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none"
-                  defaultValue={filters.process ?? ""}
-                  name="process"
-                  placeholder="Welding process"
-                  type="search"
-                />
-                <select
-                  className="h-10 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none"
-                  defaultValue={filters.availability ?? ""}
-                  name="availability"
-                >
-                  <option value="">Any availability</option>
-                  <option value="available">Available</option>
-                  <option value="open_to_opportunities">Open to opportunities</option>
-                  <option value="not_available">Not available</option>
-                </select>
-                <div className="flex gap-2">
-                  <select
-                    className="h-10 min-w-0 flex-1 rounded-weldoo-sm border border-weldoo-border-light bg-weldoo-bg px-3 text-sm outline-none"
-                    defaultValue={filters.experience ?? ""}
-                    name="experience"
-                  >
-                    <option value="">Any experience</option>
-                    <option value="0-2">0-2 years</option>
-                    <option value="3-5">3-5 years</option>
-                    <option value="6-10">6-10 years</option>
-                    <option value="10+">10+ years</option>
-                  </select>
-                  <button className="h-10 rounded-weldoo-sm bg-weldoo-indigo px-4 text-sm font-semibold text-white" type="submit">
-                    Apply
-                  </button>
-                </div>
-              </form>
-              {hasActiveFilters({ ...filters, type: localType }) ? (
-                <Link className="mt-3 inline-flex text-[12.5px] font-semibold text-weldoo-indigo" href="/network">
-                  Clear filters
-                </Link>
-              ) : null}
-            </div>
-          </details>
+          {hasActiveFilters(filters) ? (
+            <Link
+              className="inline-flex h-8 items-center rounded-full border-[1.5px] border-weldoo-border-light bg-white px-4 text-[12.5px] font-medium tracking-[-0.01em] text-weldoo-slate shadow-weldoo-sm transition hover:border-[#c8c8e4] hover:text-weldoo-indigo"
+              href="/network"
+            >
+              Clear
+            </Link>
+          ) : null}
         </div>
       </div>
 
