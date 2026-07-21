@@ -74,9 +74,13 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
       <main>
         <section className="mx-auto grid max-w-[1128px] grid-cols-1 items-start gap-6 px-4 pb-20 pt-7 lg:grid-cols-[225px_minmax(0,1fr)]">
           <NetworkSidebar
+            avatarUrl={appShellAuth?.avatarUrl}
+            displayName={appShellAuth?.displayName}
             email={appShellAuth?.email}
+            headline={appShellAuth?.headline}
+            isAuthenticated={Boolean(appShellAuth)}
+            location={appShellAuth?.location}
             profileType={appShellAuth?.profileType}
-            totalCount={directory.totalCount}
           />
 
           <NetworkDirectory

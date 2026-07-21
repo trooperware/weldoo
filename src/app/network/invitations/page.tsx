@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app/app-shell";
 import { NetworkInvitationsList } from "@/components/network/network-invitations";
 import { NetworkSidebar } from "@/components/network/network-sidebar";
 import { getAppShellAuth } from "@/lib/auth/session";
-import { getNetworkDirectoryPage, getNetworkInvitations } from "@/lib/network/queries";
+import { getNetworkInvitations } from "@/lib/network/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -58,10 +58,7 @@ export default async function NetworkInvitationsPage({
 
   const activeTab = params.tab === "sent" ? "sent" : "received";
   const supabase = await createSupabaseServerClient();
-  const [invitations, directory] = await Promise.all([
-    getNetworkInvitations(supabase, appShellAuth.profileId),
-    getNetworkDirectoryPage(supabase, 1, {}, appShellAuth.profileId),
-  ]);
+  const invitations = await getNetworkInvitations(supabase, appShellAuth.profileId);
   const visibleInvitations =
     activeTab === "sent" ? invitations.sent : invitations.received;
 
@@ -70,9 +67,13 @@ export default async function NetworkInvitationsPage({
       <main>
         <section className="mx-auto grid max-w-[1128px] grid-cols-1 items-start gap-6 px-4 pb-20 pt-7 lg:grid-cols-[225px_minmax(0,1fr)]">
           <NetworkSidebar
+            avatarUrl={appShellAuth.avatarUrl}
+            displayName={appShellAuth.displayName}
             email={appShellAuth.email}
+            headline={appShellAuth.headline}
+            isAuthenticated
+            location={appShellAuth.location}
             profileType={appShellAuth.profileType}
-            totalCount={directory.totalCount}
           />
 
           <div className="max-w-[680px]">
