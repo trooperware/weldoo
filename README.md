@@ -137,3 +137,37 @@ The `docs/` folder contains:
 - Codex task plan.
 - Validation units.
 - Vercel staging deployment guide: `docs/task-5-8-vercel-staging-deploy.md`.
+
+## Private site access
+
+Set the server-only `SITE_PASSWORD` environment variable to a random password
+of 20–256 characters to enable the shared password gate. A generated password
+has been saved in the ignored `.env.local` for local development. Never use a
+`NEXT_PUBLIC_` prefix or commit the password.
+
+For Vercel, add `SITE_PASSWORD` in the project's environment variables for each
+Preview/Production environment you want protected, then redeploy. Local `.env.local`
+is not uploaded automatically. Remove or empty the variable and redeploy to
+make the site public again. A nonempty password shorter than 20 characters
+fails closed with a 503 response.
+
+Visitors see `/site-access` before the app loads. Successful entry restores their
+original page and sets an HTTP-only, SameSite=Lax browser-session cookie (Secure
+on HTTPS), with a signed 12-hour expiry. Browser session restore can keep the
+cookie, but cannot extend the signed expiry. Changing the password and redeploying
+invalidates existing sessions. The gate is separate from the existing Supabase
+account login and authorization.
+
+All site pages, API routes, public files, and optimized images are gated.
+Next.js compiled static assets remain accessible so framework assets can load;
+do not embed private content or secrets in client bundles. Direct Supabase URLs
+and other external services are governed by their own access policies, not this
+gate. Responses passing through the enabled gate are marked private/no-store.
+Use a generated password: this gate does not implement a distributed login rate
+limiter.
+
+Run the security regression checks with Node 22.6+:
+
+```bash
+node --experimental-strip-types --test tests/site-access.test.mjs
+```
