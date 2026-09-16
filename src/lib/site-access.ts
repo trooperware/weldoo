@@ -37,12 +37,13 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
 }
 
+// Keep the origin on native same-origin form POSTs; no-referrer makes it null.
 function gatePage(next: string, error = false) {
   return new NextResponse(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Private access · Weldoo</title><style>
   *{box-sizing:border-box}body{margin:0;background:#f5f5fb;color:#0c0c18;font:16px system-ui,sans-serif;min-height:100svh;display:grid;place-items:center;padding:24px}main{width:100%;max-width:420px;background:white;border:1px solid #e0e0ed;border-radius:24px;padding:40px;box-shadow:0 16px 60px #3d3db410}.brand{font-size:32px;font-weight:800;color:#3d3db4;letter-spacing:-1.5px}h1{font-size:24px;margin:32px 0 12px}p{color:#44446a;line-height:1.6}label{display:block;font-weight:600;margin:24px 0 8px}input,button{font:inherit;width:100%;border-radius:10px;padding:14px}input{border:1px solid #b9b9d2}input:focus{outline:3px solid #7b7fe855;border-color:#3d3db4}button{border:0;background:#3d3db4;color:white;font-weight:600;margin-top:16px;cursor:pointer}button:hover{background:#2d2d9a}.error{color:#b42318;font-size:14px}.note{font-size:13px;margin-bottom:0}
   </style></head><body><main><div class="brand">weldoo</div><h1>A little privacy while we build.</h1><p>Enter the shared password to explore Weldoo.</p><form method="post" action="${ACCESS_PATH}"><input type="hidden" name="next" value="${escapeHtml(next)}"><label for="password">Site password</label><input id="password" type="password" name="password" autocomplete="current-password" required maxlength="256" autofocus ${error ? 'aria-invalid="true" aria-describedby="error"' : ""}>${error ? '<p class="error" id="error" role="alert">That password isn’t correct. Please try again.</p>' : ""}<button type="submit">Enter Weldoo</button></form><p class="note">Access lasts up to 12 hours in this browser.</p></main></body></html>`, {
     status: error ? 401 : 200,
-    headers: { ...privateHeaders, "Content-Type": "text/html; charset=utf-8", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff" },
+    headers: { ...privateHeaders, "Content-Type": "text/html; charset=utf-8", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'", "Referrer-Policy": "same-origin", "X-Content-Type-Options": "nosniff" },
   });
 }
 

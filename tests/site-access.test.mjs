@@ -43,6 +43,8 @@ test('gate covers pages, public assets, API and action requests', async () => {
 test('login validates password and origin, sets private session cookie and restores destination', async () => {
   const wrong = await enforceSiteAccess(login('incorrect'), password);
   assert.equal(wrong.status, 401);
+  assert.equal(wrong.headers.get('referrer-policy'), 'same-origin');
+  assert.equal((await enforceSiteAccess(login(password, '/', 'null'), password)).status, 403);
   assert.equal(wrong.headers.get('set-cookie'), null);
   assert.equal((await enforceSiteAccess(login(password, '/', 'https://evil.test'), password)).status, 403);
   const response = await enforceSiteAccess(login(password, '/jobs?tab=saved'), password);
@@ -59,6 +61,7 @@ test('login validates password and origin, sets private session cookie and resto
 
 test('gate escapes reflected content and bounds request bodies', async () => {
   const response = await enforceSiteAccess(request('/site-access?next=' + encodeURIComponent('/\"><script>alert(1)</script>')), password);
+  assert.equal(response.headers.get('referrer-policy'), 'same-origin');
   assert.doesNotMatch(await response.text(), /<script>/);
   assert.equal((await enforceSiteAccess(login('x'.repeat(5000)), password)).status, 413);
   assert.equal((await enforceSiteAccess(request('/site-access', { method: 'DELETE' }), password)).status, 405);

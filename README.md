@@ -171,3 +171,14 @@ Run the security regression checks with Node 22.6+:
 ```bash
 node --experimental-strip-types --test tests/site-access.test.mjs
 ```
+
+To check native browser form submissions (including the `Origin` header and
+wrong-password retries), run the browser regression with Playwright and Google
+Chrome available:
+
+```bash
+node --experimental-strip-types tests/site-access.browser.mjs
+```
+
+If Playwright is installed outside this project, set `PLAYWRIGHT_MODULE` to its
+module path. The test starts an isolated local server with a test-only password.
